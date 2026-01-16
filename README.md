@@ -1,0 +1,388 @@
+# 🏢 Dubai Real Estate Intelligence
+
+Plateforme d'intelligence immobilière institutionnelle pour le marché de Dubaï.
+
+**Mobile-first** • **Temps réel** • **IA décisionnelle** • **Scoring adaptatif**
+
+---
+
+## 🎯 Objectif
+
+Fournir une intelligence de marché de niveau institutionnel pour l'immobilier à Dubaï :
+- Détection d'opportunités sous-valorisées
+- Analyse de régimes de marché (ACCUMULATION, EXPANSION, DISTRIBUTION, RETOURNEMENT)
+- Scoring multi-stratégies (FLIP, RENT, LONG_TERM)
+- Brief quotidien automatique par agent IA CIO
+- Interface mobile-first (iPhone prioritaire)
+
+---
+
+## 🏗️ Architecture
+
+```
+dubai-real-estate-intelligence/
+├── app.py                          # Application Streamlit principale
+├── requirements.txt                # Dépendances Python
+├── env.example                     # Variables d'environnement
+│
+├── core/                           # Core système
+│   ├── config.py                   # Configuration centralisée
+│   ├── db.py                       # Connexion PostgreSQL
+│   ├── models.py                   # Modèles Pydantic
+│   └── utils.py                    # Utilitaires
+│
+├── connectors/                     # Connecteurs API
+│   ├── dld_transactions.py         # DLD Transactions
+│   ├── dld_mortgages.py            # DLD Hypothèques
+│   ├── dld_rental_index.py         # DLD Index locatif
+│   ├── developers_pipeline.py      # Pipeline développeurs
+│   └── listings_placeholder.py     # Annonces (API autorisée)
+│
+├── pipelines/                      # Pipelines de données
+│   ├── ingest_transactions.py      # Ingestion transactions
+│   ├── ingest_mortgages.py         # Ingestion hypothèques
+│   ├── compute_market_baselines.py # Calcul baselines
+│   ├── compute_market_regimes.py   # Calcul régimes
+│   ├── detect_anomalies.py         # Détection anomalies
+│   └── compute_scores.py           # Scoring multi-stratégies
+│
+├── strategies/                     # Stratégies de scoring
+│   ├── base.py                     # Classe de base
+│   ├── flip.py                     # Stratégie FLIP
+│   ├── rent.py                     # Stratégie RENT
+│   └── long_term.py                # Stratégie LONG_TERM
+│
+├── ai_agents/                      # Agents IA
+│   └── chief_investment_officer.py # Agent CIO
+│
+├── graphs/                         # LangGraph
+│   └── market_intelligence_graph.py # Pipeline LangGraph
+│
+├── alerts/                         # Système d'alertes
+│   ├── rules.py                    # Règles d'alertes
+│   └── notifier.py                 # Notifications
+│
+├── realtime/                       # Temps réel
+│   ├── poller.py                   # Polling continu
+│   ├── cache.py                    # Cache intelligent
+│   └── refresher.py                # Refresher Streamlit
+│
+├── pages/                          # Pages Streamlit
+│   ├── 01_Dashboard.py             # Dashboard + Brief CIO
+│   ├── 02_Ventes_du_jour.py        # Transactions récentes
+│   ├── 03_Zones_Projets_Buildings.py # Analyse par zone
+│   ├── 04_Deal_Radar.py            # Opportunités scorées
+│   ├── 05_Location_Yield.py        # Rendements locatifs
+│   ├── 06_Alertes.py               # Alertes actives
+│   └── 07_Admin_Data.py            # Administration
+│
+├── sql/                            # Schémas SQL
+│   ├── schema.sql                  # Schéma principal
+│   ├── baselines.sql               # Fonctions baselines
+│   ├── regimes.sql                 # Fonctions régimes
+│   └── opportunities.sql           # Fonctions opportunités
+│
+└── jobs/                           # Jobs automatisés
+    └── daily_run.py                # Job quotidien
+```
+
+---
+
+## 🚀 Installation
+
+### 1. Prérequis
+
+- Python 3.11+
+- PostgreSQL 14+
+- OpenAI API Key (pour agent CIO)
+- DLD API Key (Dubai Land Department)
+
+### 2. Installation
+
+```bash
+# Cloner le repo
+cd dubai-real-estate-intelligence
+
+# Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate  # Windows
+
+# Installer les dépendances
+pip install -r requirements.txt
+
+# Copier et configurer les variables d'environnement
+cp env.example .env
+# Éditer .env avec vos clés API
+```
+
+### 3. Configuration PostgreSQL
+
+```bash
+# Créer la base de données
+createdb dubai_real_estate
+
+# Mettre à jour DATABASE_URL dans .env
+DATABASE_URL=postgresql://user:password@localhost:5432/dubai_real_estate
+```
+
+### 4. Initialisation
+
+```bash
+# Lancer Streamlit
+streamlit run app.py
+
+# Aller dans Admin > Initialiser le schéma DB
+# Puis : Générer données MOCK (pour test)
+# Puis : Exécuter le pipeline complet
+```
+
+---
+
+## 📊 Utilisation
+
+### Interface Streamlit (Mobile-first)
+
+```bash
+streamlit run app.py
+```
+
+Accès : `http://localhost:8501`
+
+**Pages disponibles :**
+1. **Dashboard** : KPIs + Brief CIO + Top opportunités
+2. **Ventes du jour** : Transactions récentes avec filtres
+3. **Zones / Buildings** : Analyse par localisation + régimes
+4. **Deal Radar** : Opportunités scorées par stratégie
+5. **Location & Yield** : Rendements locatifs
+6. **Alertes** : Notifications actives
+7. **Admin** : Gestion des données + pipeline
+
+### Pipeline quotidien automatique
+
+```bash
+# Exécution manuelle
+python jobs/daily_run.py
+
+# Ou via cron (Linux/Mac)
+0 6 * * * /path/to/venv/bin/python /path/to/jobs/daily_run.py
+```
+
+### Polling temps réel
+
+```bash
+python realtime/poller.py
+```
+
+---
+
+## 🧠 Logique métier
+
+### Sources de données (priorité)
+
+1. **DLD Transactions** (PRIORITÉ ABSOLUE)
+2. **DLD Mortgages**
+3. **DLD Rental Index**
+4. **Developers Pipeline** (edge data)
+5. **Listings** (API autorisée uniquement)
+
+### Baselines marché
+
+Calculées sur 3 fenêtres : **7j / 30j / 90j**
+
+Métriques :
+- Médiane prix/sqft (P50)
+- Percentiles P25 / P75
+- Volume de transactions
+- Momentum (variation vs période précédente)
+- Volatilité (écart-type / médiane)
+- Dispersion (IQR / médiane)
+
+### Régimes de marché
+
+Classification automatique :
+
+| Régime | Conditions |
+|--------|-----------|
+| **ACCUMULATION** | Volume ↑, Prix stable, Dispersion élevée |
+| **EXPANSION** | Volume ↑, Prix ↑, Dispersion ↓ |
+| **DISTRIBUTION** | Volume ↓, Prix stable/haut, Dispersion ↑ |
+| **RETOURNEMENT** | Volume ↓, Prix ↓, Volatilité ↑ |
+
+### Scoring multi-stratégies
+
+Chaque opportunité reçoit 4 scores :
+
+1. **FLIP** (achat-revente rapide)
+   - Poids : Discount (40%), Liquidité (30%), Momentum (15%), Régime (15%)
+   - Pénalités : Supply élevée, Régime RETOURNEMENT
+
+2. **RENT** (cashflow locatif)
+   - Poids : Rendement (35%), Stabilité (25%), Liquidité (20%), Régime (20%)
+   - Pénalités : Volatilité excessive
+
+3. **LONG_TERM** (appréciation capital)
+   - Poids : Régime (35%), Discount (30%), Momentum (20%), Supply (15%)
+   - Pénalités : Volatilité, Supply élevée, Régime RETOURNEMENT
+
+4. **Score global** : Moyenne pondérée (FLIP 40%, RENT 30%, LONG 30%)
+
+**Recommandation** : Stratégie avec le score le plus élevé (ou IGNORE si score global < 40)
+
+### Agent IA CIO
+
+Génère quotidiennement un brief actionnable :
+- 3 zones à surveiller
+- 3 opportunités prioritaires
+- 1 risque principal
+- 1 recommandation stratégique
+
+Utilise GPT-4 via LangChain pour analyser les données du marché.
+
+---
+
+## 🔄 Pipeline LangGraph
+
+Le pipeline s'exécute quotidiennement via LangGraph :
+
+```
+ingest_transactions
+    ↓
+ingest_mortgages
+    ↓
+compute_baselines
+    ↓
+compute_regimes
+    ↓
+detect_anomalies
+    ↓
+compute_scores
+    ↓
+generate_brief (CIO)
+    ↓
+send_alerts
+```
+
+---
+
+## 📱 Design mobile-first
+
+L'interface est optimisée pour **iPhone** (70% du trafic) :
+
+- Layout vertical
+- Cards empilées
+- Graphiques lisibles sur petit écran
+- Filtres simples
+- Auto-refresh
+- Pas de tables larges
+
+---
+
+## 🔐 Sécurité
+
+- Aucune clé API en dur dans le code
+- Variables d'environnement via `.env`
+- `.gitignore` configuré
+- Aucun scraping non autorisé
+- Logs sans données sensibles
+
+---
+
+## 🧪 Tests
+
+### Données MOCK
+
+Pour tester sans API DLD :
+
+```python
+# Les connecteurs génèrent automatiquement des données MOCK
+# si les clés API ne sont pas configurées
+```
+
+### Vérification du pipeline
+
+```bash
+# Exécuter le pipeline en mode test
+python graphs/market_intelligence_graph.py
+```
+
+---
+
+## 📈 Évolutions futures
+
+### Phase 2 : Frontend natif
+
+- React / Next.js
+- App mobile native (React Native / Flutter)
+- API REST pour découplage backend/frontend
+
+### Améliorations
+
+- Intégration rental index réel
+- Calcul de rendement précis
+- Prédictions ML (prix futurs)
+- Alertes push mobile
+- Export PDF des briefs
+- Backtesting des stratégies
+
+---
+
+## 🛠️ Maintenance
+
+### Logs
+
+```bash
+# Logs stockés dans logs/
+tail -f logs/app_*.log
+```
+
+### Base de données
+
+```bash
+# Backup
+pg_dump dubai_real_estate > backup.sql
+
+# Restore
+psql dubai_real_estate < backup.sql
+```
+
+### Monitoring
+
+- Vérifier les logs quotidiens
+- Surveiller les erreurs dans Admin
+- Valider les briefs CIO
+- Contrôler le volume de données
+
+---
+
+## 📞 Support
+
+Pour toute question :
+- Consulter la documentation dans `docs/`
+- Vérifier les logs
+- Tester avec données MOCK
+
+---
+
+## 📄 Licence
+
+Propriétaire - Usage interne uniquement
+
+---
+
+## 🏆 Stack technique
+
+- **Backend** : Python 3.11+
+- **Database** : PostgreSQL 14+
+- **Orchestration** : LangGraph
+- **IA** : OpenAI GPT-4 + LangChain
+- **Frontend** : Streamlit (mobile-first)
+- **Visualisation** : Plotly
+- **Data** : Pandas, NumPy
+
+---
+
+**Version** : 1.0.0  
+**Date** : 2026-01-16  
+**Status** : ✅ Opérationnel
