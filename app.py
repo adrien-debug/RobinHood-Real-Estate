@@ -21,8 +21,9 @@ st_autorefresh(interval=5 * 60 * 1000, key="main_refresh")
 # Setup logging
 setup_logging()
 
-# Check if DATABASE_URL is configured (Streamlit Cloud)
-is_cloud = "streamlit" in str(st.__file__).lower() or "mount/src" in str(st.__file__).lower()
+# Check if DATABASE_URL is configured (Streamlit Cloud only)
+import os
+is_cloud = "mount/src" in str(st.__file__).lower() or os.getenv("STREAMLIT_CLOUD") is not None
 is_configured = (
     settings.database_url != "postgresql://user:password@localhost:5432/dubai_real_estate"
     and "localhost" not in settings.database_url
