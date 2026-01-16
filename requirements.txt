@@ -1,36 +1,37 @@
 # Core
-python-dotenv==1.0.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-# Database
-psycopg2-binary==2.9.9
-sqlalchemy==2.0.25
+# Database - psycopg3 for Python 3.13 compatibility
+psycopg[binary]>=3.1.0
+sqlalchemy>=2.0.25
 
-# LangGraph & AI
-langgraph==0.0.30
-langchain==0.1.0
-langchain-openai==0.0.2
-openai==1.10.0
+# LangGraph & AI - compatible versions
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-core>=0.3.0
+openai>=1.10.0
 
 # Data Processing
-pandas==2.1.4
-numpy==1.26.3
-scipy==1.11.4
+pandas>=2.1.0
+numpy>=1.26.0
+scipy>=1.11.0
 
 # Visualization
-plotly==5.18.0
-streamlit==1.30.0
-streamlit-autorefresh==1.0.1
+plotly>=5.18.0
+streamlit>=1.30.0
+streamlit-autorefresh>=1.0.1
 
 # HTTP & APIs
-httpx==0.26.0
-requests==2.31.0
+httpx>=0.26.0
+requests>=2.31.0
 
 # Utilities
-python-dateutil==2.8.2
-pytz==2023.3
-tenacity==8.2.3
+python-dateutil>=2.8.2
+pytz>=2023.3
+tenacity>=8.2.0
 
 # Monitoring
-loguru==0.7.2
+loguru>=0.7.0

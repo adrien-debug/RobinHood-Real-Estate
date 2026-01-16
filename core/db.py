@@ -1,10 +1,11 @@
 """
 Connexion et gestion de la base de données PostgreSQL
+Compatible avec psycopg3 (psycopg) pour Streamlit Cloud
 """
 from typing import Optional, Any, Dict, List
 from contextlib import contextmanager
-import psycopg2
-from psycopg2.extras import RealDictCursor, execute_values
+import psycopg
+from psycopg.rows import dict_row
 from loguru import logger
 from core.config import settings
 
@@ -20,7 +21,7 @@ class Database:
         """Établir la connexion"""
         if self._connection is None or self._connection.closed:
             try:
-                self._connection = psycopg2.connect(self.connection_string)
+                self._connection = psycopg.connect(self.connection_string)
                 logger.info("Connexion PostgreSQL établie")
             except Exception as e:
                 logger.error(f"Erreur connexion DB : {e}")
@@ -37,8 +38,8 @@ class Database:
     def get_cursor(self, dict_cursor: bool = True):
         """Context manager pour cursor"""
         conn = self.connect()
-        cursor_factory = RealDictCursor if dict_cursor else None
-        cursor = conn.cursor(cursor_factory=cursor_factory)
+        row_factory = dict_row if dict_cursor else None
+        cursor = conn.cursor(row_factory=row_factory)
         try:
             yield cursor
             conn.commit()
@@ -70,10 +71,11 @@ class Database:
             return
         
         cols = ", ".join(columns)
-        query = f"INSERT INTO {table} ({cols}) VALUES %s ON CONFLICT DO NOTHING"
+        placeholders = ", ".join(["%s"] * len(columns))
+        query = f"INSERT INTO {table} ({cols}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
         
         with self.get_cursor(dict_cursor=False) as cursor:
-            execute_values(cursor, query, values)
+            cursor.executemany(query, values)
             logger.info(f"Batch insert : {len(values)} lignes dans {table}")
     
     def execute_procedure(self, procedure_name: str, params: Optional[tuple] = None):
