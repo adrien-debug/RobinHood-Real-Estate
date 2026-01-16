@@ -21,6 +21,30 @@ st_autorefresh(interval=5 * 60 * 1000, key="main_refresh")
 # Setup logging
 setup_logging()
 
+# Check if DATABASE_URL is configured (Streamlit Cloud)
+is_cloud = "streamlit" in str(st.__file__).lower() or "mount/src" in str(st.__file__).lower()
+is_configured = (
+    settings.database_url != "postgresql://user:password@localhost:5432/dubai_real_estate"
+    and "localhost" not in settings.database_url
+)
+
+if is_cloud and not is_configured:
+    st.error("⚙️ Configuration Requise")
+    st.markdown("""
+    ### 🔐 DATABASE_URL Non Configuré
+    
+    L'application nécessite une connexion à Supabase.
+    
+    **Étapes :**
+    1. Cliquez "Manage app" → Settings → Secrets
+    2. Ajoutez : `DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"`
+    3. Obtenez le mot de passe sur : https://supabase.com/dashboard/project/tnnsfheflydiuhiduntn/settings/database
+    4. Cliquez "Save" puis "Reboot app"
+    
+    📖 **Guide complet** : Voir `STREAMLIT_SECRETS_SETUP.md` sur GitHub
+    """)
+    st.stop()
+
 # CSS MOBILE-FIRST
 st.markdown("""
 <style>
