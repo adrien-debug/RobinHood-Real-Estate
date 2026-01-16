@@ -10,6 +10,11 @@ from loguru import logger
 from core.config import settings
 
 
+def t(table_name: str) -> str:
+    """Get table name with prefix (for Supabase compatibility)"""
+    return f"{settings.table_prefix}{table_name}"
+
+
 class Database:
     """Gestionnaire de connexion PostgreSQL"""
     
@@ -22,6 +27,11 @@ class Database:
         if self._connection is None or self._connection.closed:
             try:
                 self._connection = psycopg.connect(self.connection_string)
+                # Set search_path for Supabase (robin schema first, then public)
+                if 'supabase' in self.connection_string:
+                    with self._connection.cursor() as cur:
+                        cur.execute("SET search_path TO robin, public")
+                    self._connection.commit()
                 logger.info("Connexion PostgreSQL établie")
             except Exception as e:
                 logger.error(f"Erreur connexion DB : {e}")

@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = get_secret("DATABASE_URL", "postgresql://user:password@localhost:5432/dubai_real_estate")
     
+    # Table prefix (empty for local, "dld_" for Supabase)
+    table_prefix: str = get_secret("TABLE_PREFIX", "")
+    
     # OpenAI
     openai_api_key: str = get_secret("OPENAI_API_KEY", "")
     openai_model: str = "gpt-4-turbo-preview"
