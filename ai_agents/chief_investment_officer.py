@@ -5,7 +5,7 @@ from typing import Dict, List
 from datetime import date
 from loguru import logger
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from core.config import settings
 from core.db import db
 

@@ -415,6 +415,14 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.0.0  
-**Date** : 2026-01-16  
+**Version** : 1.0.1  
+**Date** : 2026-01-17  
 **Status** : ✅ Opérationnel
+
+---
+
+## 🔧 Changelog récent
+
+### v1.0.1 (2026-01-17)
+- ✅ Fix : Import LangChain obsolète (`langchain.prompts` → `langchain_core.prompts`)
+- ✅ Compatible avec LangChain >= 0.1.0
