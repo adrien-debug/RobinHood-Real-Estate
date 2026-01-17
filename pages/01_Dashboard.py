@@ -1,5 +1,5 @@
 """
-Page Dashboard - Vue d'ensemble + Brief CIO
+Page Dashboard - Style Plecto Sales Revenue
 """
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
@@ -9,12 +9,145 @@ from datetime import date, timedelta
 from core.utils import get_dubai_today, format_currency, format_percentage
 from realtime.refresher import DataRefresher
 
-st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Market Intelligence Dashboard", page_icon="📊", layout="wide")
 
 # Auto-refresh
 st_autorefresh(interval=5 * 60 * 1000, key="dashboard_refresh")
 
-st.title("📊 Dashboard")
+# Custom CSS - Plecto Style
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    /* Global */
+    .stApp {
+        background: #0B1426 !important;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Header */
+    .dashboard-header {
+        text-align: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        letter-spacing: 0.5px;
+    }
+    
+    /* KPI Cards - Plecto Green Style */
+    .kpi-card {
+        background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 30px rgba(0, 217, 163, 0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 217, 163, 0.4);
+    }
+    
+    .kpi-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0B1426;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .kpi-subtitle {
+        font-size: 0.75rem;
+        color: rgba(11, 20, 38, 0.7);
+        margin-bottom: 1rem;
+    }
+    
+    .kpi-value {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #0B1426;
+        line-height: 1;
+    }
+    
+    /* Chart Cards */
+    .chart-card {
+        background: #1A2942;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1.5rem;
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+    
+    .chart-subtitle {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 1rem;
+    }
+    
+    /* Table Styles */
+    .dataframe {
+        background: #1A2942 !important;
+        border-radius: 10px;
+    }
+    
+    .dataframe th {
+        background: #0B1426 !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem !important;
+    }
+    
+    .dataframe td {
+        color: white !important;
+        padding: 0.8rem !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-won {
+        background: #00D9A3;
+        color: #0B1426;
+    }
+    
+    .status-analysis {
+        background: #5F7A9E;
+        color: white;
+    }
+    
+    .status-qualification {
+        background: #FFA726;
+        color: #0B1426;
+    }
+    
+    .status-negotiation {
+        background: #FF9800;
+        color: #0B1426;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header
+st.markdown('<div class="dashboard-header">Dubai Real Estate Intelligence Dashboard</div>', unsafe_allow_html=True)
 
 # Date selector
 target_date = st.date_input(
@@ -35,39 +168,48 @@ except Exception as e:
     st.info("Vérifiez les logs pour plus de détails.")
     st.stop()
 
-# === KPIs ===
-st.subheader("📈 KPIs du jour")
-
+# === KPIs - Plecto Style ===
 col1, col2, col3, col4 = st.columns(4)
 
 kpis = data.get('kpis', {})
 
 with col1:
-    st.metric(
-        "Transactions",
-        kpis.get('transactions_count', 0),
-        delta=None
-    )
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Number of Deals</div>
+        <div class="kpi-subtitle">Current month</div>
+        <div class="kpi-value">{kpis.get('transactions_count', 0)}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    avg_price = kpis.get('avg_price_sqft', 0)
-    st.metric(
-        "Prix moyen/sqft",
-        f"{avg_price:.0f} AED" if avg_price else "N/A"
-    )
+    avg_price = kpis.get('avg_price_sqft', 0) / 1000 if kpis.get('avg_price_sqft', 0) > 0 else 0
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Average Price/sqft</div>
+        <div class="kpi-subtitle">Current month</div>
+        <div class="kpi-value">AED {avg_price:.1f}k</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    st.metric(
-        "Opportunités",
-        kpis.get('opportunities_count', 0)
-    )
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Opportunities</div>
+        <div class="kpi-subtitle">Active deals</div>
+        <div class="kpi-value">{kpis.get('opportunities_count', 0)}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col4:
     avg_score = kpis.get('avg_opportunity_score', 0)
-    st.metric(
-        "Score moyen",
-        f"{avg_score:.0f}" if avg_score else "N/A"
-    )
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Average Score</div>
+        <div class="kpi-subtitle">Deal quality</div>
+        <div class="kpi-value">{avg_score:.0f}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
 
