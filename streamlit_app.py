@@ -52,30 +52,30 @@ st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("Dashboard", use_container_width=True, type="primary"):
-        st.switch_page("pages/01_Dashboard.py")
+    if st.button("📊 Dashboard", use_container_width=True, type="primary"):
+        st.switch_page("pages/01_📊_Dashboard.py")
 
 with col2:
-    if st.button("Today's Sales", use_container_width=True):
-        st.switch_page("pages/02_Ventes_du_jour.py")
+    if st.button("🏠 Sales", use_container_width=True):
+        st.switch_page("pages/02_🏠_Sales.py")
 
 with col3:
-    if st.button("Zones Analysis", use_container_width=True):
-        st.switch_page("pages/03_Zones_Projets_Buildings.py")
+    if st.button("📍 Zones", use_container_width=True):
+        st.switch_page("pages/03_📍_Zones.py")
 
 col4, col5, col6 = st.columns(3)
 
 with col4:
-    if st.button("Deal Radar", use_container_width=True):
-        st.switch_page("pages/04_Deal_Radar.py")
+    if st.button("🎯 Radar", use_container_width=True):
+        st.switch_page("pages/04_🎯_Radar.py")
 
 with col5:
-    if st.button("Location Yield", use_container_width=True):
-        st.switch_page("pages/05_Location_Yield.py")
+    if st.button("💰 Yield", use_container_width=True):
+        st.switch_page("pages/05_💰_Yield.py")
 
 with col6:
-    if st.button("Alerts", use_container_width=True):
-        st.switch_page("pages/06_Alertes.py")
+    if st.button("🔔 Alerts", use_container_width=True):
+        st.switch_page("pages/06_🔔_Alerts.py")
 
 st.markdown("<div style='height: 2rem'></div>", unsafe_allow_html=True)
 
