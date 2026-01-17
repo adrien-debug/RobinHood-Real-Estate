@@ -18,82 +18,110 @@ st_autorefresh(interval=5 * 60 * 1000, key="dashboard_refresh")
 # Apply Plecto style
 apply_plecto_style()
 
-# Custom CSS - Plecto Style
+# Custom CSS - Dubai Premium Chic Style
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;500;600;700&display=swap');
     
     /* Global */
     .stApp {
         background: #0B1426 !important;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Lato', sans-serif;
     }
     
     /* Header */
     .dashboard-header {
         text-align: center;
-        color: white;
-        font-size: 2rem;
+        color: #D4AF37;
+        font-size: 2.2rem;
         font-weight: 600;
+        font-family: 'Playfair Display', serif !important;
         margin-bottom: 2rem;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        padding-bottom: 1rem;
     }
     
-    /* KPI Cards - Plecto Green Style */
+    /* KPI Cards - Dubai Gold Premium Style */
     .kpi-card {
-        background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%);
-        border-radius: 15px;
+        background: linear-gradient(135deg, #D4AF37 0%, #B8962E 50%, #C5A028 100%);
+        border-radius: 16px;
         padding: 1.5rem;
-        box-shadow: 0 8px 30px rgba(0, 217, 163, 0.3);
-        transition: transform 0.3s ease;
+        box-shadow: 
+            0 8px 32px rgba(212, 175, 55, 0.25),
+            0 2px 8px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     }
     
     .kpi-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 217, 163, 0.4);
+        box-shadow: 
+            0 16px 48px rgba(212, 175, 55, 0.35),
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     
     .kpi-title {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         font-weight: 600;
-        color: #0B1426;
+        font-family: 'Lato', sans-serif !important;
+        color: #3D2914;
         margin-bottom: 0.3rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
     
     .kpi-subtitle {
         font-size: 0.75rem;
-        color: rgba(11, 20, 38, 0.7);
+        color: rgba(61, 41, 20, 0.7);
         margin-bottom: 1rem;
+        font-family: 'Lato', sans-serif !important;
     }
     
     .kpi-value {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #0B1426;
+        font-size: 2.8rem;
+        font-weight: 700;
+        font-family: 'Playfair Display', serif !important;
+        color: #3D2914;
         line-height: 1;
     }
     
     /* Chart Cards */
     .chart-card {
         background: #1A2942;
-        border-radius: 15px;
+        border-radius: 16px;
         padding: 1.5rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         margin-bottom: 1.5rem;
+        border: 1px solid rgba(212, 175, 55, 0.1);
     }
     
     .chart-title {
         font-size: 1.1rem;
         font-weight: 600;
-        color: white;
+        font-family: 'Playfair Display', serif !important;
+        color: #D4AF37;
         margin-bottom: 0.5rem;
     }
     
     .chart-subtitle {
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(245, 230, 211, 0.6);
         margin-bottom: 1rem;
     }
     
@@ -105,8 +133,9 @@ st.markdown("""
     
     .dataframe th {
         background: #0B1426 !important;
-        color: rgba(255, 255, 255, 0.7) !important;
+        color: rgba(212, 175, 55, 0.8) !important;
         font-weight: 600 !important;
+        font-family: 'Lato', sans-serif !important;
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.5px;
@@ -114,38 +143,39 @@ st.markdown("""
     }
     
     .dataframe td {
-        color: white !important;
+        color: #F5E6D3 !important;
         padding: 0.8rem !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.1) !important;
     }
     
-    /* Status Badges */
+    /* Status Badges - Dubai Premium */
     .status-badge {
         padding: 0.4rem 0.8rem;
         border-radius: 6px;
         font-size: 0.8rem;
         font-weight: 600;
+        font-family: 'Lato', sans-serif !important;
         display: inline-block;
     }
     
     .status-won {
-        background: #00D9A3;
-        color: #0B1426;
+        background: linear-gradient(135deg, #D4AF37, #C5A028);
+        color: #3D2914;
     }
     
     .status-analysis {
-        background: #5F7A9E;
-        color: white;
+        background: #5C4033;
+        color: #F5E6D3;
     }
     
     .status-qualification {
-        background: #FFA726;
-        color: #0B1426;
+        background: linear-gradient(135deg, #CD7F32, #A0522D);
+        color: #F5E6D3;
     }
     
     .status-negotiation {
-        background: #FF9800;
-        color: #0B1426;
+        background: #8B4513;
+        color: #F5E6D3;
     }
 </style>
 """, unsafe_allow_html=True)

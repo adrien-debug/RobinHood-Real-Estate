@@ -1,15 +1,16 @@
 """
-Styles Plecto - Design système pour toutes les pages
+Styles Dubai Premium Chic - Design système pour toutes les pages
+Palette : Gold (#D4AF37, #C5A028), Dark Brown (#3D2914, #5C4033), Cream (#F5E6D3)
 """
 
 PLECTO_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;500;600;700&display=swap');
     
     /* === GLOBAL === */
     .stApp {
         background: #0B1426 !important;
-        font-family: 'Inter', sans-serif !important;
+        font-family: 'Lato', sans-serif !important;
     }
     
     /* Hide Streamlit branding */
@@ -19,115 +20,143 @@ PLECTO_CSS = """
     
     /* === TYPOGRAPHY === */
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Inter', sans-serif !important;
-        color: white !important;
+        font-family: 'Playfair Display', serif !important;
+        color: #F5E6D3 !important;
     }
     
     p, span, div {
-        font-family: 'Inter', sans-serif !important;
+        font-family: 'Lato', sans-serif !important;
     }
     
     /* === HEADER === */
     .dashboard-header {
         text-align: center;
-        color: white;
-        font-size: 1.8rem;
+        color: #D4AF37;
+        font-size: 2rem;
         font-weight: 600;
+        font-family: 'Playfair Display', serif !important;
         margin-bottom: 2rem;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
         padding: 1rem 0;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
     }
     
     .section-title {
         font-size: 1.1rem;
         font-weight: 600;
-        color: white;
+        font-family: 'Playfair Display', serif !important;
+        color: #D4AF37;
         margin-bottom: 0.3rem;
     }
     
     .section-subtitle {
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(245, 230, 211, 0.6);
         margin-bottom: 1rem;
     }
     
-    /* === KPI CARDS === */
+    /* === KPI CARDS - Dubai Gold Premium === */
     .kpi-card {
-        background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%);
-        border-radius: 12px;
+        background: linear-gradient(135deg, #D4AF37 0%, #B8962E 50%, #C5A028 100%);
+        border-radius: 16px;
         padding: 1.5rem;
-        box-shadow: 0 8px 30px rgba(0, 217, 163, 0.25);
+        box-shadow: 
+            0 8px 32px rgba(212, 175, 55, 0.25),
+            0 2px 8px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     }
     
     .kpi-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 217, 163, 0.35);
+        box-shadow: 
+            0 16px 48px rgba(212, 175, 55, 0.35),
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     
-    .kpi-card-orange {
-        background: linear-gradient(135deg, #FFA726 0%, #FF9800 100%);
-        box-shadow: 0 8px 30px rgba(255, 167, 38, 0.25);
+    .kpi-card-bronze {
+        background: linear-gradient(135deg, #CD7F32 0%, #A0522D 50%, #8B4513 100%);
+        box-shadow: 
+            0 8px 32px rgba(205, 127, 50, 0.25),
+            0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
-    .kpi-card-orange:hover {
-        box-shadow: 0 12px 40px rgba(255, 167, 38, 0.35);
+    .kpi-card-bronze:hover {
+        box-shadow: 
+            0 16px 48px rgba(205, 127, 50, 0.35),
+            0 4px 12px rgba(0, 0, 0, 0.2);
     }
     
-    .kpi-card-red {
-        background: linear-gradient(135deg, #FF6B6B 0%, #EE5A5A 100%);
-        box-shadow: 0 8px 30px rgba(255, 107, 107, 0.25);
+    .kpi-card-cream {
+        background: linear-gradient(135deg, #F5E6D3 0%, #E8D5C4 100%);
+        box-shadow: 
+            0 8px 32px rgba(245, 230, 211, 0.2),
+            0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
-    .kpi-card-red:hover {
-        box-shadow: 0 12px 40px rgba(255, 107, 107, 0.35);
-    }
-    
-    .kpi-card-blue {
-        background: linear-gradient(135deg, #4ECDC4 0%, #44A3AA 100%);
-        box-shadow: 0 8px 30px rgba(78, 205, 196, 0.25);
+    .kpi-card-cream .kpi-title,
+    .kpi-card-cream .kpi-subtitle,
+    .kpi-card-cream .kpi-value {
+        color: #3D2914 !important;
     }
     
     .kpi-card-dark {
-        background: #1A2942;
-        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(135deg, #1A2942 0%, #0F1C2E 100%);
+        border: 1px solid rgba(212, 175, 55, 0.2);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     
     .kpi-title {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 600;
-        color: #0B1426;
+        font-family: 'Lato', sans-serif !important;
+        color: #3D2914;
         margin-bottom: 0.2rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
     
     .kpi-title-light {
-        color: white;
+        color: #D4AF37;
     }
     
     .kpi-subtitle {
         font-size: 0.7rem;
-        color: rgba(11, 20, 38, 0.6);
+        color: rgba(61, 41, 20, 0.7);
         margin-bottom: 0.8rem;
+        font-family: 'Lato', sans-serif !important;
     }
     
     .kpi-subtitle-light {
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(212, 175, 55, 0.6);
     }
     
     .kpi-value {
         font-size: 2.5rem;
-        font-weight: 800;
-        color: #0B1426;
+        font-weight: 700;
+        font-family: 'Playfair Display', serif !important;
+        color: #3D2914;
         line-height: 1;
     }
     
     .kpi-value-light {
-        color: white;
+        color: #F5E6D3;
     }
     
     .kpi-value-small {
@@ -177,22 +206,23 @@ PLECTO_CSS = """
         display: flex;
         align-items: center;
         padding: 1rem;
-        background: rgba(255,255,255,0.03);
+        background: rgba(212, 175, 55, 0.05);
         border-radius: 10px;
         margin-bottom: 0.5rem;
         transition: background 0.3s ease;
+        border: 1px solid rgba(212, 175, 55, 0.1);
     }
     
     .leaderboard-item:hover {
-        background: rgba(255,255,255,0.06);
+        background: rgba(212, 175, 55, 0.1);
     }
     
     .leaderboard-rank {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: #00D9A3;
-        color: #0B1426;
+        background: linear-gradient(135deg, #D4AF37, #C5A028);
+        color: #3D2914;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -202,11 +232,11 @@ PLECTO_CSS = """
     }
     
     .leaderboard-rank-2 {
-        background: #C0C0C0;
+        background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
     }
     
     .leaderboard-rank-3 {
-        background: #CD7F32;
+        background: linear-gradient(135deg, #CD7F32, #A0522D);
     }
     
     .leaderboard-avatar {
@@ -214,22 +244,22 @@ PLECTO_CSS = """
         height: 45px;
         border-radius: 50%;
         margin-right: 1rem;
-        border: 2px solid rgba(255,255,255,0.2);
+        border: 2px solid rgba(212, 175, 55, 0.3);
     }
     
     .leaderboard-name {
         flex: 1;
-        color: white;
+        color: #F5E6D3;
         font-weight: 500;
     }
     
     .leaderboard-value {
         font-weight: 700;
-        color: #00D9A3;
+        color: #D4AF37;
         font-size: 1.1rem;
     }
     
-    /* === STATUS BADGES === */
+    /* === STATUS BADGES - Dubai Premium === */
     .status-badge {
         padding: 0.35rem 0.8rem;
         border-radius: 5px;
@@ -238,51 +268,55 @@ PLECTO_CSS = """
         display: inline-block;
         text-transform: uppercase;
         letter-spacing: 0.3px;
+        font-family: 'Lato', sans-serif !important;
     }
     
     .status-won, .status-closed {
-        background: #00D9A3;
-        color: #0B1426;
+        background: linear-gradient(135deg, #D4AF37, #C5A028);
+        color: #3D2914;
     }
     
     .status-active, .status-accumulation {
-        background: #4ECDC4;
-        color: #0B1426;
+        background: linear-gradient(135deg, #5C4033, #3D2914);
+        color: #F5E6D3;
+        border: 1px solid rgba(212, 175, 55, 0.3);
     }
     
     .status-qualification {
         background: #5F7A9E;
-        color: white;
+        color: #F5E6D3;
     }
     
     .status-negotiation, .status-expansion {
-        background: #FFA726;
-        color: #0B1426;
+        background: linear-gradient(135deg, #CD7F32, #A0522D);
+        color: #F5E6D3;
     }
     
     .status-analysis, .status-distribution {
         background: #7E8C9A;
-        color: white;
+        color: #F5E6D3;
     }
     
     .status-lost, .status-retournement {
-        background: #FF6B6B;
-        color: white;
+        background: #8B4513;
+        color: #F5E6D3;
     }
     
     .status-flip {
-        background: #FF6B6B;
-        color: white;
+        background: linear-gradient(135deg, #CD7F32, #8B4513);
+        color: #F5E6D3;
     }
     
     .status-rent {
-        background: #4ECDC4;
-        color: #0B1426;
+        background: linear-gradient(135deg, #5C4033, #3D2914);
+        color: #D4AF37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
     }
     
     .status-long {
-        background: #667eea;
-        color: white;
+        background: linear-gradient(135deg, #1A2942, #0F1C2E);
+        color: #D4AF37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
     }
     
     /* === TABLES === */
@@ -411,33 +445,38 @@ PLECTO_CSS = """
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, #00D9A3 0%, #00B894 100%) !important;
-        color: #0B1426 !important;
+        background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%) !important;
+        color: #3D2914 !important;
         border: none !important;
         font-weight: 600 !important;
+        font-family: 'Lato', sans-serif !important;
         border-radius: 8px !important;
         transition: transform 0.3s ease !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 5px 20px rgba(0, 217, 163, 0.4) !important;
+        box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4) !important;
     }
     
     .stTabs [data-baseweb="tab-list"] {
         background: #1A2942 !important;
         border-radius: 10px !important;
         padding: 0.5rem !important;
+        border: 1px solid rgba(212, 175, 55, 0.1);
     }
     
     .stTabs [data-baseweb="tab"] {
-        color: rgba(255,255,255,0.6) !important;
+        color: rgba(245, 230, 211, 0.6) !important;
         border-radius: 8px !important;
+        font-family: 'Lato', sans-serif !important;
     }
     
     .stTabs [aria-selected="true"] {
-        background: #00D9A3 !important;
-        color: #0B1426 !important;
+        background: linear-gradient(135deg, #D4AF37, #C5A028) !important;
+        color: #3D2914 !important;
     }
     
     /* === EXPANDER === */
