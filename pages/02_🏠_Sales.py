@@ -78,53 +78,25 @@ if transactions:
     
     # === TABLE ===
     st.markdown('<div class="section-title">Transactions</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Latest sales</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">LATEST SALES</div>', unsafe_allow_html=True)
     
-    table_html = """
-    <div class="data-card">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Location</th>
-                    <th>Type</th>
-                    <th>Area</th>
-                    <th>Price</th>
-                    <th>Price/sqft</th>
-                    <th>vs Market</th>
-                </tr>
-            </thead>
-            <tbody>
-    """
+    import pandas as pd
     
-    for i, tx in enumerate(transactions, 1):
-        price = tx.get('price_aed', 0)
-        price_sqft = tx.get('price_per_sqft', 0)
-        area = tx.get('area_sqft', 0)
+    # Build DataFrame
+    df_data = []
+    for tx in transactions:
         discount = tx.get('discount_pct', 0) or 0
-        
-        # Discount color
-        if discount > 10:
-            disc_html = f'<span style="color: #10B981; font-weight: 600;">-{discount:.1f}%</span>'
-        elif discount > 0:
-            disc_html = f'<span style="color: #3B82F6; font-weight: 600;">-{discount:.1f}%</span>'
-        else:
-            disc_html = '<span style="color: rgba(255,255,255,0.4);">At market</span>'
-        
-        table_html += f"""
-            <tr>
-                <td class="table-rank">{i}</td>
-                <td class="table-name">{tx.get('community', 'N/A')} / {tx.get('building', 'N/A')}</td>
-                <td>{tx.get('rooms_bucket', 'N/A')}</td>
-                <td>{area:.0f} sqft</td>
-                <td class="table-value">{format_currency(price)}</td>
-                <td>{price_sqft:.0f}</td>
-                <td>{disc_html}</td>
-            </tr>
-        """
+        df_data.append({
+            "Location": f"{tx.get('community', 'N/A')} / {tx.get('building', 'N/A')}",
+            "Type": tx.get('rooms_bucket', 'N/A'),
+            "Area": f"{tx.get('area_sqft', 0):.0f} sqft",
+            "Price": format_currency(tx.get('price_aed', 0)),
+            "AED/sqft": f"{tx.get('price_per_sqft', 0):.0f}",
+            "vs Market": f"-{discount:.1f}%" if discount > 0 else "At market"
+        })
     
-    table_html += "</tbody></table></div>"
-    st.markdown(table_html, unsafe_allow_html=True)
+    df = pd.DataFrame(df_data)
+    st.dataframe(df, use_container_width=True, hide_index=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
