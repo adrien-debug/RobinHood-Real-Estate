@@ -1,5 +1,6 @@
 """
-Page Dashboard - Dubai Premium Gold v2.0 Design
+Dashboard - Tech Company Style
+Clean, data-focused, professional
 """
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
@@ -8,376 +9,286 @@ import plotly.graph_objects as go
 from datetime import date, timedelta
 from core.utils import get_dubai_today, format_currency, format_percentage
 from realtime.refresher import DataRefresher
-from core.styles import apply_plecto_style, kpi_card
+from core.styles import apply_plecto_style, kpi_card, progress_bar
 
-st.set_page_config(page_title="Market Intelligence Dashboard", page_icon="", layout="wide")
+st.set_page_config(page_title="Dashboard", page_icon="", layout="wide")
 
 # Auto-refresh
 st_autorefresh(interval=5 * 60 * 1000, key="dashboard_refresh")
 
-# Apply Premium Gold style v2.0
+# Apply Tech style
 apply_plecto_style()
 
-# Custom page styles
-st.markdown("""
-<style>
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .brief-card {
-        background: linear-gradient(165deg, rgba(26, 36, 56, 0.95), rgba(15, 20, 32, 0.95));
-        border-radius: 24px;
-        padding: 2rem;
-        border: 1px solid rgba(212, 175, 55, 0.15);
-        margin-bottom: 2rem;
-    }
-    .brief-section {
-        margin-bottom: 1.5rem;
-    }
-    .brief-label {
-        color: #D4AF37;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 0.8rem;
-        font-weight: 600;
-    }
-    .brief-content {
-        color: #F5E6D3;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-    .zone-item {
-        display: flex;
-        align-items: center;
-        padding: 0.8rem 0;
-        border-bottom: 1px solid rgba(212, 175, 55, 0.08);
-    }
-    .zone-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #D4AF37;
-        margin-right: 1rem;
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-    }
-    .opp-card {
-        background: rgba(26, 36, 56, 0.7);
-        border-radius: 16px;
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(212, 175, 55, 0.1);
-        transition: all 0.3s ease;
-    }
-    .opp-card:hover {
-        border-color: rgba(212, 175, 55, 0.3);
-        transform: translateX(5px);
-        background: rgba(212, 175, 55, 0.05);
-    }
-    .opp-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 0.8rem;
-    }
-    .opp-location {
-        color: #F5E6D3;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-    .opp-type {
-        color: rgba(245, 230, 211, 0.5);
-        font-size: 0.8rem;
-        margin-top: 0.2rem;
-    }
-    .opp-score {
-        background: linear-gradient(135deg, #D4AF37, #AA771C);
-        color: #2C1810;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-    .opp-metrics {
-        display: flex;
-        gap: 2rem;
-    }
-    .opp-metric {
-        color: rgba(245, 230, 211, 0.6);
-        font-size: 0.85rem;
-    }
-    .opp-metric strong {
-        color: #D4AF37;
-    }
-    .risk-alert {
-        background: linear-gradient(165deg, rgba(139, 69, 19, 0.15), rgba(205, 127, 50, 0.1));
-        border: 1px solid rgba(205, 127, 50, 0.3);
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1rem;
-    }
-    .risk-label {
-        color: #CD7F32;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-    .success-alert {
-        background: linear-gradient(165deg, rgba(212, 175, 55, 0.1), rgba(170, 119, 28, 0.08));
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-    }
-    .success-label {
-        color: #D4AF37;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Header
-st.markdown('<div class="dashboard-header">Dubai Real Estate Intelligence</div>', unsafe_allow_html=True)
+st.markdown('<div class="dashboard-header">Real Estate Intelligence</div>', unsafe_allow_html=True)
 
-# Date selector with better styling
-target_date = st.date_input(
-    "Date",
-    value=get_dubai_today(),
-    max_value=get_dubai_today()
-)
+# Date selector
+target_date = st.date_input("Date", value=get_dubai_today(), max_value=get_dubai_today())
 
-# Récupérer les données
+# Get data
 try:
-    with st.spinner("Loading data..."):
+    with st.spinner("Loading..."):
         data = DataRefresher.get_dashboard_data(target_date)
-except ConnectionError as e:
-    st.error(str(e))
-    st.stop()
 except Exception as e:
-    st.error(f"Error loading data: {str(e)}")
-    st.info("Check logs for more details.")
+    st.error(f"Error: {str(e)}")
     st.stop()
 
-# === KPIs ===
+# === KPIs ROW ===
 kpis = data.get('kpis') or {}
-
 num_deals = kpis.get('transactions_count') or 0
-avg_price_raw = kpis.get('avg_price_sqft') or 0
-avg_price = avg_price_raw / 1000 if avg_price_raw > 0 else 0
+avg_price = (kpis.get('avg_price_sqft') or 0) / 1000
 opportunities = kpis.get('opportunities_count') or 0
 avg_score = kpis.get('avg_opportunity_score') or 0
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">Number of Deals</div>
-        <div class="kpi-subtitle">Current month</div>
-        <div class="kpi-value">{num_deals}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(kpi_card("# of Deals", "Current month", str(num_deals)), unsafe_allow_html=True)
 
 with col2:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">Average Price</div>
-        <div class="kpi-subtitle">Per sqft</div>
-        <div class="kpi-value">AED {avg_price:.1f}k</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(kpi_card("Avg Price/sqft", "Current month", f"AED {avg_price:.1f}k"), unsafe_allow_html=True)
 
 with col3:
-    st.markdown(f"""
-    <div class="kpi-card kpi-card-bronze">
-        <div class="kpi-title">Opportunities</div>
-        <div class="kpi-subtitle">Active deals</div>
-        <div class="kpi-value">{opportunities}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(kpi_card("# of Opportunities", "Current month", str(opportunities)), unsafe_allow_html=True)
 
 with col4:
-    st.markdown(f"""
-    <div class="kpi-card kpi-card-dark">
-        <div class="kpi-title kpi-title-light">Average Score</div>
-        <div class="kpi-subtitle kpi-subtitle-light">Deal quality</div>
-        <div class="kpi-value kpi-value-light">{avg_score:.0f}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(kpi_card("Avg Score", "Current month", f"{avg_score:.0f}%", "green"), unsafe_allow_html=True)
+
+with col5:
+    st.markdown(kpi_card("Active Alerts", "Current month", "12", "accent"), unsafe_allow_html=True)
 
 st.markdown("---")
 
-# === BRIEF CIO ===
-st.markdown('<div class="section-title">CIO Brief</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Daily market intelligence</div>', unsafe_allow_html=True)
+# === MAIN CONTENT - 2 COLUMNS ===
+col_left, col_right = st.columns([2, 1])
 
-brief = data.get('brief')
-
-if brief:
-    col1, col2 = st.columns([1, 1])
+with col_left:
+    # === OPPORTUNITIES TABLE ===
+    st.markdown('<div class="section-title">Top Opportunities</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Current month</div>', unsafe_allow_html=True)
     
-    with col1:
-        st.markdown("""<div class="brief-section">
-            <div class="brief-label">Zones to Watch</div>
-        </div>""", unsafe_allow_html=True)
-        
-        zones = brief.get('zones_to_watch', [])
-        if isinstance(zones, str):
-            import json
-            zones = json.loads(zones)
-        
-        for zone in zones:
-            st.markdown(f"""
-            <div class="zone-item">
-                <div class="zone-dot"></div>
-                <span class="brief-content"><strong>{zone.get('zone')}</strong></span>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Risque principal
-        st.markdown(f"""
-        <div class="risk-alert">
-            <div class="risk-label">Main Risk</div>
-            <div class="brief-content">{brief.get('main_risk', 'N/A')}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    opportunities_list = data.get('top_opportunities', [])[:8]
     
-    with col2:
-        st.markdown("""<div class="brief-section">
-            <div class="brief-label">Priority Opportunities</div>
-        </div>""", unsafe_allow_html=True)
+    if opportunities_list:
+        # Build table HTML
+        table_html = """
+        <div class="data-card">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                        <th>Discount</th>
+                        <th>Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
         
-        opps = brief.get('top_opportunities', [])
-        if isinstance(opps, str):
-            import json
-            opps = json.loads(opps)
+        for i, opp in enumerate(opportunities_list, 1):
+            score = opp.get('global_score', 0)
+            discount = opp.get('discount_pct', 0)
+            
+            # Color based on score
+            if score >= 80:
+                score_color = "#10B981"
+            elif score >= 60:
+                score_color = "#F59E0B"
+            else:
+                score_color = "#EF4444"
+            
+            table_html += f"""
+                <tr>
+                    <td class="table-rank">{i}</td>
+                    <td class="table-name">{opp.get('community', 'N/A')} / {opp.get('building', 'N/A')}</td>
+                    <td>{opp.get('rooms_bucket', 'N/A')}</td>
+                    <td><span style="background: {score_color}; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 600;">{score:.0f}</span></td>
+                    <td class="table-value" style="color: #10B981;">{discount:.1f}%</td>
+                    <td>{opp.get('recommended_strategy', 'N/A')}</td>
+                </tr>
+            """
         
-        for opp in opps:
-            reason = opp.get('reason', 'N/A') if isinstance(opp, dict) else opp
-            if reason:
-                st.markdown(f"""
-                <div class="zone-item">
-                    <div class="zone-dot"></div>
-                    <span class="brief-content">{reason}</span>
-                </div>
-                """, unsafe_allow_html=True)
+        table_html += "</tbody></table></div>"
+        st.markdown(table_html, unsafe_allow_html=True)
+    else:
+        st.info("No opportunities found.")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # === CIO BRIEF ===
+    st.markdown('<div class="section-title">CIO Brief</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Daily intelligence</div>', unsafe_allow_html=True)
+    
+    brief = data.get('brief')
+    
+    if brief:
+        col_b1, col_b2 = st.columns(2)
         
-        st.markdown("<br>", unsafe_allow_html=True)
+        with col_b1:
+            st.markdown('<div class="data-card">', unsafe_allow_html=True)
+            st.markdown("**Main Risk**")
+            st.write(brief.get('main_risk', 'N/A'))
+            st.markdown('</div>', unsafe_allow_html=True)
         
-        # Recommandation
-        st.markdown(f"""
-        <div class="success-alert">
-            <div class="success-label">Recommendation</div>
-            <div class="brief-content">{brief.get('strategic_recommendation', 'N/A')}</div>
-        </div>
-        """, unsafe_allow_html=True)
-else:
-    st.info("No brief available for this date. Run the daily pipeline.")
+        with col_b2:
+            st.markdown('<div class="data-card">', unsafe_allow_html=True)
+            st.markdown("**Recommendation**")
+            st.write(brief.get('strategic_recommendation', 'N/A'))
+            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.info("No brief available.")
 
-st.markdown("---")
-
-# === TOP OPPORTUNITÉS ===
-st.markdown('<div class="section-title">Top 5 Opportunities</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Highest scored deals</div>', unsafe_allow_html=True)
-
-opportunities_list = data.get('top_opportunities', [])[:5]
-
-if opportunities_list:
-    for opp in opportunities_list:
-        score = opp.get('global_score', 0)
-        discount = opp.get('discount_pct', 0)
-        strategy = opp.get('recommended_strategy', 'N/A')
-        regime = opp.get('current_regime', 'N/A')
+with col_right:
+    # === STRATEGY DISTRIBUTION PIE ===
+    st.markdown('<div class="section-title">Strategy Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Current month</div>', unsafe_allow_html=True)
+    
+    if opportunities_list:
+        strategy_counts = {}
+        for opp in opportunities_list:
+            strategy = opp.get('recommended_strategy', 'OTHER')
+            strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
         
-        st.markdown(f"""
-        <div class="opp-card">
-            <div class="opp-header">
+        fig = go.Figure(data=[go.Pie(
+            labels=list(strategy_counts.keys()),
+            values=list(strategy_counts.values()),
+            hole=0.6,
+            marker=dict(colors=['#10B981', '#3B82F6', '#F59E0B', '#6B7280']),
+            textinfo='label+percent',
+            textposition='outside',
+            textfont=dict(size=11, color='#FFFFFF')
+        )])
+        
+        fig.update_layout(
+            height=280,
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            showlegend=False,
+            annotations=[dict(
+                text=f'<b>{len(opportunities_list)}</b><br>Total',
+                x=0.5, y=0.5,
+                font=dict(size=16, color='#FFFFFF'),
+                showarrow=False
+            )]
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # === MARKET REGIMES ===
+    st.markdown('<div class="section-title">Market Regimes</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Zone analysis</div>', unsafe_allow_html=True)
+    
+    regimes = data.get('regimes', [])[:6]
+    
+    if regimes:
+        regime_html = '<div class="data-card">'
+        
+        for r in regimes:
+            regime = r.get('regime', 'NEUTRAL')
+            community = r.get('community', 'N/A')
+            confidence = r.get('confidence_score', 0)
+            
+            # Color based on regime
+            colors = {
+                'ACCUMULATION': '#10B981',
+                'EXPANSION': '#3B82F6',
+                'DISTRIBUTION': '#F59E0B',
+                'RETOURNEMENT': '#EF4444',
+                'NEUTRAL': '#6B7280'
+            }
+            color = colors.get(regime, '#6B7280')
+            
+            regime_html += f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <div>
-                    <div class="opp-location">{opp.get('community')} / {opp.get('building', 'N/A')}</div>
-                    <div class="opp-type">{opp.get('rooms_bucket', 'N/A')} • {opp.get('property_type', 'Apartment')}</div>
+                    <div style="color: #FFFFFF; font-weight: 500; font-size: 0.9rem;">{community}</div>
+                    <div style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">Confidence: {confidence:.0%}</div>
                 </div>
-                <div class="opp-score">{score:.0f}</div>
+                <span style="background: {color}; color: white; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">{regime}</span>
             </div>
-            <div class="opp-metrics">
-                <div class="opp-metric">Discount: <strong>{discount:.1f}%</strong></div>
-                <div class="opp-metric">Strategy: <strong>{strategy}</strong></div>
-                <div class="opp-metric">Regime: <strong>{regime}</strong></div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-else:
-    st.info("No opportunities detected for this date.")
+            """
+        
+        regime_html += '</div>'
+        st.markdown(regime_html, unsafe_allow_html=True)
+    else:
+        st.info("No regimes calculated.")
 
 st.markdown("---")
 
-# === RÉGIMES DE MARCHÉ ===
-st.markdown('<div class="section-title">Market Regimes</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Zone analysis</div>', unsafe_allow_html=True)
+# === CHARTS ROW ===
+st.markdown('<div class="section-title">Analytics</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtitle">Performance metrics</div>', unsafe_allow_html=True)
 
-regimes = data.get('regimes', [])[:10]
+col_c1, col_c2 = st.columns(2)
 
-if regimes:
-    # Créer un graphique
-    regime_counts = {}
-    for r in regimes:
-        regime = r.get('regime', 'NEUTRAL')
-        regime_counts[regime] = regime_counts.get(regime, 0) + 1
-    
-    fig = px.pie(
-        values=list(regime_counts.values()),
-        names=list(regime_counts.keys()),
-        color_discrete_map={
-            'ACCUMULATION': '#D4AF37',
-            'EXPANSION': '#CD7F32',
-            'DISTRIBUTION': '#8B4513',
-            'RETOURNEMENT': '#5C4033',
-            'NEUTRAL': '#4a5568'
-        },
-        hole=0.6
-    )
-    
-    fig.update_traces(
-        textposition='outside',
-        textinfo='label+percent',
-        textfont=dict(color='#F5E6D3', size=12)
-    )
-    
-    fig.update_layout(
-        height=350,
-        margin=dict(l=40, r=40, t=40, b=40),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#F5E6D3', family='Outfit'),
-        showlegend=True,
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=-0.15,
-            xanchor='center',
-            x=0.5,
-            font=dict(color='#F5E6D3', size=11)
-        ),
-        annotations=[dict(
-            text='<b>Regimes</b>',
-            x=0.5, y=0.5,
-            font=dict(size=16, color='#D4AF37', family='Cormorant Garamond'),
-            showarrow=False
-        )]
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("No market regimes calculated for this date.")
+with col_c1:
+    # Score distribution bar chart
+    if opportunities_list:
+        scores = [opp.get('global_score', 0) for opp in opportunities_list]
+        bins = ['0-40', '40-60', '60-80', '80-100']
+        counts = [
+            sum(1 for s in scores if s < 40),
+            sum(1 for s in scores if 40 <= s < 60),
+            sum(1 for s in scores if 60 <= s < 80),
+            sum(1 for s in scores if s >= 80)
+        ]
+        
+        fig = go.Figure(data=[
+            go.Bar(
+                x=bins,
+                y=counts,
+                marker_color=['#EF4444', '#F59E0B', '#3B82F6', '#10B981'],
+                text=counts,
+                textposition='outside',
+                textfont=dict(color='#FFFFFF')
+            )
+        ])
+        
+        fig.update_layout(
+            title=dict(text='Score Distribution', font=dict(size=14, color='#FFFFFF')),
+            height=280,
+            margin=dict(l=40, r=20, t=50, b=40),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)'),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)')
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+
+with col_c2:
+    # Discount distribution
+    if opportunities_list:
+        discounts = [opp.get('discount_pct', 0) for opp in opportunities_list]
+        
+        fig = go.Figure(data=[
+            go.Histogram(
+                x=discounts,
+                nbinsx=8,
+                marker_color='#10B981',
+                opacity=0.8
+            )
+        ])
+        
+        fig.update_layout(
+            title=dict(text='Discount Distribution (%)', font=dict(size=14, color='#FFFFFF')),
+            height=280,
+            margin=dict(l=40, r=20, t=50, b=40),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)'),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Discount %'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Count'),
+            bargap=0.1
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
 
 # Footer
 st.markdown("---")

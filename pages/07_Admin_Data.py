@@ -1,175 +1,154 @@
 """
-Page Admin - Dubai Premium Gold Design
+Admin & Data - Tech Company Style
 """
 import streamlit as st
-from datetime import date, timedelta
 from core.db import db
-from core.utils import get_dubai_today, setup_logging
-from graphs.market_intelligence_graph import run_daily_pipeline
+from core.utils import get_dubai_today
 from core.styles import apply_plecto_style, kpi_card
 
-st.set_page_config(page_title="Administration", page_icon="", layout="wide")
+st.set_page_config(page_title="Admin & Data", page_icon="", layout="wide")
 
-# Apply Premium Gold style
+# Apply Tech style
 apply_plecto_style()
 
-st.markdown('<div class="dashboard-header">Administration</div>', unsafe_allow_html=True)
-
-st.warning("This page contains sensitive actions. Use with caution.")
-
-# === INITIALISATION ===
-st.markdown('<div class="section-title">Initialization</div>', unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("Initialize DB Schema", use_container_width=True):
-        with st.spinner("Initializing schema..."):
-            try:
-                db.init_schema()
-                
-                # Charger les fonctions SQL
-                import os
-                sql_dir = "sql"
-                for sql_file in ['baselines.sql', 'regimes.sql', 'opportunities.sql']:
-                    filepath = os.path.join(sql_dir, sql_file)
-                    if os.path.exists(filepath):
-                        db.load_sql_file(filepath)
-                
-                st.success("Schema initialized successfully")
-            except Exception as e:
-                st.error(f"Error: {e}")
-
-with col2:
-    if st.button("Generate MOCK Data", use_container_width=True):
-        with st.spinner("Generating test data..."):
-            try:
-                from pipelines.ingest_transactions import ingest_transactions
-                from pipelines.ingest_mortgages import ingest_mortgages
-                
-                # Générer pour aujourd'hui et hier
-                today = get_dubai_today()
-                ingest_transactions(today - timedelta(days=1), today)
-                ingest_mortgages(today - timedelta(days=1), today)
-                
-                st.success("MOCK data generated")
-            except Exception as e:
-                st.error(f"Error: {e}")
+st.markdown('<div class="dashboard-header">Admin & Data</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
-# === PIPELINE ===
-st.markdown('<div class="section-title">Pipeline Execution</div>', unsafe_allow_html=True)
+# === DATABASE STATS ===
+st.markdown('<div class="section-title">Database Status</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtitle">Real-time metrics</div>', unsafe_allow_html=True)
 
-target_date = st.date_input("Target date", value=get_dubai_today())
+# Get counts
+tables = [
+    ('dld_transactions', 'Transactions'),
+    ('dld_opportunities', 'Opportunities'),
+    ('dld_daily_briefs', 'Daily Briefs'),
+    ('market_baselines', 'Baselines'),
+    ('market_regimes', 'Regimes'),
+    ('active_alerts', 'Alerts')
+]
 
-if st.button("Run Full Pipeline", use_container_width=True):
-    with st.spinner(f"Running pipeline for {target_date}..."):
-        try:
-            setup_logging()
-            final_state = run_daily_pipeline(target_date)
-            
-            # Afficher le résumé
-            st.success("Pipeline completed")
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.metric("Transactions", final_state['transactions_count'])
-                st.metric("Mortgages", final_state['mortgages_count'])
-            
-            with col2:
-                st.metric("Anomalies", final_state['anomalies_count'])
-                st.metric("Opportunities", final_state['opportunities_count'])
-            
-            with col3:
-                st.metric("Alerts", final_state['alerts_sent'])
-                st.metric("CIO Brief", "Yes" if final_state['brief_generated'] else "No")
-            
-            if final_state['errors']:
-                st.warning(f"{len(final_state['errors'])} errors")
-                for error in final_state['errors']:
-                    st.caption(f"- {error}")
-        
-        except Exception as e:
-            st.error(f"Pipeline error: {e}")
+counts = {}
+for table, label in tables:
+    try:
+        result = db.execute_query(f"SELECT COUNT(*) as count FROM {table}")
+        counts[label] = result[0]['count'] if result else 0
+    except:
+        counts[label] = 0
+
+cols = st.columns(6)
+
+for i, (table, label) in enumerate(tables):
+    with cols[i]:
+        count = counts.get(label, 0)
+        st.markdown(kpi_card(label, "records", str(count)), unsafe_allow_html=True)
 
 st.markdown("---")
 
-# === STATISTIQUES ===
-st.markdown('<div class="section-title">Database Statistics</div>', unsafe_allow_html=True)
+# === RECENT ACTIVITY ===
+col_left, col_right = st.columns(2)
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    tx_count = db.execute_query("SELECT COUNT(*) as count FROM transactions")
-    st.metric("Transactions", tx_count[0]['count'] if tx_count else 0)
+with col_left:
+    st.markdown('<div class="section-title">Recent Transactions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Last 10</div>', unsafe_allow_html=True)
     
-    opp_count = db.execute_query("SELECT COUNT(*) as count FROM opportunities")
-    st.metric("Opportunities", opp_count[0]['count'] if opp_count else 0)
-
-with col2:
-    baseline_count = db.execute_query("SELECT COUNT(*) as count FROM market_baselines")
-    st.metric("Baselines", baseline_count[0]['count'] if baseline_count else 0)
-    
-    regime_count = db.execute_query("SELECT COUNT(*) as count FROM market_regimes")
-    st.metric("Regimes", regime_count[0]['count'] if regime_count else 0)
-
-with col3:
-    alert_count = db.execute_query("SELECT COUNT(*) as count FROM alerts")
-    st.metric("Alerts", alert_count[0]['count'] if alert_count else 0)
-    
-    brief_count = db.execute_query("SELECT COUNT(*) as count FROM daily_briefs")
-    st.metric("Briefs", brief_count[0]['count'] if brief_count else 0)
-
-st.markdown("---")
-
-# === DERNIÈRES ENTRÉES ===
-st.markdown('<div class="section-title">Recent Entries</div>', unsafe_allow_html=True)
-
-tab1, tab2, tab3 = st.tabs(["Transactions", "Opportunities", "Alerts"])
-
-with tab1:
     recent_tx = db.execute_query("""
-        SELECT transaction_date, community, price_per_sqft, rooms_bucket
+        SELECT transaction_date, community, rooms_bucket, price_aed
         FROM transactions
-        ORDER BY created_at DESC
+        ORDER BY transaction_date DESC, created_at DESC
         LIMIT 10
     """)
     
     if recent_tx:
-        import pandas as pd
-        st.dataframe(pd.DataFrame(recent_tx), use_container_width=True)
+        table_html = """
+        <div class="data-card">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        for tx in recent_tx:
+            price = tx.get('price_aed', 0)
+            table_html += f"""
+                <tr>
+                    <td>{tx.get('transaction_date', 'N/A')}</td>
+                    <td>{tx.get('community', 'N/A')}</td>
+                    <td>{tx.get('rooms_bucket', 'N/A')}</td>
+                    <td style="color: #10B981; font-weight: 600;">{price:,.0f}</td>
+                </tr>
+            """
+        
+        table_html += "</tbody></table></div>"
+        st.markdown(table_html, unsafe_allow_html=True)
     else:
-        st.info("No transactions")
+        st.info("No recent transactions.")
 
-with tab2:
-    recent_opp = db.execute_query("""
-        SELECT detection_date, community, discount_pct, global_score, recommended_strategy
-        FROM opportunities
-        ORDER BY created_at DESC
-        LIMIT 10
-    """)
+with col_right:
+    st.markdown('<div class="section-title">Data Sync</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Manual controls</div>', unsafe_allow_html=True)
     
-    if recent_opp:
-        import pandas as pd
-        st.dataframe(pd.DataFrame(recent_opp), use_container_width=True)
-    else:
-        st.info("No opportunities")
-
-with tab3:
-    recent_alerts = db.execute_query("""
-        SELECT alert_date, alert_type, severity, title
-        FROM alerts
-        ORDER BY alert_date DESC
-        LIMIT 10
-    """)
+    st.markdown('<div class="data-card" style="padding: 2rem;">', unsafe_allow_html=True)
     
-    if recent_alerts:
-        import pandas as pd
-        st.dataframe(pd.DataFrame(recent_alerts), use_container_width=True)
-    else:
-        st.info("No alerts")
+    if st.button("Refresh Transactions", use_container_width=True):
+        with st.spinner("Syncing..."):
+            try:
+                from pipelines.ingest_transactions import ingest_dld_transactions
+                result = ingest_dld_transactions()
+                st.success(f"Done: {result}")
+            except Exception as e:
+                st.error(str(e))
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    if st.button("Compute Baselines", use_container_width=True):
+        with st.spinner("Computing..."):
+            try:
+                from pipelines.compute_market_baselines import compute_baselines
+                compute_baselines()
+                st.success("Baselines updated")
+            except Exception as e:
+                st.error(str(e))
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    if st.button("Compute Scores", use_container_width=True):
+        with st.spinner("Scoring..."):
+            try:
+                from pipelines.compute_scores import compute_scores
+                compute_scores()
+                st.success("Scores updated")
+            except Exception as e:
+                st.error(str(e))
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("---")
+
+# === SYSTEM INFO ===
+st.markdown('<div class="section-title">System Info</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtitle">Environment</div>', unsafe_allow_html=True)
+
+import platform
+import sys
+
+info_html = f"""
+<div class="data-card">
+    <table class="styled-table">
+        <tr><td>Python</td><td style="color: #10B981;">{sys.version.split()[0]}</td></tr>
+        <tr><td>Platform</td><td>{platform.system()} {platform.release()}</td></tr>
+        <tr><td>Date</td><td>{get_dubai_today()}</td></tr>
+    </table>
+</div>
+"""
+
+st.markdown(info_html, unsafe_allow_html=True)
+
 st.caption(f"Last update: {get_dubai_today()}")

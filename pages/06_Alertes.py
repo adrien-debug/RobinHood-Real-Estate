@@ -1,113 +1,115 @@
 """
-Page Alertes - Dubai Premium Gold Design
+Alerts - Tech Company Style
 """
 import streamlit as st
-from datetime import timedelta
 from core.db import db
 from core.utils import get_dubai_today
-from core.styles import apply_plecto_style, kpi_card, status_badge
+from core.styles import apply_plecto_style, kpi_card
 
 st.set_page_config(page_title="Alerts", page_icon="", layout="wide")
 
-# Apply Premium Gold style
+# Apply Tech style
 apply_plecto_style()
 
 st.markdown('<div class="dashboard-header">Alerts</div>', unsafe_allow_html=True)
 
-# Filtres
-col1, col2 = st.columns(2)
+# Filters
+col1, col2 = st.columns([1, 3])
 
 with col1:
-    days_back = st.slider("Days to display", 1, 30, 7)
+    target_date = st.date_input("Date", value=get_dubai_today())
 
 with col2:
-    show_dismissed = st.checkbox("Show dismissed alerts", value=False)
+    severity_filter = st.multiselect("Severity", ["high", "medium", "low"], default=["high", "medium"])
 
-# Récupérer les alertes
+st.markdown("---")
+
+# Query
 query = """
-SELECT * FROM alerts
-WHERE alert_date >= %s
+SELECT * FROM active_alerts
+WHERE %s = %s
+ORDER BY created_at DESC
+LIMIT 50
 """
-params = [get_dubai_today() - timedelta(days=days_back)]
 
-if not show_dismissed:
-    query += " AND is_dismissed = FALSE"
+# Simple query without filters for now
+alerts = db.execute_query("""
+SELECT * FROM active_alerts
+ORDER BY created_at DESC
+LIMIT 50
+""")
 
-query += " ORDER BY alert_date DESC, severity DESC"
-
-alerts = db.execute_query(query, tuple(params))
-
-# Statistiques
 if alerts:
-    severity_counts = {}
-    for alert in alerts:
-        severity = alert.get('severity', 'low')
-        severity_counts[severity] = severity_counts.get(severity, 0) + 1
+    # Filter by severity
+    if severity_filter:
+        alerts = [a for a in alerts if (a.get('severity') or 'medium').lower() in [s.lower() for s in severity_filter]]
+    
+    # === KPIs ===
+    high_count = sum(1 for a in alerts if (a.get('severity') or '').lower() == 'high')
+    medium_count = sum(1 for a in alerts if (a.get('severity') or '').lower() == 'medium')
+    low_count = sum(1 for a in alerts if (a.get('severity') or '').lower() == 'low')
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total", len(alerts))
+        st.markdown(kpi_card("Total", "Alerts", str(len(alerts)), "accent"), unsafe_allow_html=True)
+    
     with col2:
-        st.metric("Critical", severity_counts.get('critical', 0))
+        st.markdown(kpi_card("High", "Priority", str(high_count)), unsafe_allow_html=True)
+    
     with col3:
-        st.metric("High", severity_counts.get('high', 0))
+        st.markdown(kpi_card("Medium", "Priority", str(medium_count)), unsafe_allow_html=True)
+    
     with col4:
-        st.metric("Medium", severity_counts.get('medium', 0))
+        st.markdown(kpi_card("Low", "Priority", str(low_count)), unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Affichage des alertes
+    # === ALERTS LIST ===
+    st.markdown('<div class="section-title">Active Alerts</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Recent notifications</div>', unsafe_allow_html=True)
+    
     for alert in alerts:
-        severity = alert.get('severity', 'low')
+        severity = (alert.get('severity') or 'medium').lower()
         
-        # Container avec couleur
-        with st.container():
-            col1, col2 = st.columns([4, 1])
-            
-            with col1:
-                severity_color = {
-                    'critical': '#D4AF37',
-                    'high': '#CD7F32',
-                    'medium': '#8B4513',
-                    'low': '#5C4033'
-                }.get(severity, '#5C4033')
-                
-                st.markdown(f"<span style='color: {severity_color}; font-weight: 600;'>{severity.upper()}</span> **{alert.get('title', 'N/A')}**", unsafe_allow_html=True)
-                st.caption(alert.get('message', ''))
-            
-            with col2:
-                alert_date = alert.get('alert_date')
-                if alert_date:
-                    st.caption(f"{alert_date.strftime('%Y-%m-%d %H:%M')}")
-            
-            # Actions
-            col3, col4, col5 = st.columns([1, 1, 2])
-            
-            with col3:
-                if not alert.get('is_read'):
-                    if st.button("Mark read", key=f"read_{alert['id']}"):
-                        db.execute_query(
-                            "UPDATE alerts SET is_read = TRUE WHERE id = %s",
-                            (alert['id'],)
-                        )
-                        st.rerun()
-            
-            with col4:
-                if not alert.get('is_dismissed'):
-                    if st.button("Dismiss", key=f"dismiss_{alert['id']}"):
-                        db.execute_query(
-                            "UPDATE alerts SET is_dismissed = TRUE WHERE id = %s",
-                            (alert['id'],)
-                        )
-                        st.rerun()
-            
-            with col5:
-                if alert.get('community'):
-                    st.caption(f"Location: {alert['community']}")
-            
-            st.markdown("---")
+        # Colors
+        colors = {
+            'high': ('#EF4444', 'rgba(239, 68, 68, 0.1)'),
+            'medium': ('#F59E0B', 'rgba(245, 158, 11, 0.1)'),
+            'low': ('#3B82F6', 'rgba(59, 130, 246, 0.1)')
+        }
+        accent, bg = colors.get(severity, ('#6B7280', 'rgba(107, 114, 128, 0.1)'))
+        
+        st.markdown(f"""
+        <div style="
+            background: {bg};
+            border-left: 4px solid {accent};
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span style="
+                    background: {accent};
+                    color: white;
+                    padding: 0.2rem 0.6rem;
+                    border-radius: 4px;
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                ">{severity}</span>
+                <span style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">{alert.get('created_at', 'N/A')}</span>
+            </div>
+            <div style="color: #FFFFFF; font-weight: 500; font-size: 0.95rem; margin-bottom: 0.5rem;">
+                {alert.get('rule_code', 'Alert')}
+            </div>
+            <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">
+                {alert.get('message', 'No details')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
 else:
-    st.info("No alerts for this period.")
+    st.info("No active alerts.")
 
 st.caption(f"Last update: {get_dubai_today()}")

@@ -1,42 +1,38 @@
 """
-Page Ventes du jour - Dubai Premium Gold Design
+Today's Sales - Tech Company Style
 """
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 from core.db import db
 from core.utils import get_dubai_today, format_currency
-from core.styles import apply_plecto_style, kpi_card, status_badge
+from core.styles import apply_plecto_style, kpi_card
 
 st.set_page_config(page_title="Today's Sales", page_icon="", layout="wide")
 
-# Apply Premium Gold style
+# Apply Tech style
 apply_plecto_style()
 
 st.markdown('<div class="dashboard-header">Today\'s Sales</div>', unsafe_allow_html=True)
 
-# Date selector
-target_date = st.date_input("Date", value=get_dubai_today())
-
-# Filtres
-col1, col2, col3 = st.columns(3)
+# Filters
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
+    target_date = st.date_input("Date", value=get_dubai_today())
+
+with col2:
     communities = db.execute_query("SELECT DISTINCT community FROM transactions WHERE community IS NOT NULL ORDER BY community")
     community_list = [c['community'] for c in communities]
     selected_community = st.selectbox("Community", ["All"] + community_list)
 
-with col2:
+with col3:
     rooms_filter = st.selectbox("Rooms", ["All", "studio", "1BR", "2BR", "3BR+"])
 
-with col3:
+with col4:
     min_price = st.number_input("Min price (AED)", value=0, step=100000)
 
-# Récupérer les transactions
-query = """
-SELECT * FROM v_recent_transactions
-WHERE transaction_date = %s
-"""
+# Query
+query = "SELECT * FROM v_recent_transactions WHERE transaction_date = %s"
 params = [target_date]
 
 if selected_community != "All":
@@ -51,63 +47,144 @@ if min_price > 0:
     query += " AND price_aed >= %s"
     params.append(min_price)
 
-query += " ORDER BY transaction_date DESC, price_per_sqft DESC LIMIT 50"
+query += " ORDER BY price_per_sqft DESC LIMIT 50"
 
 transactions = db.execute_query(query, tuple(params))
 
-# Statistiques
-st.markdown(f'<div class="section-title">{len(transactions)} Transactions</div>', unsafe_allow_html=True)
+st.markdown("---")
 
+# === KPIs ===
 if transactions:
-    col1, col2, col3 = st.columns(3)
+    total_volume = sum(t.get('price_aed', 0) or 0 for t in transactions)
+    avg_price = sum(t.get('price_per_sqft', 0) or 0 for t in transactions) / len(transactions)
+    below_market = sum(1 for t in transactions if (t.get('discount_pct') or 0) > 0)
+    pct_below = (below_market / len(transactions)) * 100
+    
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        total_volume = sum(t.get('price_aed', 0) or 0 for t in transactions)
-        st.metric("Total Volume", format_currency(total_volume))
+        st.markdown(kpi_card("Transactions", "Today", str(len(transactions)), "accent"), unsafe_allow_html=True)
     
     with col2:
-        avg_price = sum(t.get('price_per_sqft', 0) or 0 for t in transactions) / len(transactions)
-        st.metric("Avg Price/sqft", f"{avg_price:.0f} AED")
+        st.markdown(kpi_card("Total Volume", "AED", format_currency(total_volume)), unsafe_allow_html=True)
     
     with col3:
-        below_market = sum(1 for t in transactions if (t.get('discount_pct') or 0) > 0)
-        st.metric("Below Market", f"{below_market} ({below_market/len(transactions)*100:.0f}%)")
+        st.markdown(kpi_card("Avg Price/sqft", "AED", f"{avg_price:.0f}"), unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(kpi_card("Below Market", "Opportunities", f"{pct_below:.0f}%", "green"), unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Liste des transactions (cards mobile-friendly)
-    for tx in transactions:
-        with st.container():
-            col1, col2 = st.columns([3, 1])
-            
-            with col1:
-                st.markdown(f"**{tx.get('community')} / {tx.get('building', 'N/A')}**")
-                st.caption(f"{tx.get('rooms_bucket', 'N/A')} • {tx.get('area_sqft', 0):.0f} sqft")
-            
-            with col2:
-                price = tx.get('price_aed', 0)
-                st.metric("Price", format_currency(price))
-            
-            col3, col4, col5 = st.columns(3)
-            
-            with col3:
-                price_sqft = tx.get('price_per_sqft', 0)
-                st.caption(f"{price_sqft:.0f} AED/sqft")
-            
-            with col4:
-                discount = tx.get('discount_pct', 0)
-                if discount and discount > 0:
-                    st.caption(f"{discount:.1f}% below market")
-                else:
-                    st.caption("At market")
-            
-            with col5:
-                regime = tx.get('market_regime', 'N/A')
-                st.caption(f"Regime: {regime}")
-            
-            st.markdown("---")
-else:
-    st.info("No transactions for this date with these filters.")
+    # === TABLE ===
+    st.markdown('<div class="section-title">Transactions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Latest sales</div>', unsafe_allow_html=True)
+    
+    table_html = """
+    <div class="data-card">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Area</th>
+                    <th>Price</th>
+                    <th>Price/sqft</th>
+                    <th>vs Market</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+    
+    for i, tx in enumerate(transactions, 1):
+        price = tx.get('price_aed', 0)
+        price_sqft = tx.get('price_per_sqft', 0)
+        area = tx.get('area_sqft', 0)
+        discount = tx.get('discount_pct', 0) or 0
+        
+        # Discount color
+        if discount > 10:
+            disc_html = f'<span style="color: #10B981; font-weight: 600;">-{discount:.1f}%</span>'
+        elif discount > 0:
+            disc_html = f'<span style="color: #3B82F6; font-weight: 600;">-{discount:.1f}%</span>'
+        else:
+            disc_html = '<span style="color: rgba(255,255,255,0.4);">At market</span>'
+        
+        table_html += f"""
+            <tr>
+                <td class="table-rank">{i}</td>
+                <td class="table-name">{tx.get('community', 'N/A')} / {tx.get('building', 'N/A')}</td>
+                <td>{tx.get('rooms_bucket', 'N/A')}</td>
+                <td>{area:.0f} sqft</td>
+                <td class="table-value">{format_currency(price)}</td>
+                <td>{price_sqft:.0f}</td>
+                <td>{disc_html}</td>
+            </tr>
+        """
+    
+    table_html += "</tbody></table></div>"
+    st.markdown(table_html, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # === CHARTS ===
+    col_c1, col_c2 = st.columns(2)
+    
+    with col_c1:
+        # Price distribution
+        prices = [t.get('price_per_sqft', 0) for t in transactions]
+        
+        fig = go.Figure(data=[go.Histogram(
+            x=prices,
+            nbinsx=10,
+            marker_color='#10B981',
+            opacity=0.8
+        )])
+        
+        fig.update_layout(
+            title=dict(text='Price/sqft Distribution', font=dict(size=14, color='#FFFFFF')),
+            height=280,
+            margin=dict(l=40, r=20, t=50, b=40),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)'),
+            xaxis=dict(title='AED/sqft', gridcolor='rgba(255,255,255,0.05)'),
+            yaxis=dict(title='Count', gridcolor='rgba(255,255,255,0.05)')
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col_c2:
+        # By room type
+        room_counts = {}
+        for t in transactions:
+            room = t.get('rooms_bucket', 'Other')
+            room_counts[room] = room_counts.get(room, 0) + 1
+        
+        fig = go.Figure(data=[go.Bar(
+            x=list(room_counts.keys()),
+            y=list(room_counts.values()),
+            marker_color=['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#6B7280'][:len(room_counts)],
+            text=list(room_counts.values()),
+            textposition='outside',
+            textfont=dict(color='#FFFFFF')
+        )])
+        
+        fig.update_layout(
+            title=dict(text='By Room Type', font=dict(size=14, color='#FFFFFF')),
+            height=280,
+            margin=dict(l=40, r=20, t=50, b=40),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)'),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)')
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
 
-# Footer
+else:
+    st.info("No transactions for this date.")
+
 st.caption(f"Last update: {get_dubai_today()}")
