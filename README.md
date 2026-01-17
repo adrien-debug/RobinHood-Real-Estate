@@ -213,11 +213,14 @@ python realtime/poller.py
 
 ### Sources de données (priorité)
 
-1. **DLD Transactions** (PRIORITÉ ABSOLUE)
-2. **DLD Mortgages**
-3. **DLD Rental Index**
-4. **Developers Pipeline** (edge data)
-5. **Listings** (API autorisée uniquement)
+1. **DLD Transactions** (PRIORITÉ ABSOLUE) ✅ **Connecté via Dubai Pulse API**
+2. **DLD Buildings** ✅ **Connecté via Dubai Pulse API**
+3. **DLD Mortgages** (à venir)
+4. **DLD Rental Index** (à venir)
+5. **Developers Pipeline** (edge data)
+6. **Listings** (API autorisée uniquement)
+
+**📖 Guide de configuration** : Voir `docs/dubai_pulse_api_setup.md`
 
 ### Baselines marché
 
@@ -415,13 +418,21 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.0.1  
+**Version** : 1.1.0  
 **Date** : 2026-01-17  
-**Status** : ✅ Opérationnel
+**Status** : ✅ Opérationnel (APIs DLD connectées)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.1.0 (2026-01-17)
+- ✅ **APIs DLD connectées** : Intégration Dubai Pulse API officielle
+- ✅ **Authentification OAuth** : Module d'auth automatique avec cache de token
+- ✅ **Connecteur Transactions** : Récupération données réelles DLD
+- ✅ **Connecteur Buildings** : Métadonnées bâtiments et projets
+- ✅ **Fallback intelligent** : Mode MOCK si clés API non configurées
+- ✅ **Documentation** : Guide complet d'obtention des clés API
 
 ### v1.0.1 (2026-01-17)
 - ✅ Fix : Import LangChain obsolète (`langchain.prompts` → `langchain_core.prompts`)

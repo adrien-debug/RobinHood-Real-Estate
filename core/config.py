@@ -42,9 +42,10 @@ class Settings(BaseSettings):
     openai_api_key: str = get_secret("OPENAI_API_KEY", "")
     openai_model: str = "gpt-4-turbo-preview"
     
-    # DLD API
-    dld_api_key: str = get_secret("DLD_API_KEY", "")
-    dld_api_base_url: str = get_secret("DLD_API_BASE_URL", "https://api.dubailand.gov.ae/v1")
+    # DLD API (Dubai Pulse)
+    dld_api_key: str = get_secret("DLD_API_KEY", "")  # Client ID
+    dld_api_secret: str = get_secret("DLD_API_SECRET", "")  # Client Secret
+    dld_api_base_url: str = get_secret("DLD_API_BASE_URL", "https://api.dubaipulse.gov.ae")
     
     # Listings API
     listings_api_key: str = get_secret("LISTINGS_API_KEY", "")
