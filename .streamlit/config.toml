@@ -1,9 +1,9 @@
 [theme]
-primaryColor = "#D4AF37"  # Gold Dubai
-backgroundColor = "#0E1117"  # Dark premium
-secondaryBackgroundColor = "#1A1F2E"  # Dark blue
-textColor = "#FAFAFA"  # White text
-font = "sans serif"
+primaryColor = "#C9A961"  # Gold élégant
+backgroundColor = "#1C1C1E"  # Noir profond
+secondaryBackgroundColor = "#2C2C2E"  # Gris foncé
+textColor = "#F5F5F5"  # Blanc cassé
+font = "serif"
 
 [server]
 headless = true
