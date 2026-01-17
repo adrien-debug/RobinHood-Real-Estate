@@ -43,14 +43,14 @@ class DataRefresher:
         """KPIs principaux"""
         query_tx = """
         SELECT COUNT(*) as count, AVG(price_per_sqft) as avg_price
-        FROM transactions
+        FROM dld_transactions
         WHERE transaction_date = %s
         """
         tx_data = db.execute_query(query_tx, (target_date,))
         
         query_opp = """
         SELECT COUNT(*) as count, AVG(global_score) as avg_score
-        FROM opportunities
+        FROM dld_opportunities
         WHERE detection_date = %s AND status = 'active'
         """
         opp_data = db.execute_query(query_opp, (target_date,))
@@ -66,8 +66,8 @@ class DataRefresher:
     def _get_top_opportunities(target_date: date, limit: int = 10) -> list:
         """Top opportunités"""
         query = """
-        SELECT * FROM v_active_opportunities
-        WHERE detection_date = %s
+        SELECT * FROM dld_opportunities
+        WHERE detection_date = %s AND status = 'active'
         ORDER BY global_score DESC
         LIMIT %s
         """
@@ -77,7 +77,7 @@ class DataRefresher:
     def _get_regimes(target_date: date) -> list:
         """Régimes de marché"""
         query = """
-        SELECT * FROM market_regimes
+        SELECT * FROM dld_market_regimes
         WHERE regime_date = %s
         ORDER BY confidence_score DESC
         LIMIT 20
@@ -88,7 +88,7 @@ class DataRefresher:
     def _get_daily_brief(target_date: date) -> Dict:
         """Brief quotidien CIO"""
         query = """
-        SELECT * FROM daily_briefs
+        SELECT * FROM dld_daily_briefs
         WHERE brief_date = %s
         """
         results = db.execute_query(query, (target_date,))
