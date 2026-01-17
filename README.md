@@ -211,16 +211,22 @@ python realtime/poller.py
 
 ## 🧠 Logique métier
 
-### Sources de données (priorité)
+### Stack data optimal pour détecter les deals
 
-1. **DLD Transactions** (PRIORITÉ ABSOLUE) ✅ **Connecté via Dubai Pulse API**
-2. **DLD Buildings** ✅ **Connecté via Dubai Pulse API**
-3. **DLD Mortgages** (à venir)
-4. **DLD Rental Index** (à venir)
-5. **Developers Pipeline** (edge data)
-6. **Listings** (API autorisée uniquement)
+**Hiérarchie des sources (par priorité)** :
 
-**📖 Guide de configuration** : Voir `docs/dubai_pulse_api_setup.md`
+1. **DLD Transactions** (Dubai Pulse) ✅ **Connecté** - La vérité terrain (closing data)
+2. **DLD Rental Index API** 🔄 **À activer** - Rendement & pression locative
+3. **Bayut API** 🆕 **Nouveau** - Offre live (lead indicators)
+4. **Makani + GeoHub** 🆕 **Nouveau** - Matching + scoring localisation
+5. **DDA Zoning/Planning** 🆕 **Nouveau** - Signaux en avance
+
+**Mini check-list "anti faux signaux"** :
+- ✅ Transactions ≠ Listings : les "bons coups" se confirment sur DLD closings, pas sur annonces
+- ✅ Normalisation : même projet peut avoir variantes de noms → join via IDs/adresses (Makani aide)
+- ✅ Compliance : Dubai Municipality rappelle que l'usage des données implique conditions + responsabilité
+
+**📖 Guide complet** : Voir `docs/data_sources.md`
 
 ### Baselines marché
 
@@ -418,13 +424,22 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.1.0  
+**Version** : 1.2.0  
 **Date** : 2026-01-17  
-**Status** : ✅ Opérationnel (APIs DLD connectées)
+**Status** : ✅ Opérationnel (Stack data optimal prêt)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.2.0 (2026-01-17) - Stack Data Optimal
+- 🆕 **Bayut API** : Connecteur pour lead indicators (annonces live)
+- 🆕 **Makani Geocoding** : Matching précis + scoring localisation
+- 🆕 **DDA Planning & Zoning** : Signaux en avance (permis, zonage)
+- ✅ **DLD Rental Index** : Mise à jour pour Dubai Pulse API
+- ✅ **Nouveaux modèles** : Listing, MakaniAddress, PlanningPermit, ZoningChange
+- ✅ **Documentation complète** : `docs/optimal_data_stack.md`
+- ✅ **Anti-faux signaux** : Règles de validation Transactions vs Listings
 
 ### v1.1.0 (2026-01-17)
 - ✅ **APIs DLD connectées** : Intégration Dubai Pulse API officielle

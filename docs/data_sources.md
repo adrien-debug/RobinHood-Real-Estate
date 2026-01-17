@@ -240,16 +240,54 @@ Accès : https://www.dm.gov.ae/open-data
 
 ---
 
-## Hiérarchie des données
+## Mini check-list "anti faux signaux"
 
-**LA SEULE VÉRITÉ = DLD TRANSACTIONS**
+### 1. Transactions ≠ Listings
 
-Les annonces servent uniquement à :
-- Mesurer l'offre
-- Détecter des baisses de prix
-- Comparer avec le marché réel
+**Règle d'or** : Les "bons coups" se confirment sur DLD closings, pas sur annonces.
 
-En cas de conflit entre annonce et transaction DLD → **DLD gagne toujours**.
+- ✅ **DLD Transactions** = Vérité terrain (prix réels payés)
+- ⚠️ **Bayut Listings** = Lead indicators (prix demandés)
+
+**Utilisation correcte** :
+- Bayut pour détecter les signaux précoces (baisses de prix, sur-offre)
+- DLD pour valider les opportunités réelles
+- Comparaison Bayut vs DLD = mesure de l'écart demande/réel
+
+**En cas de conflit** : DLD gagne toujours.
+
+---
+
+### 2. Normalisation (Makani aide)
+
+**Problème** : Même projet peut avoir variantes de noms
+- "Marina Heights" vs "Marina Heights Tower" vs "MH"
+- "Dubai Marina" vs "D. Marina" vs "Marina"
+
+**Solution** : Utiliser Makani pour matching précis
+- Chaque bâtiment a un numéro Makani unique (10 chiffres)
+- Join via IDs/adresses normalisées
+- Évite les faux doublons et les données manquées
+
+**Fichier** : `core/utils.py` → `normalize_location_name()`
+
+---
+
+### 3. Compliance & Responsabilité
+
+⚠️ **Dubai Municipality rappelle** : L'usage des données implique conditions + responsabilité côté utilisateur.
+
+**Règles** :
+- ✅ Utiliser UNIQUEMENT des APIs officielles autorisées
+- ❌ AUCUN scraping non autorisé
+- ✅ Respecter les rate limits
+- ✅ Cacher les tokens d'accès
+- ✅ Logger sans données sensibles
+
+**APIs officielles** :
+- Dubai Pulse : https://www.dubaipulse.gov.ae
+- Bayut Partnerships : https://www.bayut.com/partnerships
+- Dubai Municipality : https://www.dm.gov.ae/open-data
 
 ---
 
@@ -264,6 +302,8 @@ Community (ex: Dubai Marina)
       └── Building (ex: Tower A)
           └── Unit (ex: 1205)
 ```
+
+**Makani Number** : Identifiant unique par bâtiment (10 chiffres)
 
 ### Chambres
 
@@ -289,33 +329,38 @@ Buckets standardisés :
 - Filtrer les prix = 0 ou NULL
 - Normaliser les noms de lieux (trim, casse)
 - Détecter les doublons (transaction_id)
+- Utiliser Makani pour matching précis
 
 ### Logs
 
 - Logger toutes les erreurs de parsing
 - Compter les données rejetées
 - Alerter si taux de rejet > 10%
+- **JAMAIS de données sensibles** dans les logs
 
 ---
 
 ## Fréquence de refresh
 
-| Source | Fréquence | Priorité |
-|--------|-----------|----------|
-| DLD Transactions | Quotidienne | 1 |
-| DLD Mortgages | Quotidienne | 2 |
-| DLD Rental Index | Mensuelle | 3 |
-| Developers Pipeline | Hebdomadaire | 4 |
-| Listings | Quotidienne | 5 |
+| Source | Fréquence | Priorité | Statut |
+|--------|-----------|----------|--------|
+| DLD Transactions | Quotidienne | 1 | ✅ Connecté |
+| DLD Rental Index | Mensuelle | 2 | 🔄 À activer |
+| Bayut Listings | Quotidienne | 3 | 🆕 Nouveau |
+| Makani Geocoding | On-demand | 4 | 🆕 Nouveau |
+| DDA Planning | Hebdomadaire | 5 | 🆕 Nouveau |
+| Developers Pipeline | Hebdomadaire | 6 | ✅ Existant |
 
 ---
 
 ## Contacts API
 
-- **DLD** : [api.dubailand.gov.ae](https://api.dubailand.gov.ae)
+- **Dubai Pulse (DLD)** : https://www.dubaipulse.gov.ae
+- **Bayut Partnerships** : https://www.bayut.com/partnerships
+- **Makani (GeoHub)** : https://geohub.dubaipulse.gov.ae
+- **Dubai Municipality (DDA)** : https://www.dm.gov.ae/open-data
 - **Developers** : À configurer selon partenaire
-- **Listings** : À configurer selon partenaire autorisé
 
 ---
 
-**Dernière mise à jour** : 2026-01-16
+**Dernière mise à jour** : 2026-01-17

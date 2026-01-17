@@ -309,6 +309,146 @@ with col_4:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+# === ROW 5: AI INSIGHTS ===
+st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+st.markdown('<div class="section-title">AI Insights</div>', unsafe_allow_html=True)
+
+# Generate AI insights based on data
+def generate_ai_insights(opps, kpis_data, brief_data):
+    """Generate smart AI insights from current data"""
+    insights = []
+    
+    # Insight 1: Market momentum
+    if kpis_data.get('avg_price_sqft', 0) > 1800:
+        insights.append({
+            'type': 'trend',
+            'icon': '📈',
+            'title': 'Strong Market',
+            'text': f"Avg price at AED {kpis_data.get('avg_price_sqft', 0):,.0f}/sqft indicates seller's market. Consider aggressive bidding on undervalued assets.",
+            'action': 'Review FLIP opportunities',
+            'color': '#10B981'
+        })
+    else:
+        insights.append({
+            'type': 'trend', 
+            'icon': '📉',
+            'title': 'Buyer Opportunity',
+            'text': 'Market prices below typical range. Good entry point for long-term positions.',
+            'action': 'Focus on LONG strategy',
+            'color': '#3B82F6'
+        })
+    
+    # Insight 2: Opportunity quality
+    if opps:
+        high_score = [o for o in opps if o.get('global_score', 0) >= 80]
+        if len(high_score) >= 3:
+            insights.append({
+                'type': 'opportunity',
+                'icon': '🎯',
+                'title': f'{len(high_score)} High-Score Deals',
+                'text': f"Multiple opportunities scoring 80+. Focus on {high_score[0].get('community', 'top zones')} for best risk/reward.",
+                'action': 'Prioritize today',
+                'color': '#10B981'
+            })
+        
+        # Discount analysis
+        avg_disc = sum(o.get('discount_pct', 0) for o in opps) / len(opps) if opps else 0
+        if avg_disc > 15:
+            insights.append({
+                'type': 'value',
+                'icon': '💰',
+                'title': 'Deep Value Detected',
+                'text': f"Average {avg_disc:.1f}% discount vs market. Indicates motivated sellers or pricing inefficiencies.",
+                'action': 'Execute quickly',
+                'color': '#F59E0B'
+            })
+    
+    # Insight 3: Risk from brief
+    if brief_data:
+        risk = brief_data.get('main_risk', '')
+        if 'supply' in risk.lower():
+            insights.append({
+                'type': 'risk',
+                'icon': '⚠️',
+                'title': 'Supply Risk',
+                'text': risk[:100] + '...' if len(risk) > 100 else risk,
+                'action': 'Avoid over-leveraging',
+                'color': '#EF4444'
+            })
+    
+    # Insight 4: Strategy recommendation
+    if opps:
+        strategies = {}
+        for o in opps:
+            s = o.get('recommended_strategy', 'OTHER')
+            strategies[s] = strategies.get(s, 0) + 1
+        
+        top_strat = max(strategies, key=strategies.get) if strategies else 'FLIP'
+        insights.append({
+            'type': 'strategy',
+            'icon': '🧠',
+            'title': f'Focus: {top_strat}',
+            'text': f"{strategies.get(top_strat, 0)} opportunities favor {top_strat} strategy based on current market conditions.",
+            'action': f'Review {top_strat} criteria',
+            'color': '#8B5CF6'
+        })
+    
+    return insights[:4]  # Max 4 insights
+
+insights = generate_ai_insights(opportunities_list, kpis, brief)
+
+col_i1, col_i2, col_i3, col_i4 = st.columns(4)
+insight_cols = [col_i1, col_i2, col_i3, col_i4]
+
+for i, insight in enumerate(insights):
+    with insight_cols[i]:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, rgba(19,29,50,0.95) 0%, rgba(15,26,46,0.95) 100%);
+            border-radius: 12px;
+            padding: 1.2rem;
+            border-left: 4px solid {insight['color']};
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+        ">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem;">
+                <span style="font-size: 1.2rem;">{insight['icon']}</span>
+                <span style="color: {insight['color']}; font-weight: 600; font-size: 0.85rem;">{insight['title']}</span>
+            </div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 0.78rem; line-height: 1.5; flex: 1;">
+                {insight['text']}
+            </div>
+            <div style="
+                margin-top: 0.8rem;
+                padding-top: 0.6rem;
+                border-top: 1px solid rgba(255,255,255,0.1);
+            ">
+                <span style="color: {insight['color']}; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">
+                    → {insight['action']}
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Fill remaining columns if less than 4 insights
+for i in range(len(insights), 4):
+    with insight_cols[i]:
+        st.markdown("""
+        <div style="
+            background: rgba(19,29,50,0.5);
+            border-radius: 12px;
+            padding: 1.2rem;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255,255,255,0.1);
+        ">
+            <span style="color: rgba(255,255,255,0.3); font-size: 0.8rem;">More insights coming...</span>
+        </div>
+        """, unsafe_allow_html=True)
+
 # Footer
-st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)
-st.caption(f"Last update: {get_dubai_today()}")
+st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+st.caption(f"Last update: {get_dubai_today()} | AI-powered insights")
