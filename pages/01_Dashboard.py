@@ -175,19 +175,24 @@ except Exception as e:
 # === KPIs - Plecto Style ===
 col1, col2, col3, col4 = st.columns(4)
 
-kpis = data.get('kpis', {})
+kpis = data.get('kpis') or {}
+
+# Valeurs sécurisées
+num_deals = kpis.get('transactions_count') or 0
+avg_price_raw = kpis.get('avg_price_sqft') or 0
+avg_price = avg_price_raw / 1000 if avg_price_raw > 0 else 0
+opportunities = kpis.get('opportunities_count') or 0
 
 with col1:
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-title">Number of Deals</div>
         <div class="kpi-subtitle">Current month</div>
-        <div class="kpi-value">{kpis.get('transactions_count', 0)}</div>
+        <div class="kpi-value">{num_deals}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    avg_price = kpis.get('avg_price_sqft', 0) / 1000 if kpis.get('avg_price_sqft', 0) > 0 else 0
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-title">Average Price/sqft</div>
@@ -201,12 +206,12 @@ with col3:
     <div class="kpi-card">
         <div class="kpi-title">Opportunities</div>
         <div class="kpi-subtitle">Active deals</div>
-        <div class="kpi-value">{kpis.get('opportunities_count', 0)}</div>
+        <div class="kpi-value">{opportunities}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col4:
-    avg_score = kpis.get('avg_opportunity_score', 0)
+    avg_score = kpis.get('avg_opportunity_score') or 0
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-title">Average Score</div>
