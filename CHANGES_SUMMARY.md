@@ -34,7 +34,7 @@
 ### 3. Page de Setup améliorée (`pages/00_Setup_Required.py`)
 
 **Changements** :
-- Affichage du `DATABASE_URL` complet avec le vrai mot de passe
+- Affichage du `DATABASE_URL` avec placeholders (`[PASSWORD]`)
 - Instructions étape par étape avec la config exacte à copier-coller
 - Version encodée fournie en cas de problème avec `/` et `=`
 - Pas besoin de chercher le mot de passe ailleurs
@@ -82,7 +82,7 @@
 3. Copier-coller cette config :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```

@@ -4,6 +4,7 @@ Compatible avec psycopg3 (psycopg) pour Streamlit Cloud
 """
 from typing import Optional, Any, Dict, List
 from contextlib import contextmanager
+from urllib.parse import urlparse
 import psycopg
 from psycopg.rows import dict_row
 from loguru import logger
@@ -22,6 +23,42 @@ class Database:
         self.connection_string = connection_string or settings.database_url
         self._connection = None
     
+    def _validate_connection_string(self):
+        """Valider la chaîne de connexion pour erreurs courantes (sans secrets)."""
+        if not self.connection_string:
+            return
+
+        if "[" in self.connection_string or "]" in self.connection_string:
+            error_msg = (
+                "❌ DATABASE_URL invalide : retirez les crochets [ ] autour du mot de passe.\n\n"
+                "Exemple :\n"
+                'DATABASE_URL="postgresql://postgres.<PROJECT_REF>:<PASSWORD>@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"'
+            )
+            logger.error("DATABASE_URL contient des crochets [ ]")
+            raise ConnectionError(error_msg)
+
+        parsed = urlparse(self.connection_string)
+        host = parsed.hostname or ""
+        user = parsed.username or ""
+
+        if host.endswith(".pooler.supabase.com"):
+            if user == "postgres" or not user.startswith("postgres."):
+                error_msg = (
+                    "❌ DATABASE_URL Supabase invalide (Pooler).\n\n"
+                    "Le user doit être au format : postgres.<PROJECT_REF>\n"
+                    "Exemple :\n"
+                    'DATABASE_URL="postgresql://postgres.<PROJECT_REF>:<PASSWORD>@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"'
+                )
+                logger.error("DATABASE_URL Supabase Pooler sans project ref dans le user")
+                raise ConnectionError(error_msg)
+
+        if host.startswith("db.") and host.endswith(".supabase.co"):
+            if user and user != "postgres" and not user.startswith("postgres."):
+                logger.warning(
+                    "DATABASE_URL Supabase (db.*) avec user inattendu. "
+                    "Attendu: postgres ou postgres.<PROJECT_REF>."
+                )
+
     def connect(self):
         """Établir la connexion"""
         if self._connection is None or self._connection.closed:
@@ -40,6 +77,7 @@ class Database:
                     logger.error(error_msg)
                     raise ConnectionError(error_msg)
                 
+                self._validate_connection_string()
                 self._connection = psycopg.connect(self.connection_string)
                 # Set search_path for Supabase (robin schema first, then public)
                 if 'supabase' in self.connection_string:

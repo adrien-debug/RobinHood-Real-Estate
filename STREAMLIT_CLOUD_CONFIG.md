@@ -23,7 +23,7 @@ Ton app Streamlit Cloud ne peut pas se connecter à la base de données car **DA
 **COPIE EXACTEMENT CECI** dans la zone de texte des secrets :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```
@@ -52,7 +52,7 @@ TIMEZONE = "Asia/Dubai"
 Le mot de passe contient un `/` qui peut poser problème. Utilise cette version **encodée** :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl%2FzSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ%3D%3D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD_URL_ENCODED]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```

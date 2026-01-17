@@ -52,7 +52,7 @@ L'erreur se produit à la ligne 29 de `core/db.py` lors de l'appel à `psycopg.c
 4. **Copie-colle EXACTEMENT cette configuration** :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```
@@ -72,7 +72,7 @@ Le mot de passe contient `/` et `=` qui peuvent causer des problèmes.
 Utilise cette version **URL-encodée** :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl%2FzSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ%3D%3D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD_URL_ENCODED]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```
@@ -147,10 +147,8 @@ TIMEZONE = "Asia/Dubai"
 
 ## 🔒 Note de Sécurité
 
-Le mot de passe que je t'ai fourni est :
-- ✅ Uniquement pour la base de données PostgreSQL
-- ✅ Chiffré dans les secrets Streamlit
-- ✅ Jamais exposé dans le code source
+Le mot de passe n'est jamais exposé dans le code source :
+- ✅ Uniquement fourni via secrets Streamlit
 - ✅ Jamais visible dans les logs publics
 
 ---

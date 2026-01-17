@@ -3,11 +3,32 @@ Script de test de connexion à la base de données
 Utilisé pour vérifier que DATABASE_URL est correctement configuré
 """
 import sys
+from urllib.parse import urlparse, urlunparse
 from loguru import logger
 
 # Configure logger
 logger.remove()
 logger.add(sys.stdout, format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>")
+
+def _mask_database_url(url: str) -> str:
+    """Masquer le mot de passe d'une URL PostgreSQL sans casser le format."""
+    try:
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.hostname or not parsed.username:
+            return url
+
+        netloc = parsed.username
+        if parsed.password is not None:
+            netloc += ":****"
+        netloc += f"@{parsed.hostname}"
+        if parsed.port:
+            netloc += f":{parsed.port}"
+
+        return urlunparse(
+            (parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
+        )
+    except Exception:
+        return url
 
 def test_connection():
     """Teste la connexion à la base de données"""
@@ -30,12 +51,7 @@ def test_connection():
             return False
         
         # Masquer le mot de passe dans l'affichage
-        safe_url = settings.database_url
-        if "@" in safe_url:
-            parts = safe_url.split("@")
-            if ":" in parts[0]:
-                user_pass = parts[0].split(":")
-                safe_url = f"{user_pass[0]}:****@{parts[1]}"
+        safe_url = _mask_database_url(settings.database_url)
         
         logger.success(f"✅ DATABASE_URL configuré : {safe_url}")
         logger.info(f"   TABLE_PREFIX : {settings.table_prefix}")

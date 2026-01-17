@@ -22,7 +22,7 @@ psycopg.OperationalError: This app has encountered an error.
 **COPIE EXACTEMENT CECI** dans la zone de texte :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```
@@ -49,7 +49,7 @@ Le mot de passe contient un `/` qui peut causer des problèmes.
 **Utilise cette version encodée** :
 
 ```toml
-DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl%2FzSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ%3D%3D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD_URL_ENCODED]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 TABLE_PREFIX = "dld_"
 TIMEZONE = "Asia/Dubai"
 ```
