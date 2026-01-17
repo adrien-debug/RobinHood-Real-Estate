@@ -1,14 +1,19 @@
 """
-Page Ventes du jour - Transactions récentes
+Page Ventes du jour - Transactions récentes (Style Plecto)
 """
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from core.db import db
 from core.utils import get_dubai_today, format_currency
+from core.styles import apply_plecto_style, kpi_card, status_badge
 
-st.set_page_config(page_title="Ventes du jour", page_icon="🏠", layout="wide")
+st.set_page_config(page_title="Today's Sales", page_icon="🏠", layout="wide")
 
-st.title("🏠 Ventes du jour")
+# Apply Plecto style
+apply_plecto_style()
+
+st.markdown('<div class="dashboard-header">Today\'s Sales</div>', unsafe_allow_html=True)
 
 # Date selector
 target_date = st.date_input("Date", value=get_dubai_today())

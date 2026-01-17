@@ -1,15 +1,19 @@
 """
-Page Zones / Projets / Buildings - Analyse par localisation
+Page Zones / Projets / Buildings - Analyse par localisation (Style Plecto)
 """
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from core.db import db
 from core.utils import get_dubai_today
+from core.styles import apply_plecto_style, kpi_card, status_badge
 
 st.set_page_config(page_title="Zones & Buildings", page_icon="📍", layout="wide")
 
-st.title("📍 Zones / Projets / Buildings")
+# Apply Plecto style
+apply_plecto_style()
+
+st.markdown('<div class="dashboard-header">📍 Zones & Buildings</div>', unsafe_allow_html=True)
 
 target_date = st.date_input("Date", value=get_dubai_today())
 

@@ -8,11 +8,15 @@ import plotly.graph_objects as go
 from datetime import date, timedelta
 from core.utils import get_dubai_today, format_currency, format_percentage
 from realtime.refresher import DataRefresher
+from core.styles import apply_plecto_style, kpi_card
 
 st.set_page_config(page_title="Market Intelligence Dashboard", page_icon="📊", layout="wide")
 
 # Auto-refresh
 st_autorefresh(interval=5 * 60 * 1000, key="dashboard_refresh")
+
+# Apply Plecto style
+apply_plecto_style()
 
 # Custom CSS - Plecto Style
 st.markdown("""

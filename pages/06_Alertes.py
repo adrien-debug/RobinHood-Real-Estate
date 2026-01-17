@@ -1,14 +1,18 @@
 """
-Page Alertes - Notifications actives
+Page Alertes - Notifications actives (Style Plecto)
 """
 import streamlit as st
 from datetime import timedelta
 from core.db import db
 from core.utils import get_dubai_today
+from core.styles import apply_plecto_style, kpi_card, status_badge
 
-st.set_page_config(page_title="Alertes", page_icon="🔔", layout="wide")
+st.set_page_config(page_title="Alerts", page_icon="🔔", layout="wide")
 
-st.title("🔔 Alertes")
+# Apply Plecto style
+apply_plecto_style()
+
+st.markdown('<div class="dashboard-header">🔔 Alerts</div>', unsafe_allow_html=True)
 
 # Filtres
 col1, col2 = st.columns(2)

@@ -1,15 +1,19 @@
 """
-Page Admin - Gestion des données
+Page Admin - Gestion des données (Style Plecto)
 """
 import streamlit as st
 from datetime import date, timedelta
 from core.db import db
 from core.utils import get_dubai_today, setup_logging
 from graphs.market_intelligence_graph import run_daily_pipeline
+from core.styles import apply_plecto_style, kpi_card
 
 st.set_page_config(page_title="Admin", page_icon="⚙️", layout="wide")
 
-st.title("⚙️ Administration")
+# Apply Plecto style
+apply_plecto_style()
+
+st.markdown('<div class="dashboard-header">⚙️ Administration</div>', unsafe_allow_html=True)
 
 st.warning("⚠️ Cette page contient des actions sensibles. Utilisez avec précaution.")
 

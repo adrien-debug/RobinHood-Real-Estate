@@ -1,14 +1,19 @@
 """
-Page Location & Yield - Rendements locatifs
+Page Location & Yield - Rendements locatifs (Style Plecto)
 """
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from core.db import db
 from core.utils import get_dubai_today, format_currency
+from core.styles import apply_plecto_style, kpi_card, status_badge
 
 st.set_page_config(page_title="Location & Yield", page_icon="💰", layout="wide")
 
-st.title("💰 Location & Yield")
+# Apply Plecto style
+apply_plecto_style()
+
+st.markdown('<div class="dashboard-header">💰 Rental Yields</div>', unsafe_allow_html=True)
 
 st.info("📊 Cette page affiche les rendements locatifs basés sur le DLD Rental Index")
 
