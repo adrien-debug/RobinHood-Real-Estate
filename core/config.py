@@ -47,7 +47,19 @@ class Settings(BaseSettings):
     dld_api_secret: str = get_secret("DLD_API_SECRET", "")  # Client Secret
     dld_api_base_url: str = get_secret("DLD_API_BASE_URL", "https://api.dubaipulse.gov.ae")
     
-    # Listings API
+    # Bayut API (lead indicators)
+    bayut_api_key: str = get_secret("BAYUT_API_KEY", "")
+    bayut_api_url: str = get_secret("BAYUT_API_URL", "https://api.bayut.com/v1")
+    
+    # Makani Geocoding (Dubai Municipality)
+    makani_api_key: str = get_secret("MAKANI_API_KEY", "")
+    makani_api_url: str = get_secret("MAKANI_API_URL", "https://api.dubaipulse.gov.ae/makani")
+    
+    # DDA Planning & Zoning
+    dda_api_key: str = get_secret("DDA_API_KEY", "")
+    dda_api_url: str = get_secret("DDA_API_URL", "https://api.dm.gov.ae/v1")
+    
+    # Listings API (legacy - remplacé par Bayut)
     listings_api_key: str = get_secret("LISTINGS_API_KEY", "")
     listings_api_url: str = get_secret("LISTINGS_API_URL", "")
     

@@ -186,3 +186,82 @@ class DailyBrief(BaseModel):
     strategic_recommendation: str
     
     full_brief_text: str
+
+
+class Listing(BaseModel):
+    """Annonce immobilière (Bayut, Property Finder, etc.)"""
+    listing_id: str
+    listing_date: Optional[date] = None
+    source: str  # bayut, property_finder, etc.
+    
+    community: Optional[str] = None
+    project: Optional[str] = None
+    building: Optional[str] = None
+    
+    property_type: Optional[str] = None
+    rooms_count: Optional[int] = None
+    rooms_bucket: Optional[str] = None
+    area_sqft: Optional[Decimal] = None
+    
+    asking_price_aed: Optional[Decimal] = None
+    asking_price_per_sqft: Optional[Decimal] = None
+    original_price_aed: Optional[Decimal] = None
+    
+    price_changes: int = 0
+    last_price_change_date: Optional[date] = None
+    days_on_market: int = 0
+    
+    status: str = "active"  # active, sold, rented, withdrawn
+    url: Optional[str] = None
+
+
+class MakaniAddress(BaseModel):
+    """Adresse Makani (système d'adressage officiel de Dubaï)"""
+    makani_number: Optional[str] = None  # 10 chiffres
+    
+    community: Optional[str] = None
+    project: Optional[str] = None
+    building: Optional[str] = None
+    street: Optional[str] = None
+    
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    
+    # Points d'intérêt à proximité
+    metro_station: Optional[str] = None
+    metro_distance_m: Optional[int] = None
+    beach_distance_m: Optional[int] = None
+    mall_distance_m: Optional[int] = None
+
+
+class PlanningPermit(BaseModel):
+    """Permis de construire (DDA)"""
+    permit_id: str
+    issue_date: Optional[date] = None
+    permit_type: str  # new_construction, renovation, extension
+    
+    community: Optional[str] = None
+    project_name: Optional[str] = None
+    developer: Optional[str] = None
+    
+    total_units: Optional[int] = None
+    residential_units: Optional[int] = None
+    commercial_units: Optional[int] = None
+    
+    estimated_completion: Optional[date] = None
+    total_area_sqm: Optional[int] = None
+
+
+class ZoningChange(BaseModel):
+    """Changement de zonage (DDA)"""
+    change_id: str
+    effective_date: Optional[date] = None
+    
+    community: Optional[str] = None
+    area_name: Optional[str] = None
+    
+    old_zoning: Optional[str] = None  # residential, commercial, mixed_use, industrial
+    new_zoning: Optional[str] = None
+    
+    reason: Optional[str] = None
+    impact: Optional[str] = None

@@ -353,21 +353,41 @@ PLECTO_CSS = """
         color: var(--text-primary) !important;
     }
     
-    /* === SIDEBAR === */
+    /* === SIDEBAR COMPACT === */
     [data-testid="stSidebar"] {
         background: var(--bg-secondary) !important;
         border-right: 1px solid var(--border-subtle) !important;
     }
     
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        width: 60px !important;
+        min-width: 60px !important;
+    }
+    
+    [data-testid="stSidebarNav"] {
+        padding: 0.5rem !important;
+    }
+    
     [data-testid="stSidebarNav"] a {
         color: var(--text-secondary) !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
         transition: all 0.2s ease !important;
+        padding: 0.8rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.8rem !important;
     }
     
     [data-testid="stSidebarNav"] a:hover {
         color: var(--accent-green) !important;
-        background: rgba(0, 217, 163, 0.1) !important;
+        background: rgba(0, 217, 163, 0.15) !important;
+        transform: translateX(2px) !important;
+    }
+    
+    [data-testid="stSidebarNav"] a[aria-current="page"] {
+        background: rgba(0, 217, 163, 0.2) !important;
+        color: var(--accent-green) !important;
+        border-left: 3px solid var(--accent-green) !important;
     }
     
     /* === SLIDER === */

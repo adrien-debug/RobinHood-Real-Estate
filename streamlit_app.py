@@ -1,27 +1,25 @@
 """
-DUBAI REAL ESTATE INTELLIGENCE
-Application Streamlit - Page principale
+Robin - Dubai Real Estate Intelligence
+Main entry point
 """
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from core.config import settings
-from core.utils import setup_logging
+from core.styles import apply_plecto_style
 
-# Configuration de la page (MOBILE-FIRST)
 st.set_page_config(
-    page_title="Dubai Real Estate Intelligence",
-    page_icon="🏢",
+    page_title="Robin - Real Estate Intel",
+    page_icon="",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Sidebar fermée par défaut (mobile)
+    initial_sidebar_state="collapsed"
 )
 
-# Auto-refresh (toutes les 5 minutes)
 st_autorefresh(interval=5 * 60 * 1000, key="main_refresh")
 
-# Setup logging
-setup_logging()
+# Apply style
+apply_plecto_style()
 
-# Check if DATABASE_URL is configured (Streamlit Cloud only)
+# Check config
 import os
 is_cloud = "mount/src" in str(st.__file__).lower() or os.getenv("STREAMLIT_CLOUD") is not None
 is_configured = (
@@ -30,152 +28,81 @@ is_configured = (
 )
 
 if is_cloud and not is_configured:
-    st.error("⚙️ Configuration Requise")
+    st.error("Configuration Required")
     st.markdown("""
-    ### 🔐 DATABASE_URL Non Configuré
+    **DATABASE_URL not configured**
     
-    L'application nécessite une connexion à Supabase.
-    
-    **Étapes :**
-    1. Cliquez "Manage app" → Settings → Secrets
-    2. Ajoutez : `DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"`
-    3. Obtenez le mot de passe sur : https://supabase.com/dashboard/project/tnnsfheflydiuhiduntn/settings/database
-    4. Cliquez "Save" puis "Reboot app"
-    
-    📖 **Guide complet** : Voir `STREAMLIT_SECRETS_SETUP.md` sur GitHub
+    1. Click "Manage app" → Settings → Secrets
+    2. Add your Supabase connection string
+    3. Save and reboot
     """)
     st.stop()
 
-# CSS MOBILE-FIRST
+# Header
 st.markdown("""
-<style>
-    /* Mobile-first : optimisation pour iPhone */
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding: 1rem 0.5rem;
-            max-width: 100%;
-        }
-        
-        h1 {
-            font-size: 1.5rem !important;
-        }
-        
-        h2 {
-            font-size: 1.2rem !important;
-        }
-        
-        h3 {
-            font-size: 1rem !important;
-        }
-        
-        .stMetric {
-            background-color: #f0f2f6;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-        }
-    }
-    
-    /* Cards */
-    .card {
-        background-color: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
-    }
-    
-    /* Badges */
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: bold;
-    }
-    
-    .badge-success {
-        background-color: #10b981;
-        color: white;
-    }
-    
-    .badge-warning {
-        background-color: #f59e0b;
-        color: white;
-    }
-    
-    .badge-danger {
-        background-color: #ef4444;
-        color: white;
-    }
-    
-    .badge-info {
-        background-color: #3b82f6;
-        color: white;
-    }
-</style>
+<div style="text-align: center; padding: 3rem 0;">
+    <div style="font-size: 3rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.5rem;">Robin</div>
+    <div style="font-size: 1.1rem; color: rgba(255,255,255,0.6);">Dubai Real Estate Intelligence Platform</div>
+</div>
 """, unsafe_allow_html=True)
 
-# Header
-st.title("🏢 Dubai Real Estate Intelligence")
-st.caption("Plateforme d'intelligence immobilière institutionnelle - Mobile-first")
-
-# Navigation
-st.markdown("---")
-
-st.markdown("""
-### 📱 Navigation
-
-Utilisez le menu latéral (☰) pour accéder aux différentes sections :
-
-- **📊 Dashboard** : Vue d'ensemble + Brief CIO
-- **🏠 Ventes du jour** : Transactions récentes
-- **📍 Zones / Buildings** : Analyse par localisation
-- **🎯 Deal Radar** : Opportunités scorées
-- **💰 Location & Yield** : Rendements locatifs
-- **🔔 Alertes** : Notifications actives
-- **⚙️ Admin** : Gestion des données
-
----
-
-### 🚀 Démarrage rapide
-
-1. **Initialiser la base de données** (première utilisation)
-2. **Exécuter le pipeline quotidien** (collecte + analyse)
-3. **Consulter le Dashboard** pour le brief CIO
-
----
-
-### 📖 Documentation
-
-- **Sources de données** : DLD Transactions, Mortgages, Rental Index
-- **Scoring** : Multi-stratégies (FLIP, RENT, LONG_TERM)
-- **Régimes de marché** : ACCUMULATION, EXPANSION, DISTRIBUTION, RETOURNEMENT
-- **Agent CIO** : Brief quotidien automatique
-
----
-
-### ⚡ Actions rapides
-""")
+# Navigation grid
+st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🔄 Refresh Data", use_container_width=True):
-        st.rerun()
-
-with col2:
-    if st.button("📊 Dashboard", use_container_width=True):
+    if st.button("Dashboard", use_container_width=True, type="primary"):
         st.switch_page("pages/01_Dashboard.py")
 
+with col2:
+    if st.button("Today's Sales", use_container_width=True):
+        st.switch_page("pages/02_Ventes_du_jour.py")
+
 with col3:
-    if st.button("🎯 Deals", use_container_width=True):
+    if st.button("Zones Analysis", use_container_width=True):
+        st.switch_page("pages/03_Zones_Projets_Buildings.py")
+
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    if st.button("Deal Radar", use_container_width=True):
         st.switch_page("pages/04_Deal_Radar.py")
 
-st.markdown("---")
+with col5:
+    if st.button("Location Yield", use_container_width=True):
+        st.switch_page("pages/05_Location_Yield.py")
+
+with col6:
+    if st.button("Alerts", use_container_width=True):
+        st.switch_page("pages/06_Alertes.py")
+
+st.markdown("<div style='height: 2rem'></div>", unsafe_allow_html=True)
+
+# Quick stats
+from core.db import db
+
+try:
+    stats = db.execute_query("""
+        SELECT 
+            (SELECT COUNT(*) FROM transactions WHERE transaction_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_tx,
+            (SELECT COUNT(*) FROM dld_opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_opps,
+            (SELECT AVG(global_score) FROM dld_opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as avg_score
+    """)
+    
+    if stats:
+        s = stats[0]
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Weekly Transactions", s.get('weekly_tx', 0))
+        with c2:
+            st.metric("Weekly Opportunities", s.get('weekly_opps', 0))
+        with c3:
+            avg = s.get('avg_score', 0)
+            st.metric("Avg Score", f"{avg or 0:.0f}%")
+except Exception:
+    pass
 
 # Footer
-st.caption(f"""
-🌐 Timezone: {settings.timezone}  
-🔄 Auto-refresh: {settings.polling_interval_minutes} min  
-📡 Status: ✅ Opérationnel
-""")
+st.markdown("<div style='height: 2rem'></div>", unsafe_allow_html=True)
+st.caption(f"Timezone: {settings.timezone} | Auto-refresh: {settings.polling_interval_minutes} min | Status: Online")
