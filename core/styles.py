@@ -854,3 +854,4 @@ def section_header(title: str, subtitle: str = "") -> str:
 def animated_value(value: str) -> str:
     """Générer une valeur animée avec effet shimmer"""
     return f'<span class="gauge-value">{value}</span>'
+
