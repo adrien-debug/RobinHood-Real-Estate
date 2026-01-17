@@ -24,8 +24,16 @@ target_date = st.date_input(
 )
 
 # Récupérer les données
-with st.spinner("Chargement des données..."):
-    data = DataRefresher.get_dashboard_data(target_date)
+try:
+    with st.spinner("Chargement des données..."):
+        data = DataRefresher.get_dashboard_data(target_date)
+except ConnectionError as e:
+    st.error(str(e))
+    st.stop()
+except Exception as e:
+    st.error(f"❌ Erreur lors du chargement des données : {str(e)}")
+    st.info("Vérifiez les logs pour plus de détails.")
+    st.stop()
 
 # === KPIs ===
 st.subheader("📈 KPIs du jour")

@@ -88,16 +88,45 @@ dubai-real-estate-intelligence/
 
 ---
 
-## 🚀 Installation
+## 🚀 Déploiement
 
-### 1. Prérequis
+### ☁️ Streamlit Cloud (Production)
+
+**L'app est déployée sur** : https://adrien-debug-robinhood-real-estate-app-5mafql.streamlit.app/
+
+#### Configuration Requise
+
+Si tu vois une erreur de connexion DB, suis ces étapes :
+
+1. **Ouvre les secrets Streamlit Cloud**
+   - Va sur https://share.streamlit.io/
+   - Clique sur "Manage app" → Settings → Secrets
+
+2. **Ajoute cette configuration** :
+   ```toml
+   DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+   TABLE_PREFIX = "dld_"
+   TIMEZONE = "Asia/Dubai"
+   ```
+
+3. **Sauvegarde et redémarre**
+   - Clique sur "Save"
+   - Clique sur "Reboot app"
+   - Attends 60 secondes
+
+📖 **Guide complet** : Voir `STREAMLIT_CLOUD_CONFIG.md`
+
+---
+
+### 💻 Installation Locale
+
+#### 1. Prérequis
 
 - Python 3.11+
-- PostgreSQL 14+
-- OpenAI API Key (pour agent CIO)
-- DLD API Key (Dubai Land Department)
+- PostgreSQL 14+ ou Supabase
+- OpenAI API Key (optionnel, pour agent CIO)
 
-### 2. Installation
+#### 2. Installation
 
 ```bash
 # Cloner le repo
@@ -117,14 +146,17 @@ cp env.example .env
 # Éditer .env avec vos clés API
 ```
 
-### 3. Configuration PostgreSQL
+#### 3. Configuration PostgreSQL
 
 ```bash
-# Créer la base de données
+# Option A : PostgreSQL local
 createdb dubai_real_estate
-
-# Mettre à jour DATABASE_URL dans .env
 DATABASE_URL=postgresql://user:password@localhost:5432/dubai_real_estate
+
+# Option B : Supabase (recommandé)
+# Utilise le même DATABASE_URL que Streamlit Cloud
+DATABASE_URL=postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+TABLE_PREFIX=dld_
 ```
 
 ### 4. Initialisation

@@ -26,6 +26,20 @@ class Database:
         """Établir la connexion"""
         if self._connection is None or self._connection.closed:
             try:
+                # Vérifier que DATABASE_URL est configuré
+                if not self.connection_string or self.connection_string == "postgresql://user:password@localhost:5432/dubai_real_estate":
+                    error_msg = (
+                        "❌ DATABASE_URL non configuré.\n\n"
+                        "Sur Streamlit Cloud :\n"
+                        "1. Cliquez sur 'Manage app' (en bas à droite)\n"
+                        "2. Allez dans Settings > Secrets\n"
+                        "3. Ajoutez : DATABASE_URL = \"postgresql://...\"\n"
+                        "4. Cliquez sur 'Reboot app'\n\n"
+                        "Voir STREAMLIT_SECRETS_SETUP.md pour plus de détails."
+                    )
+                    logger.error(error_msg)
+                    raise ConnectionError(error_msg)
+                
                 self._connection = psycopg.connect(self.connection_string)
                 # Set search_path for Supabase (robin schema first, then public)
                 if 'supabase' in self.connection_string:
@@ -33,6 +47,21 @@ class Database:
                         cur.execute("SET search_path TO robin, public")
                     self._connection.commit()
                 logger.info("Connexion PostgreSQL établie")
+            except psycopg.OperationalError as e:
+                error_msg = (
+                    f"❌ Impossible de se connecter à la base de données.\n\n"
+                    f"Erreur : {str(e)}\n\n"
+                    f"Vérifiez :\n"
+                    f"1. DATABASE_URL est bien configuré dans les secrets Streamlit\n"
+                    f"2. Le mot de passe est correct (pas d'espaces)\n"
+                    f"3. La base Supabase est accessible\n\n"
+                    f"Si le mot de passe contient /, =, @, etc., encodez-le en URL :\n"
+                    f"  / devient %2F\n"
+                    f"  = devient %3D\n"
+                    f"  @ devient %40"
+                )
+                logger.error(error_msg)
+                raise ConnectionError(error_msg) from e
             except Exception as e:
                 logger.error(f"Erreur connexion DB : {e}")
                 raise

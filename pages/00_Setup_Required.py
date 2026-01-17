@@ -23,49 +23,61 @@ if not is_configured:
     ## ⚠️ DATABASE_URL Non Configuré
     
     L'application nécessite une connexion à Supabase pour fonctionner.
+    """)
     
-    ### 📋 Étapes de Configuration :
+    # Instructions détaillées avec le mot de passe
+    st.markdown("### 📋 Configuration Rapide (5 minutes)")
     
-    1. **Accédez aux Secrets Streamlit Cloud**
-       - Cliquez sur **"Manage app"** (en bas à droite)
-       - Allez dans **⚙️ Settings** → **Secrets**
+    st.markdown("""
+    **1️⃣ Ouvre les paramètres Streamlit Cloud**
+    - Clique sur **"Manage app"** (bouton en bas à droite)
+    - Va dans **⚙️ Settings** → **Secrets**
+    """)
     
-    2. **Obtenez votre Connection String Supabase**
-       - Allez sur : https://supabase.com/dashboard/project/tnnsfheflydiuhiduntn/settings/database
-       - Copiez le "Connection string (URI)" sous "Connection pooling"
-       - Si vous ne connaissez pas le mot de passe, cliquez "Reset database password"
+    st.markdown("**2️⃣ Copie-colle EXACTEMENT cette configuration :**")
     
-    3. **Ajoutez cette configuration** (remplacez `[PASSWORD]`) :
+    config_code = '''DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+TABLE_PREFIX = "dld_"
+TIMEZONE = "Asia/Dubai"'''
     
-    ```toml
-    DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
-    OPENAI_API_KEY = "sk-[YOUR_KEY]"
-    ```
+    st.code(config_code, language="toml")
     
-    4. **Sauvegardez et Redémarrez**
-       - Cliquez **"Save"**
-       - Cliquez **"Reboot app"**
+    st.markdown("""
+    **3️⃣ Sauvegarde et redémarre**
+    - Clique sur **"Save"**
+    - Clique sur **"Reboot app"**
+    - Attends 60 secondes
+    """)
     
-    ---
+    st.warning("""
+    ⚠️ **Si ça ne marche pas** : Le mot de passe contient un `/` qui peut poser problème.
     
+    Utilise cette version encodée à la place :
+    """)
+    
+    config_code_encoded = '''DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl%2FzSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ%3D%3D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+TABLE_PREFIX = "dld_"
+TIMEZONE = "Asia/Dubai"'''
+    
+    st.code(config_code_encoded, language="toml")
+    
+    st.markdown("---")
+    
+    st.markdown("""
     ### 📖 Documentation Complète
     
-    Consultez les fichiers suivants dans le repo GitHub :
-    - `STREAMLIT_SECRETS_SETUP.md` - Guide détaillé
-    - `DEPLOYMENT.md` - Architecture et déploiement
-    - `DEPLOYMENT_STATUS.md` - Statut complet
+    Consultez `STREAMLIT_CLOUD_CONFIG.md` dans le repo pour plus de détails.
     
     ### 🔗 Liens Utiles
     
     - [Supabase Dashboard](https://supabase.com/dashboard/project/tnnsfheflydiuhiduntn)
-    - [GitHub Repo](https://github.com/adrien-debug/RobinHood-Real-Estate)
     - [Streamlit Cloud](https://share.streamlit.io/)
     
     ---
     
     ### ✅ Vérification
     
-    Une fois configuré, cette page disparaîtra et vous verrez le Dashboard.
+    Une fois configuré, cette page disparaîtra et tu verras le Dashboard.
     """)
     
     st.info("💡 **Astuce** : L'application fonctionne parfaitement en local. Cette configuration est uniquement nécessaire pour Streamlit Cloud.")

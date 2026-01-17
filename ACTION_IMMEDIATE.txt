@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                    ⚡ ACTION IMMÉDIATE REQUISE ⚡                            ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🎯 PROBLÈME
+───────────
+Ton app Streamlit Cloud ne peut pas se connecter à Supabase.
+Erreur : psycopg.OperationalError
+
+✅ SOLUTION (2 MINUTES)
+────────────────────────
+
+ÉTAPE 1 : Ouvre Streamlit Cloud
+→ https://share.streamlit.io/
+→ Trouve ton app "robinhood-real-estate"
+→ Clique sur "Manage app" (bouton en bas à droite)
+→ Menu gauche : Settings
+→ Onglet : Secrets
+
+ÉTAPE 2 : Copie-colle EXACTEMENT cette config
+──────────────────────────────────────────────
+
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl/zSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ==@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+TABLE_PREFIX = "dld_"
+TIMEZONE = "Asia/Dubai"
+
+ÉTAPE 3 : Sauvegarde
+────────────────────
+→ Clique sur "Save"
+→ Clique sur "Reboot app"
+→ Attends 60 secondes
+
+ÉTAPE 4 : Vérifie
+─────────────────
+→ Va sur ton app : https://adrien-debug-robinhood-real-estate-app-5mafql.streamlit.app/
+→ Tu devrais voir le Dashboard se charger ✅
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║  ⚠️  SI ÇA NE MARCHE PAS : Utilise la version encodée                       ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:IvVcjJbr3pl%2FzSBHT5gltczPtZFV4US7RXMjALiJomv518VZMq57m2ruFrMPhj4yRdiZQLIEnuoQzbFnngdDAQ%3D%3D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+TABLE_PREFIX = "dld_"
+TIMEZONE = "Asia/Dubai"
+
+(Le / devient %2F et le = devient %3D)
+
+───────────────────────────────────────────────────────────────────────────────
+
+📁 GUIDES DISPONIBLES
+─────────────────────
+
+QUICK_FIX.md                    ← Guide ultra-rapide (2 min)
+STREAMLIT_CLOUD_CONFIG.md       ← Guide détaillé complet
+CHANGES_SUMMARY.md              ← Résumé des modifications
+README.md                       ← Documentation mise à jour
+
+───────────────────────────────────────────────────────────────────────────────
+
+✅ CHECKLIST
+────────────
+
+□ J'ai ouvert Streamlit Cloud
+□ J'ai trouvé mon app
+□ J'ai cliqué sur "Manage app"
+□ J'ai ouvert Settings > Secrets
+□ J'ai copié-collé DATABASE_URL
+□ J'ai cliqué sur "Save"
+□ J'ai cliqué sur "Reboot app"
+□ J'ai attendu 60 secondes
+□ L'app charge maintenant ✅
+
+───────────────────────────────────────────────────────────────────────────────
+
+⏱️  TEMPS TOTAL : 2 MINUTES
+🎯 RÉSULTAT : App fonctionnelle sur Streamlit Cloud
+
+───────────────────────────────────────────────────────────────────────────────
