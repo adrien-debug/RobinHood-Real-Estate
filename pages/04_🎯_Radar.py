@@ -82,64 +82,35 @@ if opportunities:
     
     # === MAIN TABLE ===
     st.markdown('<div class="section-title">Opportunities</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Sorted by score</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">SORTED BY SCORE</div>', unsafe_allow_html=True)
     
-    table_html = """
-    <div class="data-card">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Location</th>
-                    <th>Type</th>
-                    <th>Area</th>
-                    <th>Score</th>
-                    <th>Discount</th>
-                    <th>Strategy</th>
-                    <th>Regime</th>
-                </tr>
-            </thead>
-            <tbody>
-    """
+    import pandas as pd
     
-    for i, opp in enumerate(opportunities, 1):
-        score = opp.get('global_score', 0)
-        discount = opp.get('discount_pct', 0)
-        area = opp.get('area_sqft', 0)
-        
-        # Score color
-        if score >= 80:
-            score_bg = "#10B981"
-        elif score >= 60:
-            score_bg = "#3B82F6"
-        elif score >= 40:
-            score_bg = "#F59E0B"
-        else:
-            score_bg = "#EF4444"
-        
-        # Discount color
-        if discount >= 20:
-            disc_color = "#10B981"
-        elif discount >= 10:
-            disc_color = "#3B82F6"
-        else:
-            disc_color = "#F59E0B"
-        
-        table_html += f"""
-            <tr>
-                <td class="table-rank">{i}</td>
-                <td class="table-name">{opp.get('community', 'N/A')} / {opp.get('building', 'N/A')}</td>
-                <td>{opp.get('rooms_bucket', 'N/A')}</td>
-                <td>{area:.0f} sqft</td>
-                <td><span style="background: {score_bg}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem;">{score:.0f}</span></td>
-                <td style="color: {disc_color}; font-weight: 600;">{discount:.1f}%</td>
-                <td>{opp.get('recommended_strategy', 'N/A')}</td>
-                <td>{opp.get('current_regime', 'N/A')}</td>
-            </tr>
-        """
+    df_data = []
+    for opp in opportunities:
+        df_data.append({
+            "Location": f"{opp.get('community', 'N/A')} / {opp.get('building', 'N/A')}",
+            "Type": opp.get('rooms_bucket', 'N/A'),
+            "Score": opp.get('global_score', 0),
+            "Discount": f"{opp.get('discount_pct', 0):.1f}%",
+            "Strategy": opp.get('recommended_strategy', 'N/A'),
+            "Regime": opp.get('current_regime', 'N/A')
+        })
     
-    table_html += "</tbody></table></div>"
-    st.markdown(table_html, unsafe_allow_html=True)
+    df = pd.DataFrame(df_data)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Score": st.column_config.ProgressColumn(
+                "Score",
+                min_value=0,
+                max_value=100,
+                format="%d"
+            )
+        }
+    )
     
     st.markdown("<br>", unsafe_allow_html=True)
     

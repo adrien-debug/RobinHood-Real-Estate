@@ -88,55 +88,33 @@ if yields:
     
     # === TABLE ===
     st.markdown('<div class="section-title">Market Performance by Zone</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Sorted by momentum</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">SORTED BY MOMENTUM</div>', unsafe_allow_html=True)
     
-    table_html = """
-    <div class="data-card">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Zone</th>
-                    <th>Type</th>
-                    <th>Price/sqft</th>
-                    <th>Momentum</th>
-                    <th>Volume</th>
-                </tr>
-            </thead>
-            <tbody>
-    """
+    import pandas as pd
     
-    for i, y in enumerate(yields, 1):
+    df_data = []
+    for y in yields:
         momentum = (y.get('momentum') or 0) * 100
-        price = y.get('avg_price', 0) or 0
-        
-        # Momentum color
-        if momentum > 5:
-            mom_bg = "#10B981"
-            mom_sign = "+"
-        elif momentum > 0:
-            mom_bg = "#3B82F6"
-            mom_sign = "+"
-        elif momentum > -5:
-            mom_bg = "#F59E0B"
-            mom_sign = ""
-        else:
-            mom_bg = "#EF4444"
-            mom_sign = ""
-        
-        table_html += f"""
-            <tr>
-                <td class="table-rank">{i}</td>
-                <td class="table-name">{y.get('community', 'N/A')}</td>
-                <td>{y.get('rooms_bucket', 'N/A')}</td>
-                <td>{price:.0f} AED</td>
-                <td><span style="background: {mom_bg}; color: white; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">{mom_sign}{momentum:.1f}%</span></td>
-                <td>{y.get('tx_count', 0)}</td>
-            </tr>
-        """
+        df_data.append({
+            "Zone": y.get('community', 'N/A'),
+            "Type": y.get('rooms_bucket', 'N/A'),
+            "Price/sqft": f"{y.get('avg_price', 0) or 0:.0f} AED",
+            "Momentum": momentum,
+            "Volume": y.get('tx_count', 0)
+        })
     
-    table_html += "</tbody></table></div>"
-    st.markdown(table_html, unsafe_allow_html=True)
+    df = pd.DataFrame(df_data)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Momentum": st.column_config.NumberColumn(
+                "Momentum %",
+                format="%.1f%%"
+            )
+        }
+    )
     
     st.markdown("<br>", unsafe_allow_html=True)
     

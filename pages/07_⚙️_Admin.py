@@ -61,33 +61,17 @@ with col_left:
     """)
     
     if recent_tx:
-        table_html = """
-        <div class="data-card">
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Location</th>
-                        <th>Type</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
-        
+        import pandas as pd
+        df_data = []
         for tx in recent_tx:
-            price = tx.get('price_aed', 0)
-            table_html += f"""
-                <tr>
-                    <td>{tx.get('transaction_date', 'N/A')}</td>
-                    <td>{tx.get('community', 'N/A')}</td>
-                    <td>{tx.get('rooms_bucket', 'N/A')}</td>
-                    <td style="color: #10B981; font-weight: 600;">{price:,.0f}</td>
-                </tr>
-            """
-        
-        table_html += "</tbody></table></div>"
-        st.markdown(table_html, unsafe_allow_html=True)
+            df_data.append({
+                "Date": str(tx.get('transaction_date', 'N/A')),
+                "Location": tx.get('community', 'N/A'),
+                "Type": tx.get('rooms_bucket', 'N/A'),
+                "Price": f"{tx.get('price_aed', 0):,.0f} AED"
+            })
+        df = pd.DataFrame(df_data)
+        st.dataframe(df, use_container_width=True, hide_index=True)
     else:
         st.info("No recent transactions.")
 
@@ -139,16 +123,12 @@ st.markdown('<div class="section-subtitle">Environment</div>', unsafe_allow_html
 import platform
 import sys
 
-info_html = f"""
-<div class="data-card">
-    <table class="styled-table">
-        <tr><td>Python</td><td style="color: #10B981;">{sys.version.split()[0]}</td></tr>
-        <tr><td>Platform</td><td>{platform.system()} {platform.release()}</td></tr>
-        <tr><td>Date</td><td>{get_dubai_today()}</td></tr>
-    </table>
-</div>
-"""
-
-st.markdown(info_html, unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("Python", sys.version.split()[0])
+with col2:
+    st.metric("Platform", f"{platform.system()}")
+with col3:
+    st.metric("Date", str(get_dubai_today()))
 
 st.caption(f"Last update: {get_dubai_today()}")
