@@ -1,5 +1,5 @@
 """
-Page Deal Radar - Opportunités scorées (Style Plecto)
+Page Deal Radar - Dubai Premium Gold Design
 """
 import streamlit as st
 import plotly.express as px
@@ -8,12 +8,12 @@ from core.db import db
 from core.utils import get_dubai_today, format_currency
 from core.styles import apply_plecto_style, kpi_card, status_badge
 
-st.set_page_config(page_title="Deal Radar", page_icon="🎯", layout="wide")
+st.set_page_config(page_title="Deal Radar", page_icon="", layout="wide")
 
-# Apply Plecto style
+# Apply Premium Gold style
 apply_plecto_style()
 
-st.markdown('<div class="dashboard-header">🎯 Deal Radar</div>', unsafe_allow_html=True)
+st.markdown('<div class="dashboard-header">Deal Radar</div>', unsafe_allow_html=True)
 
 target_date = st.date_input("Date", value=get_dubai_today())
 
@@ -21,13 +21,13 @@ target_date = st.date_input("Date", value=get_dubai_today())
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    strategy_filter = st.selectbox("Stratégie", ["Toutes", "FLIP", "RENT", "LONG", "IGNORE"])
+    strategy_filter = st.selectbox("Strategy", ["All", "FLIP", "RENT", "LONG", "IGNORE"])
 
 with col2:
-    min_score = st.slider("Score minimum", 0, 100, 50)
+    min_score = st.slider("Minimum score", 0, 100, 50)
 
 with col3:
-    regime_filter = st.selectbox("Régime", ["Tous", "ACCUMULATION", "EXPANSION", "DISTRIBUTION", "RETOURNEMENT"])
+    regime_filter = st.selectbox("Regime", ["All", "ACCUMULATION", "EXPANSION", "DISTRIBUTION", "RETOURNEMENT"])
 
 # Récupérer les opportunités
 query = """
@@ -37,11 +37,11 @@ WHERE detection_date = %s
 """
 params = [target_date, min_score]
 
-if strategy_filter != "Toutes":
+if strategy_filter != "All":
     query += " AND recommended_strategy = %s"
     params.append(strategy_filter)
 
-if regime_filter != "Tous":
+if regime_filter != "All":
     query += " AND current_regime = %s"
     params.append(regime_filter)
 
@@ -50,7 +50,7 @@ query += " ORDER BY global_score DESC LIMIT 50"
 opportunities = db.execute_query(query, tuple(params))
 
 # Statistiques
-st.subheader(f"💎 {len(opportunities)} opportunités")
+st.markdown(f'<div class="section-title">{len(opportunities)} Opportunities</div>', unsafe_allow_html=True)
 
 if opportunities:
     # Distribution des stratégies
@@ -69,7 +69,7 @@ if opportunities:
         st.metric("LONG", strategy_counts.get('LONG', 0))
     with col4:
         avg_discount = sum(opp.get('discount_pct', 0) or 0 for opp in opportunities) / len(opportunities)
-        st.metric("Discount moyen", f"{avg_discount:.1f}%")
+        st.metric("Avg Discount", f"{avg_discount:.1f}%")
     
     st.markdown("---")
     
@@ -85,31 +85,29 @@ if opportunities:
             
             with col2:
                 score = opp.get('global_score', 0)
-                color = "🟢" if score >= 75 else "🟡" if score >= 50 else "🔴"
-                st.metric("Score", f"{color} {score:.0f}")
+                st.metric("Score", f"{score:.0f}")
             
             # Métriques
             col3, col4, col5, col6 = st.columns(4)
             
             with col3:
                 discount = opp.get('discount_pct', 0)
-                st.caption(f"💰 **{discount:.1f}%** sous marché")
+                st.caption(f"**{discount:.1f}%** below market")
             
             with col4:
                 strategy = opp.get('recommended_strategy', 'N/A')
-                emoji = {'FLIP': '⚡', 'RENT': '💵', 'LONG': '📈', 'IGNORE': '⏸️'}.get(strategy, '❓')
-                st.caption(f"{emoji} **{strategy}**")
+                st.caption(f"**{strategy}**")
             
             with col5:
                 regime = opp.get('current_regime', 'N/A')
-                st.caption(f"📊 {regime}")
+                st.caption(f"Regime: {regime}")
             
             with col6:
                 liquidity = opp.get('liquidity_score', 0)
-                st.caption(f"💧 Liquidité: {liquidity:.0f}")
+                st.caption(f"Liquidity: {liquidity:.0f}")
             
             # Scores détaillés
-            with st.expander("📊 Scores détaillés"):
+            with st.expander("Detailed Scores"):
                 col7, col8, col9 = st.columns(3)
                 
                 with col7:
@@ -125,27 +123,32 @@ if opportunities:
                     st.metric("LONG", f"{long_score:.0f}")
                 
                 # Graphique radar
-                import plotly.graph_objects as go
-                
                 fig = go.Figure()
                 
                 fig.add_trace(go.Scatterpolar(
                     r=[flip_score, rent_score, long_score],
                     theta=['FLIP', 'RENT', 'LONG'],
                     fill='toself',
-                    name='Scores'
+                    name='Scores',
+                    line=dict(color='#D4AF37'),
+                    fillcolor='rgba(212,175,55,0.3)'
                 ))
                 
                 fig.update_layout(
-                    polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                    polar=dict(
+                        radialaxis=dict(visible=True, range=[0, 100], color='#D4AF37'),
+                        bgcolor='rgba(0,0,0,0)'
+                    ),
                     height=250,
-                    margin=dict(l=20, r=20, t=20, b=20)
+                    margin=dict(l=20, r=20, t=20, b=20),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='#F5E6D3')
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
             
             st.markdown("---")
 else:
-    st.info("Aucune opportunité avec ces critères.")
+    st.info("No opportunities with these criteria.")
 
-st.caption(f"Dernière mise à jour : {get_dubai_today()}")
+st.caption(f"Last update: {get_dubai_today()}")

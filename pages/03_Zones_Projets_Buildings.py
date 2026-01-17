@@ -1,5 +1,5 @@
 """
-Page Zones / Projets / Buildings - Analyse par localisation (Style Plecto)
+Page Zones / Projets / Buildings - Dubai Premium Gold Design
 """
 import streamlit as st
 import plotly.express as px
@@ -8,12 +8,12 @@ from core.db import db
 from core.utils import get_dubai_today
 from core.styles import apply_plecto_style, kpi_card, status_badge
 
-st.set_page_config(page_title="Zones & Buildings", page_icon="📍", layout="wide")
+st.set_page_config(page_title="Zones & Buildings", page_icon="", layout="wide")
 
-# Apply Plecto style
+# Apply Premium Gold style
 apply_plecto_style()
 
-st.markdown('<div class="dashboard-header">📍 Zones & Buildings</div>', unsafe_allow_html=True)
+st.markdown('<div class="dashboard-header">Zones & Buildings</div>', unsafe_allow_html=True)
 
 target_date = st.date_input("Date", value=get_dubai_today())
 
@@ -48,27 +48,19 @@ if selected_community:
     """, (target_date, selected_community))
     
     # Affichage
-    st.subheader(f"📊 {selected_community}")
+    st.markdown(f'<div class="section-title">{selected_community}</div>', unsafe_allow_html=True)
     
     if regime:
         r = regime[0]
         regime_name = r.get('regime', 'N/A')
         confidence = r.get('confidence_score', 0)
         
-        emoji = {
-            'ACCUMULATION': '🟢',
-            'EXPANSION': '🔵',
-            'DISTRIBUTION': '🟡',
-            'RETOURNEMENT': '🔴',
-            'NEUTRAL': '⚪'
-        }.get(regime_name, '⚪')
-        
-        st.info(f"{emoji} **Régime : {regime_name}** (confiance: {confidence:.2f})")
+        st.info(f"**Regime: {regime_name}** (confidence: {confidence:.2f})")
     
     st.markdown("---")
     
     # Métriques par type de bien
-    st.subheader("📈 Métriques par type")
+    st.markdown('<div class="section-title">Metrics by Type</div>', unsafe_allow_html=True)
     
     if baselines:
         for b in baselines:
@@ -77,7 +69,7 @@ if selected_community:
                 
                 with col1:
                     median = b.get('median_price_per_sqft', 0)
-                    st.metric("Médiane prix/sqft", f"{median:.0f} AED")
+                    st.metric("Median price/sqft", f"{median:.0f} AED")
                 
                 with col2:
                     momentum = b.get('momentum', 0)
@@ -87,14 +79,15 @@ if selected_community:
                 with col3:
                     volatility = b.get('volatility', 0)
                     vol_pct = (volatility * 100) if volatility else 0
-                    st.metric("Volatilité", f"{vol_pct:.1f}%")
+                    st.metric("Volatility", f"{vol_pct:.1f}%")
     else:
-        st.info("Pas assez de données pour calculer les baselines.")
+        st.info("Not enough data to calculate baselines.")
     
     st.markdown("---")
     
     # Graphique : évolution des prix
-    st.subheader("📊 Évolution des prix (30 derniers jours)")
+    st.markdown('<div class="section-title">Price Evolution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Last 30 days</div>', unsafe_allow_html=True)
     
     price_history = db.execute_query("""
         SELECT transaction_date, AVG(price_per_sqft) as avg_price, COUNT(*) as count
@@ -118,8 +111,9 @@ if selected_community:
             x=df['transaction_date'],
             y=df['avg_price'],
             mode='lines+markers',
-            name='Prix moyen/sqft',
-            line=dict(color='#3b82f6', width=2)
+            name='Avg price/sqft',
+            line=dict(color='#D4AF37', width=3),
+            marker=dict(size=8, color='#D4AF37')
         ))
         
         # Volume (axe secondaire)
@@ -129,22 +123,28 @@ if selected_community:
             name='Volume',
             yaxis='y2',
             opacity=0.3,
-            marker_color='#10b981'
+            marker_color='#CD7F32'
         ))
         
         fig.update_layout(
-            height=300,
+            height=350,
             margin=dict(l=20, r=20, t=20, b=20),
-            yaxis=dict(title='Prix AED/sqft'),
-            yaxis2=dict(title='Volume', overlaying='y', side='right'),
-            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+            yaxis=dict(title='Price AED/sqft', color='#D4AF37'),
+            yaxis2=dict(title='Volume', overlaying='y', side='right', color='#CD7F32'),
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#F5E6D3')
         )
+        
+        fig.update_xaxes(gridcolor='rgba(212,175,55,0.1)')
+        fig.update_yaxes(gridcolor='rgba(212,175,55,0.1)')
         
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("Pas assez de données pour le graphique.")
+        st.info("Not enough data for chart.")
 
 else:
-    st.info("Sélectionnez une zone.")
+    st.info("Select a zone.")
 
-st.caption(f"Dernière mise à jour : {get_dubai_today()}")
+st.caption(f"Last update: {get_dubai_today()}")

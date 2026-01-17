@@ -1,5 +1,5 @@
 """
-Page Location & Yield - Rendements locatifs (Style Plecto)
+Page Location & Yield - Dubai Premium Gold Design
 """
 import streamlit as st
 import plotly.express as px
@@ -8,16 +8,16 @@ from core.db import db
 from core.utils import get_dubai_today, format_currency
 from core.styles import apply_plecto_style, kpi_card, status_badge
 
-st.set_page_config(page_title="Location & Yield", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Rental Yields", page_icon="", layout="wide")
 
-# Apply Plecto style
+# Apply Premium Gold style
 apply_plecto_style()
 
-st.markdown('<div class="dashboard-header">💰 Rental Yields</div>', unsafe_allow_html=True)
+st.markdown('<div class="dashboard-header">Rental Yields</div>', unsafe_allow_html=True)
 
-st.info("📊 Cette page affiche les rendements locatifs basés sur le DLD Rental Index")
+st.info("This page displays rental yields based on the DLD Rental Index")
 
-target_date = st.date_input("Période", value=get_dubai_today().replace(day=1))
+target_date = st.date_input("Period", value=get_dubai_today().replace(day=1))
 
 # Récupérer les données locatives
 rental_data = db.execute_query("""
@@ -28,14 +28,14 @@ rental_data = db.execute_query("""
 """, (target_date,))
 
 if rental_data:
-    st.subheader(f"📈 {len(rental_data)} entrées")
+    st.markdown(f'<div class="section-title">{len(rental_data)} Entries</div>', unsafe_allow_html=True)
     
     # Filtres
     communities = list(set(r['community'] for r in rental_data if r.get('community')))
-    selected_community = st.selectbox("Community", ["Toutes"] + sorted(communities))
+    selected_community = st.selectbox("Community", ["All"] + sorted(communities))
     
     # Filtrer
-    if selected_community != "Toutes":
+    if selected_community != "All":
         rental_data = [r for r in rental_data if r.get('community') == selected_community]
     
     # Affichage par type
@@ -49,25 +49,23 @@ if rental_data:
             
             with col2:
                 avg_rent = rental.get('avg_rent_aed', 0)
-                st.metric("Loyer moyen", format_currency(avg_rent))
+                st.metric("Avg Rent", format_currency(avg_rent))
             
             col3, col4, col5 = st.columns(3)
             
             with col3:
                 median_rent = rental.get('median_rent_aed', 0)
-                st.caption(f"📊 Médiane: {format_currency(median_rent)}")
+                st.caption(f"Median: {format_currency(median_rent)}")
             
             with col4:
                 count = rental.get('rent_count', 0)
-                st.caption(f"📈 Volume: {count}")
+                st.caption(f"Volume: {count}")
             
             with col5:
                 # Estimation yield (approximatif)
-                # Yield = (loyer annuel / prix achat) * 100
-                # On utilise une approximation : prix = loyer * 15-20
                 estimated_price = avg_rent * 17  # Approximation
                 estimated_yield = (avg_rent / estimated_price * 100) if estimated_price > 0 else 0
-                st.caption(f"💹 Yield estimé: {estimated_yield:.1f}%")
+                st.caption(f"Est. Yield: {estimated_yield:.1f}%")
             
             st.markdown("---")
     
@@ -84,21 +82,28 @@ if rental_data:
             x='community',
             y='estimated_yield',
             color='rooms_bucket',
-            title="Top 10 rendements estimés par zone",
-            labels={'estimated_yield': 'Yield (%)', 'community': 'Zone'}
+            title="Top 10 Estimated Yields by Zone",
+            labels={'estimated_yield': 'Yield (%)', 'community': 'Zone'},
+            color_discrete_sequence=['#D4AF37', '#CD7F32', '#8B4513', '#F4E4BA', '#AA771C']
         )
         
         fig.update_layout(
-            height=300,
-            margin=dict(l=20, r=20, t=40, b=20)
+            height=350,
+            margin=dict(l=20, r=20, t=40, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#F5E6D3')
         )
+        
+        fig.update_xaxes(gridcolor='rgba(212,175,55,0.1)')
+        fig.update_yaxes(gridcolor='rgba(212,175,55,0.1)')
         
         st.plotly_chart(fig, use_container_width=True)
 
 else:
-    st.warning("Aucune donnée locative pour cette période.")
-    st.info("💡 Les données locatives sont généralement mises à jour mensuellement par le DLD.")
+    st.warning("No rental data for this period.")
+    st.info("Rental data is typically updated monthly by the DLD.")
 
 st.markdown("---")
-st.caption("⚠️ Les rendements affichés sont des estimations basées sur des approximations du marché.")
-st.caption(f"Dernière mise à jour : {get_dubai_today()}")
+st.caption("The yields shown are estimates based on market approximations.")
+st.caption(f"Last update: {get_dubai_today()}")
