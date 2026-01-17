@@ -70,48 +70,50 @@ with col_left:
     opportunities_list = data.get('top_opportunities', [])[:8]
     
     if opportunities_list:
-        # Build table HTML
-        table_html = """
-        <div class="data-card">
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Location</th>
-                        <th>Type</th>
-                        <th>Score</th>
-                        <th>Discount</th>
-                        <th>Strategy</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
+        # Display as dataframe for better rendering
+        import pandas as pd
         
+        table_data = []
         for i, opp in enumerate(opportunities_list, 1):
-            score = opp.get('global_score', 0)
-            discount = opp.get('discount_pct', 0)
-            
-            # Color based on score
-            if score >= 80:
-                score_color = "#10B981"
-            elif score >= 60:
-                score_color = "#F59E0B"
-            else:
-                score_color = "#EF4444"
-            
-            table_html += f"""
-                <tr>
-                    <td class="table-rank">{i}</td>
-                    <td class="table-name">{opp.get('community', 'N/A')} / {opp.get('building', 'N/A')}</td>
-                    <td>{opp.get('rooms_bucket', 'N/A')}</td>
-                    <td><span style="background: {score_color}; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 600;">{score:.0f}</span></td>
-                    <td class="table-value" style="color: #10B981;">{discount:.1f}%</td>
-                    <td>{opp.get('recommended_strategy', 'N/A')}</td>
-                </tr>
-            """
+            table_data.append({
+                "#": i,
+                "Location": f"{opp.get('community', 'N/A')} / {opp.get('building', 'N/A')}",
+                "Type": opp.get('rooms_bucket', 'N/A'),
+                "Score": int(opp.get('global_score', 0)),
+                "Discount": f"{opp.get('discount_pct', 0):.1f}%",
+                "Strategy": opp.get('recommended_strategy', 'N/A')
+            })
         
-        table_html += "</tbody></table></div>"
-        st.markdown(table_html, unsafe_allow_html=True)
+        df = pd.DataFrame(table_data)
+        
+        # Style the dataframe
+        def style_score(val):
+            if isinstance(val, int):
+                if val >= 80:
+                    return 'background-color: #10B981; color: white; font-weight: 600; border-radius: 4px; padding: 4px 8px;'
+                elif val >= 60:
+                    return 'background-color: #F59E0B; color: white; font-weight: 600; border-radius: 4px; padding: 4px 8px;'
+                else:
+                    return 'background-color: #EF4444; color: white; font-weight: 600; border-radius: 4px; padding: 4px 8px;'
+            return ''
+        
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "#": st.column_config.NumberColumn(width="small"),
+                "Location": st.column_config.TextColumn(width="large"),
+                "Type": st.column_config.TextColumn(width="small"),
+                "Score": st.column_config.ProgressColumn(
+                    min_value=0,
+                    max_value=100,
+                    format="%d",
+                ),
+                "Discount": st.column_config.TextColumn(width="small"),
+                "Strategy": st.column_config.TextColumn(width="medium"),
+            }
+        )
     else:
         st.info("No opportunities found.")
     
@@ -127,16 +129,20 @@ with col_left:
         col_b1, col_b2 = st.columns(2)
         
         with col_b1:
-            st.markdown('<div class="data-card">', unsafe_allow_html=True)
-            st.markdown("**Main Risk**")
-            st.write(brief.get('main_risk', 'N/A'))
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="data-card">
+                <div style="color: rgba(255,255,255,0.5); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem;">Main Risk</div>
+                <div style="color: #FFFFFF; font-size: 0.9rem;">{brief.get('main_risk', 'N/A')}</div>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col_b2:
-            st.markdown('<div class="data-card">', unsafe_allow_html=True)
-            st.markdown("**Recommendation**")
-            st.write(brief.get('strategic_recommendation', 'N/A'))
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="data-card">
+                <div style="color: rgba(255,255,255,0.5); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem;">Recommendation</div>
+                <div style="color: #FFFFFF; font-size: 0.9rem;">{brief.get('strategic_recommendation', 'N/A')}</div>
+            </div>
+            """, unsafe_allow_html=True)
     else:
         st.info("No brief available.")
 
@@ -186,8 +192,6 @@ with col_right:
     regimes = data.get('regimes', [])[:6]
     
     if regimes:
-        regime_html = '<div class="data-card">'
-        
         for r in regimes:
             regime = r.get('regime', 'NEUTRAL')
             community = r.get('community', 'N/A')
@@ -203,18 +207,15 @@ with col_right:
             }
             color = colors.get(regime, '#6B7280')
             
-            regime_html += f"""
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            st.markdown(f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: rgba(19, 29, 50, 0.8); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
                 <div>
                     <div style="color: #FFFFFF; font-weight: 500; font-size: 0.9rem;">{community}</div>
                     <div style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">Confidence: {confidence:.0%}</div>
                 </div>
                 <span style="background: {color}; color: white; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">{regime}</span>
             </div>
-            """
-        
-        regime_html += '</div>'
-        st.markdown(regime_html, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
     else:
         st.info("No regimes calculated.")
 
