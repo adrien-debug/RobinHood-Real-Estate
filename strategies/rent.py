@@ -1,5 +1,9 @@
 """
 Stratégie RENT - Cashflow locatif
+
+Enrichi avec KPIs avancés :
+- RSG (Rental Stress Gap) : détecte les zones en tension locative
+- GPI (Geo-Premium Index) : valorise les emplacements premium
 """
 from typing import Dict
 from decimal import Decimal
@@ -11,54 +15,101 @@ class RentStrategy(BaseStrategy):
     Stratégie RENT (cashflow locatif)
     
     Poids forts :
-    - Rendement locatif élevé
-    - Tension locative (demande > offre)
+    - Rendement locatif élevé (avec RSG)
+    - Tension locative positive (RSG > 0)
     - Stabilité des prix
+    - Localisation premium (GPI)
     - Régime DISTRIBUTION ou EXPANSION
     
     Pénalités :
     - Volatilité élevée
-    - Risque réglementaire (plafonnement loyers)
+    - RSG très négatif (offre > demande)
     """
     
     def __init__(self):
         super().__init__("RENT")
     
     def score(self, opportunity: Dict, context: Dict) -> float:
-        """Calculer le score RENT"""
+        """Calculer le score RENT enrichi avec KPIs avancés"""
         
-        # 1. Rendement estimé (35% du score)
-        # Note : nécessite rental_index pour calcul précis
-        # Ici on utilise une estimation basée sur le discount
+        # Récupérer le contexte KPI
+        kpi_ctx = self._get_kpi_context(
+            opportunity.get('community', ''),
+            opportunity.get('rooms_bucket')
+        )
+        
+        # 1. Rendement avec RSG (35% du score)
         discount_pct = opportunity.get('discount_pct', 0)
         price_per_sqft = opportunity.get('price_per_sqft', 0)
         
-        # Rendement estimé : loyer annuel / prix d'achat
-        # Approximation : 5-8% rendement typique à Dubaï
-        estimated_yield = self._estimate_rental_yield(price_per_sqft, discount_pct)
-        yield_score = self._get_yield_score(estimated_yield) * 0.35
+        # Utilise RSG pour ajuster le score de rendement
+        base_yield = self._estimate_rental_yield(price_per_sqft, discount_pct)
         
-        # 2. Stabilité prix (25% du score)
+        if kpi_ctx.rsg is not None:
+            # RSG > 0 = loyers au-dessus des attentes = tension locative
+            # RSG < 0 = loyers sous les attentes = offre excédentaire
+            if kpi_ctx.rsg > 0.15:
+                yield_bonus = 20  # Forte tension locative
+            elif kpi_ctx.rsg > 0.05:
+                yield_bonus = 10
+            elif kpi_ctx.rsg > -0.05:
+                yield_bonus = 0  # Équilibré
+            elif kpi_ctx.rsg > -0.15:
+                yield_bonus = -10
+            else:
+                yield_bonus = -20  # Offre excédentaire
+            
+            adjusted_yield = base_yield + (yield_bonus * 0.1)  # Ajustement modéré
+        else:
+            adjusted_yield = base_yield
+        
+        yield_score = self._get_yield_score(adjusted_yield) * 0.35
+        
+        # 2. Stabilité prix (20% du score)
         baseline = context.get('baseline', {})
         volatility = baseline.get('volatility', 0.15)
-        stability_score = self._get_stability_score(volatility) * 0.25
+        stability_score = self._get_stability_score(volatility) * 0.20
         
-        # 3. Liquidité (20% du score)
+        # 3. Score de localisation GPI (20% du score) - nouveau
+        gpi_score = 0
+        if kpi_ctx.gpi is not None:
+            # GPI basé sur location_score * (1 + price_premium)
+            if kpi_ctx.gpi >= 80:
+                gpi_score = 100 * 0.20
+            elif kpi_ctx.gpi >= 60:
+                gpi_score = 75 * 0.20
+            elif kpi_ctx.gpi >= 40:
+                gpi_score = 50 * 0.20
+            else:
+                gpi_score = 25 * 0.20
+        else:
+            gpi_score = 50 * 0.20  # Neutre
+        
+        # 4. Liquidité (10% du score)
         transaction_count = baseline.get('transaction_count', 0)
-        liquidity_score = self._get_liquidity_score(transaction_count) * 0.20
+        liquidity_score = self._get_liquidity_score(transaction_count) * 0.10
         
-        # 4. Régime de marché (20% du score)
+        # 5. Régime de marché (15% du score)
         regime = context.get('regime', 'NEUTRAL')
-        regime_score = self._get_regime_score(regime, 'rent') * 0.20
+        regime_score = self._get_regime_score(regime, 'rent') * 0.15
         
-        raw_score = yield_score + stability_score + liquidity_score + regime_score
+        raw_score = yield_score + stability_score + gpi_score + liquidity_score + regime_score
         
         # Pénalités
         penalties = 0
         
-        # Volatilité excessive
-        if volatility and volatility > 0.25:
+        # Volatilité excessive (utilise le risque si disponible)
+        volatility_risk = kpi_ctx.volatility_risk
+        if volatility_risk == "HIGH":
             penalties += 15
+        elif volatility_risk == "MEDIUM":
+            penalties += 5
+        elif volatility and float(volatility) > 0.25:
+            penalties += 15
+        
+        # RSG très négatif = marché locatif saturé
+        if kpi_ctx.rsg is not None and kpi_ctx.rsg < -0.20:
+            penalties += 10
         
         final_score = raw_score - penalties
         
@@ -100,7 +151,7 @@ class RentStrategy(BaseStrategy):
         elif yield_pct >= 4.0:
             return 40.0 + (yield_pct - 4.0) * 15.0
         else:
-            return yield_pct * 10.0
+            return max(0, yield_pct * 10.0)
     
     def _get_stability_score(self, volatility: Decimal) -> float:
         """Score basé sur la stabilité (inverse de la volatilité)"""

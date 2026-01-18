@@ -48,10 +48,15 @@ dubai-real-estate-intelligence/
 ├── pipelines/                      # Pipelines de données
 │   ├── ingest_transactions.py      # Ingestion transactions
 │   ├── ingest_mortgages.py         # Ingestion hypothèques
+│   ├── ingest_rental_index.py      # Ingestion index locatif (nouveau)
+│   ├── compute_features.py         # Features normalisées (nouveau)
 │   ├── compute_market_baselines.py # Calcul baselines
 │   ├── compute_market_regimes.py   # Calcul régimes
+│   ├── compute_kpis.py             # 8 KPIs avancés (nouveau)
 │   ├── detect_anomalies.py         # Détection anomalies
-│   └── compute_scores.py           # Scoring multi-stratégies
+│   ├── compute_scores.py           # Scoring multi-stratégies
+│   ├── compute_risk_summary.py     # Résumé risques (nouveau)
+│   └── quality_logger.py           # Logs qualité (nouveau)
 │
 ├── strategies/                     # Stratégies de scoring
 │   ├── base.py                     # Classe de base
@@ -88,7 +93,8 @@ dubai-real-estate-intelligence/
 │   ├── schema.sql                  # Schéma principal
 │   ├── baselines.sql               # Fonctions baselines
 │   ├── regimes.sql                 # Fonctions régimes
-│   └── opportunities.sql           # Fonctions opportunités
+│   ├── opportunities.sql           # Fonctions opportunités
+│   └── features_kpis.sql           # Tables features, KPIs, qualité, risques (nouveau)
 │
 └── jobs/                           # Jobs automatisés
     └── daily_run.py                # Job quotidien
@@ -282,6 +288,38 @@ Chaque opportunité reçoit 4 scores :
 
 **Recommandation** : Stratégie avec le score le plus élevé (ou IGNORE si score global < 40)
 
+### KPIs avancés
+
+8 KPIs calculés pour chaque zone et fenêtre (7j/30j/90j) :
+
+| KPI | Nom complet | Formule | Usage |
+|-----|-------------|---------|-------|
+| **TLS** | Transaction-to-Listing Spread | (median_listing - median_tx) / median_tx | Détecte marge de revente |
+| **LAD** | Liquidity-Adjusted Discount | discount × log(1 + tx_count) | Discount ajusté à la liquidité |
+| **RSG** | Rental Stress Gap | (loyer_réel - loyer_attendu) / loyer_attendu | Tension locative |
+| **SPI** | Supply Pressure Index | normalize(unités_planifiées / tx_12m) | Pression de supply future |
+| **GPI** | Geo-Premium Index | location_score × (1 + prime_prix) | Valorisation localisation |
+| **RCWM** | Regime Confidence-Weighted Momentum | momentum × confidence_régime | Momentum pondéré |
+| **ORD** | Offplan Risk Delta | median_offplan / median_ready - 1 | Risque premium offplan |
+| **APS** | Anomaly Persistence Score | jours_anomalie / fenêtre | Persistance des anomalies |
+
+**Utilisation dans les stratégies :**
+- FLIP : LAD, TLS, ORD
+- RENT : RSG, GPI
+- LONG_TERM : SPI, RCWM, APS
+
+### Résumé des risques
+
+Évaluation automatique par zone :
+
+| Risque | Métrique | Seuils |
+|--------|----------|--------|
+| **Supply** | SPI | LOW < 30, MEDIUM 30-70, HIGH > 70 |
+| **Volatilité** | Volatilité % | LOW < 15%, MEDIUM 15-25%, HIGH > 25% |
+| **Divergence** | TLS | LOW < 10%, MEDIUM 10-20%, HIGH > 20% |
+
+Score global : moyenne pondérée (Supply 40%, Volatilité 35%, Divergence 25%)
+
 ### Agent IA CIO
 
 Génère quotidiennement un brief actionnable :
@@ -296,25 +334,39 @@ Utilise GPT-4 via LangChain pour analyser les données du marché.
 
 ## 🔄 Pipeline LangGraph
 
-Le pipeline s'exécute quotidiennement via LangGraph :
+Le pipeline enrichi s'exécute quotidiennement via LangGraph :
 
 ```
 ingest_transactions
     ↓
 ingest_mortgages
     ↓
+ingest_rental_index      ← Nouveau : données loyers
+    ↓
+compute_features         ← Nouveau : normalisation + outliers
+    ↓
 compute_baselines
     ↓
 compute_regimes
     ↓
+compute_kpis             ← Nouveau : 8 KPIs avancés
+    ↓
 detect_anomalies
     ↓
-compute_scores
+compute_scores           ← Enrichi avec KPIs
+    ↓
+compute_risk_summary     ← Nouveau : résumé risques
     ↓
 generate_brief (CIO)
     ↓
 send_alerts
 ```
+
+**Tables générées :**
+- `features` : données normalisées (prix/sqft 500-10000 AED)
+- `kpis` : 8 KPIs par zone/fenêtre
+- `quality_logs` : métriques de qualité des données
+- `risk_summaries` : risques par zone
 
 ---
 
@@ -435,13 +487,26 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.3.2  
+**Version** : 1.4.0  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + Helper Emaar)
+**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + 8 KPIs avancés)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.4.0 (2026-01-18) - KPIs Avancés et Pipeline Enrichi
+- **Nouveau** : 8 KPIs avancés (TLS, LAD, RSG, SPI, GPI, RCWM, ORD, APS)
+- **Nouveau** : `sql/features_kpis.sql` - Tables features, kpis, quality_logs, risk_summaries
+- **Nouveau** : `pipelines/compute_features.py` - Normalisation et filtrage outliers (500-10000 AED/sqft)
+- **Nouveau** : `pipelines/compute_kpis.py` - Calcul des 8 KPIs par zone/fenêtre
+- **Nouveau** : `pipelines/compute_risk_summary.py` - Évaluation risques (supply, volatilité, divergence)
+- **Nouveau** : `pipelines/ingest_rental_index.py` - Ingestion index locatif DLD
+- **Nouveau** : `pipelines/quality_logger.py` - Tracking qualité des données
+- **Enrichi** : Stratégies FLIP/RENT/LONG_TERM utilisent les nouveaux KPIs
+- **Enrichi** : Pipeline LangGraph avec 4 nouvelles étapes
+- **Nouveau** : `test_kpis.py` - Tests unitaires des formules KPIs
+- **Modèles** : Feature, KPI, QualityLog, RiskSummary, KPIContext
 
 ### v1.3.2 (2026-01-18) - UAE RealTime API
 - **Nouveau** : `connectors/uae_realtime_api.py` - UAE Real Estate Data-Real Time API

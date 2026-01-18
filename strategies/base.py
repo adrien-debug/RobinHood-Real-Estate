@@ -1,9 +1,23 @@
 """
 Classe de base pour les stratégies de scoring
+
+Enrichi avec les KPIs avancés :
+- TLS (Transaction-to-Listing Spread)
+- LAD (Liquidity-Adjusted Discount)
+- RSG (Rental Stress Gap)
+- SPI (Supply Pressure Index)
+- GPI (Geo-Premium Index)
+- RCWM (Regime Confidence-Weighted Momentum)
+- ORD (Offplan Risk Delta)
+- APS (Anomaly Persistence Score)
 """
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, Optional
 from decimal import Decimal
+from loguru import logger
+
+from core.db import db
+from core.models import KPIContext
 
 
 class BaseStrategy(ABC):
@@ -19,7 +33,7 @@ class BaseStrategy(ABC):
         
         Args:
             opportunity: Données de l'opportunité (anomalie détectée)
-            context: Contexte marché (baseline, régime, etc.)
+            context: Contexte marché (baseline, régime, kpis, etc.)
         
         Returns:
             Score entre 0 et 100
@@ -29,6 +43,81 @@ class BaseStrategy(ABC):
     def _normalize_score(self, raw_score: float) -> float:
         """Normaliser un score entre 0 et 100"""
         return max(0.0, min(100.0, raw_score))
+    
+    def _get_kpi_context(
+        self, 
+        community: str, 
+        rooms_bucket: Optional[str] = None,
+        window_days: int = 30
+    ) -> KPIContext:
+        """
+        Récupérer le contexte KPI pour le scoring enrichi
+        
+        Args:
+            community: Communauté
+            rooms_bucket: Type de chambres (optionnel)
+            window_days: Fenêtre en jours
+            
+        Returns:
+            KPIContext avec les KPIs et risques
+        """
+        kpi_context = KPIContext()
+        
+        # Récupérer les KPIs
+        kpi_query = """
+        SELECT tls, lad, rsg, spi, gpi, rcwm, ord, aps
+        FROM kpis
+        WHERE community = %s
+            AND window_days = %s
+        """
+        params = [community, window_days]
+        
+        if rooms_bucket:
+            kpi_query += " AND rooms_bucket = %s"
+            params.append(rooms_bucket)
+        
+        kpi_query += " ORDER BY calculation_date DESC LIMIT 1"
+        
+        try:
+            results = db.execute_query(kpi_query, tuple(params))
+            if results:
+                row = results[0]
+                kpi_context.tls = float(row["tls"]) if row.get("tls") else None
+                kpi_context.lad = float(row["lad"]) if row.get("lad") else None
+                kpi_context.rsg = float(row["rsg"]) if row.get("rsg") else None
+                kpi_context.spi = float(row["spi"]) if row.get("spi") else None
+                kpi_context.gpi = float(row["gpi"]) if row.get("gpi") else None
+                kpi_context.rcwm = float(row["rcwm"]) if row.get("rcwm") else None
+                kpi_context.ord = float(row["ord"]) if row.get("ord") else None
+                kpi_context.aps = float(row["aps"]) if row.get("aps") else None
+        except Exception as e:
+            logger.warning(f"Erreur récupération KPIs pour scoring : {e}")
+        
+        # Récupérer les risques
+        risk_query = """
+        SELECT 
+            supply_risk_level,
+            volatility_risk_level,
+            divergence_risk_level,
+            overall_risk_score
+        FROM risk_summaries
+        WHERE community = %s
+        ORDER BY summary_date DESC
+        LIMIT 1
+        """
+        
+        try:
+            risk_results = db.execute_query(risk_query, (community,))
+            if risk_results:
+                row = risk_results[0]
+                kpi_context.supply_risk = row.get("supply_risk_level", "UNKNOWN")
+                kpi_context.volatility_risk = row.get("volatility_risk_level", "UNKNOWN")
+                kpi_context.divergence_risk = row.get("divergence_risk_level", "UNKNOWN")
+                kpi_context.overall_risk_score = float(row["overall_risk_score"]) if row.get("overall_risk_score") else None
+        except Exception as e:
+            logger.warning(f"Erreur récupération risques pour scoring : {e}")
+        
+        return kpi_context
     
     def _get_discount_score(self, discount_pct: Decimal) -> float:
         """Score basé sur le discount (0-100)"""

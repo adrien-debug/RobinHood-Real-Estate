@@ -265,3 +265,152 @@ class ZoningChange(BaseModel):
     
     reason: Optional[str] = None
     impact: Optional[str] = None
+
+
+# ====================================================================
+# NOUVEAUX MODÈLES - KPIs AVANCÉS
+# ====================================================================
+
+class SourceType(str, Enum):
+    """Type de source de données"""
+    TRANSACTION = "transaction"
+    LISTING = "listing"
+
+
+class RiskLevel(str, Enum):
+    """Niveaux de risque"""
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    UNKNOWN = "UNKNOWN"
+
+
+class Feature(BaseModel):
+    """Feature normalisée (transaction ou listing)"""
+    source_type: str  # 'transaction' ou 'listing'
+    source_id: str
+    record_date: date
+    
+    # Localisation normalisée
+    community: Optional[str] = None
+    project: Optional[str] = None
+    building: Optional[str] = None
+    rooms_bucket: Optional[str] = None
+    property_type: Optional[str] = None
+    
+    # Prix normalisés (AED)
+    price_aed: Optional[Decimal] = None
+    price_per_sqft: Optional[Decimal] = None
+    area_sqft: Optional[Decimal] = None
+    
+    # Features dérivées
+    is_offplan: bool = False
+    days_on_market: Optional[int] = None
+    price_change_count: int = 0
+    
+    # Geo-features Makani
+    makani_number: Optional[str] = None
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    metro_distance_m: Optional[int] = None
+    beach_distance_m: Optional[int] = None
+    mall_distance_m: Optional[int] = None
+    location_score: Optional[Decimal] = None  # 0-100
+
+
+class KPI(BaseModel):
+    """KPIs avancés calculés par zone"""
+    calculation_date: date
+    
+    # Scope
+    community: Optional[str] = None
+    project: Optional[str] = None
+    rooms_bucket: Optional[str] = None
+    window_days: int  # 7, 30, 90
+    
+    # 8 KPIs calculés
+    tls: Optional[Decimal] = None  # Transaction-to-Listing Spread
+    lad: Optional[Decimal] = None  # Liquidity-Adjusted Discount
+    rsg: Optional[Decimal] = None  # Rental Stress Gap
+    spi: Optional[Decimal] = None  # Supply Pressure Index (0-100)
+    gpi: Optional[Decimal] = None  # Geo-Premium Index
+    rcwm: Optional[Decimal] = None  # Regime Confidence-Weighted Momentum
+    ord: Optional[Decimal] = None  # Offplan Risk Delta
+    aps: Optional[Decimal] = None  # Anomaly Persistence Score
+    
+    # Données sources (traçabilité)
+    median_tx_psf: Optional[Decimal] = None
+    median_listing_psf: Optional[Decimal] = None
+    tx_count: Optional[int] = None
+    listing_count: Optional[int] = None
+    planned_units_12m: Optional[int] = None
+    median_rent_aed: Optional[Decimal] = None
+
+
+class QualityLog(BaseModel):
+    """Log de qualité des données"""
+    run_date: datetime
+    source_type: str  # 'transactions', 'listings', 'rental_index'
+    pipeline_step: Optional[str] = None
+    
+    # Métriques de volume
+    records_total: int = 0
+    records_accepted: int = 0
+    records_rejected: int = 0
+    
+    # Détails des rejets
+    rejection_reasons: Dict[str, int] = Field(default_factory=dict)
+    # Format: {"outliers": 15, "duplicates": 3, "missing_fields": 8}
+    
+    # Complétude des champs
+    field_completeness: Dict[str, float] = Field(default_factory=dict)
+    # Format: {"community": 98.5, "price": 100.0, "area": 95.2}
+    
+    # Exécution
+    execution_time_ms: Optional[int] = None
+    status: str = "success"  # 'success', 'warning', 'error'
+    error_message: Optional[str] = None
+
+
+class RiskSummary(BaseModel):
+    """Résumé des risques par zone"""
+    summary_date: date
+    
+    # Scope
+    community: str
+    project: Optional[str] = None
+    
+    # Niveaux de risque
+    supply_risk_level: str = "UNKNOWN"  # 'LOW', 'MEDIUM', 'HIGH'
+    volatility_risk_level: str = "UNKNOWN"
+    divergence_risk_level: str = "UNKNOWN"
+    
+    # Métriques détaillées
+    supply_spi: Optional[Decimal] = None
+    volatility_pct: Optional[Decimal] = None
+    listing_tx_divergence_pct: Optional[Decimal] = None
+    
+    # Score global
+    overall_risk_score: Optional[Decimal] = None  # 0-100
+    
+    # Facteurs de risque
+    risk_factors: List[str] = Field(default_factory=list)
+
+
+class KPIContext(BaseModel):
+    """Contexte KPI pour le scoring enrichi"""
+    # KPIs de base
+    tls: Optional[float] = None
+    lad: Optional[float] = None
+    rsg: Optional[float] = None
+    spi: Optional[float] = None
+    gpi: Optional[float] = None
+    rcwm: Optional[float] = None
+    ord: Optional[float] = None
+    aps: Optional[float] = None
+    
+    # Risques
+    supply_risk: str = "UNKNOWN"
+    volatility_risk: str = "UNKNOWN"
+    divergence_risk: str = "UNKNOWN"
+    overall_risk_score: Optional[float] = None
