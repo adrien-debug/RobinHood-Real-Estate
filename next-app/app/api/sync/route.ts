@@ -14,19 +14,23 @@ export async function POST(request: NextRequest) {
     const action = body.action
 
     if (action === 'sync_transactions') {
-      return await syncTransactions()
+      const result = await syncTransactions()
+      return NextResponse.json(result)
     }
 
     if (action === 'compute_baselines') {
-      return await computeBaselines()
+      const result = await computeBaselines()
+      return NextResponse.json(result)
     }
 
     if (action === 'compute_regimes') {
-      return await computeRegimes()
+      const result = await computeRegimes()
+      return NextResponse.json(result)
     }
 
     if (action === 'generate_alerts') {
-      return await generateAlerts()
+      const result = await generateAlerts()
+      return NextResponse.json(result)
     }
 
     if (action === 'full_pipeline') {
