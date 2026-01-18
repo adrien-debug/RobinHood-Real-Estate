@@ -486,9 +486,10 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 2.4.3  
+**Version** : 2.5.0  
 **Date** : 2026-01-18  
-**Status** : ✅ 100% Next.js - Migration Complète (9 APIs + 45+ endpoints + 20 KPIs + 10 pages Next.js + Visualisation 3D)
+**Status** : ✅ 100% Next.js - Migration Complète (9 APIs + 45+ endpoints + 20 KPIs + 10 pages Next.js + Visualisation 3D)  
+**APIs** : ✅ Toutes vérifiées et opérationnelles (voir `API_VERIFICATION_REPORT.md`)
 
 ### API Routes Next.js (Connectées Supabase)
 
