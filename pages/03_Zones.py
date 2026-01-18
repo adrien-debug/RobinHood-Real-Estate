@@ -502,7 +502,6 @@ if selected_community:
     """, (selected_community, target_date, target_date))
     
     if price_history:
-        import pandas as pd
         df = pd.DataFrame(price_history)
         
         fig = go.Figure()

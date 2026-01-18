@@ -358,8 +358,6 @@ if transactions:
     st.markdown('<div class="section-title">Transactions</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-subtitle">LATEST SALES</div>', unsafe_allow_html=True)
     
-    import pandas as pd
-    
     # Build DataFrame
     df_data = []
     for tx in transactions:

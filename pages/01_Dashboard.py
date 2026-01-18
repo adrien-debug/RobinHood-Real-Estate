@@ -736,7 +736,8 @@ def generate_ai_insights(opps, kpis_data, brief_data):
         kpis_data = {}
 
     # Insight 1: Market momentum
-    if kpis_data.get('avg_price_sqft', 0) > 1800:
+    # Use (x or 0) pattern to handle None values safely
+    if (kpis_data.get('avg_price_sqft') or 0) > 1800:
         insights.append({
             'type': 'trend',
             'icon': '[TREND]',

@@ -412,8 +412,6 @@ if yields:
     st.markdown('<div class="section-title">Market Performance by Zone</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-subtitle">SORTED BY MOMENTUM</div>', unsafe_allow_html=True)
     
-    import pandas as pd
-    
     df_data = []
     for y in yields:
         momentum = (y.get('momentum') or 0) * 100
@@ -445,7 +443,6 @@ if yields:
     
     with col_c1:
         # Momentum bar chart
-        import pandas as pd
         df = pd.DataFrame(yields[:15])
         df['label'] = df['community'].str[:12] + ' (' + df['rooms_bucket'].astype(str) + ')'
         df['momentum_pct'] = df['momentum'].apply(lambda x: (x or 0) * 100)

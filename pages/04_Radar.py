@@ -448,8 +448,6 @@ if opportunities:
     st.markdown('<div class="section-title">Opportunities</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-subtitle">SORTED BY SCORE</div>', unsafe_allow_html=True)
     
-    import pandas as pd
-    
     df_data = []
     for opp in opportunities:
         df_data.append({

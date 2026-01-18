@@ -117,10 +117,11 @@ def calculate_market_sentiment():
         """)
 
         if len(correlation_data) >= 4:
-            prices = [d['avg_price'] for d in correlation_data]
-            volumes = [d['volume'] for d in correlation_data]
-            sentiment_indicators['price_volume_corr'] = np.corrcoef(prices, volumes)[0, 1]
-    except:
+            prices = [d['avg_price'] for d in correlation_data if d['avg_price']]
+            volumes = [d['volume'] for d in correlation_data if d['volume']]
+            if len(prices) >= 4 and len(volumes) >= 4:
+                sentiment_indicators['price_volume_corr'] = np.corrcoef(prices, volumes)[0, 1]
+    except Exception:
         sentiment_indicators['price_volume_corr'] = 0
 
     # Days on market trend

@@ -3,6 +3,7 @@ Advanced Analytics Dashboard - Bloomberg-Style Performance Monitoring
 Predictive KPIs, system health, and comprehensive analytics
 """
 import streamlit as st
+from loguru import logger
 from core.db import db
 from core.utils import get_dubai_today, format_currency
 from core.styles import apply_plecto_style, kpi_card
@@ -26,9 +27,10 @@ def calculate_system_health_metrics():
         latest_transaction = db.execute_query("""
             SELECT MAX(transaction_date) as latest_date FROM transactions
         """)
-        days_since_update = (get_dubai_today() - latest_transaction[0]['latest_date']).days if latest_transaction else 999
+        days_since_update = (get_dubai_today() - latest_transaction[0]['latest_date']).days if latest_transaction and latest_transaction[0]['latest_date'] else 999
         metrics['data_freshness'] = days_since_update
-    except:
+    except Exception as e:
+        logger.warning(f"Erreur calcul data_freshness: {e}")
         metrics['data_freshness'] = 999
 
     # API connectivity
@@ -44,7 +46,8 @@ def calculate_system_health_metrics():
         if opportunities:
             metrics['model_accuracy'] = opportunities[0]['avg_score'] or 0
             metrics['opportunities_generated'] = opportunities[0]['total'] or 0
-    except:
+    except Exception as e:
+        logger.warning(f"Erreur calcul model_accuracy: {e}")
         metrics['model_accuracy'] = 0
         metrics['opportunities_generated'] = 0
 
@@ -76,8 +79,9 @@ def generate_performance_forecasts():
             current_volume = volumes[-1]
             forecast_4w = current_volume + (slope * 4)
 
-            forecasts['volume_growth'] = ((forecast_4w - current_volume) / current_volume) * 100
-    except:
+            forecasts['volume_growth'] = ((forecast_4w - current_volume) / current_volume) * 100 if current_volume else 0
+    except Exception as e:
+        logger.warning(f"Erreur calcul volume_growth: {e}")
         forecasts['volume_growth'] = 0
 
     # Price trend forecast
@@ -94,13 +98,14 @@ def generate_performance_forecasts():
         """)
 
         if len(price_trend) >= 3:
-            prices = [p['avg_price'] for p in price_trend[::-1]]
-            slope = np.polyfit(range(len(prices)), prices, 1)[0]
-            current_price = prices[-1]
-            forecast_3m = current_price + (slope * 3)
-
-            forecasts['price_growth'] = ((forecast_3m - current_price) / current_price) * 100
-    except:
+            prices = [p['avg_price'] for p in price_trend[::-1] if p['avg_price']]
+            if len(prices) >= 3:
+                slope = np.polyfit(range(len(prices)), prices, 1)[0]
+                current_price = prices[-1]
+                forecast_3m = current_price + (slope * 3)
+                forecasts['price_growth'] = ((forecast_3m - current_price) / current_price) * 100 if current_price else 0
+    except Exception as e:
+        logger.warning(f"Erreur calcul price_growth: {e}")
         forecasts['price_growth'] = 0
 
     return forecasts
@@ -128,7 +133,7 @@ for table, label in tables:
     try:
         result = db.execute_query(f"SELECT COUNT(*) as count FROM {table}")
         counts[label] = result[0]['count'] if result else 0
-    except:
+    except Exception:
         counts[label] = 0
 
 cols = st.columns(6)
@@ -243,7 +248,6 @@ with col_left:
     """)
     
     if recent_tx:
-        import pandas as pd
         df_data = []
         for tx in recent_tx:
             df_data.append({

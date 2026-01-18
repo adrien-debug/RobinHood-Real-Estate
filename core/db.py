@@ -94,7 +94,7 @@ class Database:
                     logger.warning(f"Vérification schéma: {e}")
                     try:
                         self._connection.rollback()
-                    except:
+                    except Exception:
                         pass
                 logger.info("Connexion PostgreSQL établie")
             except psycopg.OperationalError as e:
@@ -151,7 +151,8 @@ class Database:
             cursor.execute(query, params)
             try:
                 return cursor.fetchone()
-            except:
+            except psycopg.ProgrammingError:
+                # No results to fetch (e.g., after INSERT without RETURNING)
                 return None
     
     def execute_batch_insert(self, table: str, columns: List[str], values: List[tuple]):
