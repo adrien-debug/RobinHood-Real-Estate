@@ -88,51 +88,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Navigation grid
-st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("Dashboard", key="nav_dashboard", use_container_width=True, type="primary"):
-        st.switch_page("pages/01_Dashboard.py")
-
-with col2:
-    if st.button("Sales", key="nav_sales", use_container_width=True):
-        st.switch_page("pages/02_Sales.py")
-
-with col3:
-    if st.button("Zones", key="nav_zones", use_container_width=True):
-        st.switch_page("pages/03_Zones.py")
-
-col4, col5, col6 = st.columns(3)
-
-with col4:
-    if st.button("Radar", key="nav_radar", use_container_width=True):
-        st.switch_page("pages/04_Radar.py")
-
-with col5:
-    if st.button("Yield", key="nav_yield", use_container_width=True):
-        st.switch_page("pages/05_Yield.py")
-
-with col6:
-    if st.button("Alerts", key="nav_alerts", use_container_width=True):
-        st.switch_page("pages/06_Alerts.py")
-
-col7, col8, col9 = st.columns(3)
-
-with col7:
-    if st.button("Admin", key="nav_admin", use_container_width=True):
-        st.switch_page("pages/07_Admin.py")
-
-with col8:
-    if st.button("Insights", key="nav_insights", use_container_width=True):
-        st.switch_page("pages/08_Market_Insights.py")
-
-with col9:
-    st.empty()  # Placeholder for future feature
-
-st.markdown("<div style='height: 2rem'></div>", unsafe_allow_html=True)
+# Navigation grid removed to avoid duplicate menu with Streamlit sidebar
 
 # Quick stats
 from core.db import db

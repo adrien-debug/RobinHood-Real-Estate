@@ -426,13 +426,17 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.2.2  
+**Version** : 1.2.3  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (Alertes corrigées)
+**Status** : ✅ Opérationnel (Navigation simplifiée)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.2.3 (2026-01-18) - Navigation
+- **Fix** : Suppression de la grille de boutons sur la page d'accueil pour éviter le menu en double
+- **Fix** : Navigation par sidebar Streamlit uniquement
 
 ### v1.2.2 (2026-01-18) - Fix Système Alertes
 - **Fix** : Correction des noms de tables SQL dans tout le projet
