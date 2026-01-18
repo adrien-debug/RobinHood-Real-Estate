@@ -39,16 +39,15 @@ CREATE TABLE IF NOT EXISTS transactions (
     
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    
-    -- Indexes
-    INDEX idx_transaction_date (transaction_date DESC),
-    INDEX idx_community (community),
-    INDEX idx_project (project),
-    INDEX idx_building (building),
-    INDEX idx_rooms_bucket (rooms_bucket),
-    INDEX idx_price_per_sqft (price_per_sqft)
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_transaction_date ON transactions (transaction_date DESC);
+CREATE INDEX IF NOT EXISTS idx_community ON transactions (community);
+CREATE INDEX IF NOT EXISTS idx_project ON transactions (project);
+CREATE INDEX IF NOT EXISTS idx_building ON transactions (building);
+CREATE INDEX IF NOT EXISTS idx_rooms_bucket ON transactions (rooms_bucket);
+CREATE INDEX IF NOT EXISTS idx_price_per_sqft ON transactions (price_per_sqft);
 
 -- ====================================================================
 -- MORTGAGES (DLD)
@@ -69,11 +68,11 @@ CREATE TABLE IF NOT EXISTS mortgages (
     borrower VARCHAR(255),
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_mortgage_date (mortgage_date DESC),
-    INDEX idx_community_mortgage (community)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_mortgage_date ON mortgages (mortgage_date DESC);
+CREATE INDEX IF NOT EXISTS idx_community_mortgage ON mortgages (community);
 
 -- ====================================================================
 -- RENTAL INDEX (DLD)
@@ -98,10 +97,11 @@ CREATE TABLE IF NOT EXISTS rental_index (
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
     
-    UNIQUE (period_date, community, project, property_type, rooms_bucket),
-    INDEX idx_rental_period (period_date DESC),
-    INDEX idx_rental_community (community)
+    UNIQUE (period_date, community, project, property_type, rooms_bucket)
 );
+
+CREATE INDEX IF NOT EXISTS idx_rental_period ON rental_index (period_date DESC);
+CREATE INDEX IF NOT EXISTS idx_rental_community ON rental_index (community);
 
 -- ====================================================================
 -- DEVELOPERS PIPELINE (supply future)
@@ -129,11 +129,11 @@ CREATE TABLE IF NOT EXISTS developers_pipeline (
     
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_handover_date (expected_handover_date),
-    INDEX idx_developer_community (community)
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_handover_date ON developers_pipeline (expected_handover_date);
+CREATE INDEX IF NOT EXISTS idx_developer_community ON developers_pipeline (community);
 
 -- ====================================================================
 -- LISTINGS (annonces autorisées)
@@ -168,12 +168,12 @@ CREATE TABLE IF NOT EXISTS listings (
     
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_listing_date (listing_date DESC),
-    INDEX idx_listing_community (community),
-    INDEX idx_listing_status (status)
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_listing_date ON listings (listing_date DESC);
+CREATE INDEX IF NOT EXISTS idx_listing_community ON listings (community);
+CREATE INDEX IF NOT EXISTS idx_listing_status ON listings (status);
 
 -- ====================================================================
 -- MARKET BASELINES (rolling metrics)
@@ -209,10 +209,11 @@ CREATE TABLE IF NOT EXISTS market_baselines (
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
     
-    UNIQUE (calculation_date, community, project, building, rooms_bucket, window_days),
-    INDEX idx_baseline_date (calculation_date DESC),
-    INDEX idx_baseline_scope (community, project, building)
+    UNIQUE (calculation_date, community, project, building, rooms_bucket, window_days)
 );
+
+CREATE INDEX IF NOT EXISTS idx_baseline_date ON market_baselines (calculation_date DESC);
+CREATE INDEX IF NOT EXISTS idx_baseline_scope ON market_baselines (community, project, building);
 
 -- ====================================================================
 -- MARKET REGIMES (classification institutionnelle)
@@ -237,12 +238,12 @@ CREATE TABLE IF NOT EXISTS market_regimes (
     volatility_level VARCHAR(20),
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_regime_date (regime_date DESC),
-    INDEX idx_regime_type (regime),
-    INDEX idx_regime_scope (community, project)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_regime_date ON market_regimes (regime_date DESC);
+CREATE INDEX IF NOT EXISTS idx_regime_type ON market_regimes (regime);
+CREATE INDEX IF NOT EXISTS idx_regime_scope ON market_regimes (community, project);
 
 -- ====================================================================
 -- OPPORTUNITIES (deals détectés)
@@ -284,13 +285,13 @@ CREATE TABLE IF NOT EXISTS opportunities (
     status VARCHAR(50) DEFAULT 'active', -- active, reviewed, dismissed
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_opp_date (detection_date DESC),
-    INDEX idx_opp_score (global_score DESC),
-    INDEX idx_opp_strategy (recommended_strategy),
-    INDEX idx_opp_status (status)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_opp_date ON opportunities (detection_date DESC);
+CREATE INDEX IF NOT EXISTS idx_opp_score ON opportunities (global_score DESC);
+CREATE INDEX IF NOT EXISTS idx_opp_strategy ON opportunities (recommended_strategy);
+CREATE INDEX IF NOT EXISTS idx_opp_status ON opportunities (status);
 
 -- ====================================================================
 -- ALERTS
@@ -316,12 +317,12 @@ CREATE TABLE IF NOT EXISTS alerts (
     is_dismissed BOOLEAN DEFAULT FALSE,
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_alert_date (alert_date DESC),
-    INDEX idx_alert_type (alert_type),
-    INDEX idx_alert_status (is_read, is_dismissed)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_alert_date ON alerts (alert_date DESC);
+CREATE INDEX IF NOT EXISTS idx_alert_type ON alerts (alert_type);
+CREATE INDEX IF NOT EXISTS idx_alert_status ON alerts (is_read, is_dismissed);
 
 -- ====================================================================
 -- DAILY BRIEFS (CIO Agent)
@@ -340,10 +341,10 @@ CREATE TABLE IF NOT EXISTS daily_briefs (
     full_brief_text TEXT,
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT NOW(),
-    
-    INDEX idx_brief_date (brief_date DESC)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_brief_date ON daily_briefs (brief_date DESC);
 
 -- ====================================================================
 -- VIEWS
