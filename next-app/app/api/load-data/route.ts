@@ -11,7 +11,49 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { action } = await request.json()
+    const { action, data } = await request.json()
+
+    if (action === 'load_rental_data') {
+      console.log(`Loading ${data?.length || 0} rental records`)
+      
+      if (!data || !Array.isArray(data)) {
+        return NextResponse.json({ error: 'Invalid data format' }, { status: 400 })
+      }
+
+      // Insert rental data in batches
+      const batchSize = 50
+      let totalInserted = 0
+      let totalErrors = 0
+
+      for (let i = 0; i < data.length; i += batchSize) {
+        const batch = data.slice(i, i + batchSize)
+
+        try {
+          const { error } = await supabase
+            .from('dld_rental_index')
+            .upsert(batch)
+
+          if (error) {
+            console.error(`Batch ${Math.floor(i / batchSize) + 1} error:`, error.message)
+            totalErrors += batch.length
+          } else {
+            totalInserted += batch.length
+          }
+        } catch (err: any) {
+          console.error(`Batch ${Math.floor(i / batchSize) + 1} exception:`, err.message)
+          totalErrors += batch.length
+        }
+      }
+
+      console.log(`Rental data loaded: ${totalInserted} inserted, ${totalErrors} errors`)
+
+      return NextResponse.json({
+        success: true,
+        totalRecords: data.length,
+        inserted: totalInserted,
+        errors: totalErrors
+      })
+    }
 
     if (action === 'load_transactions') {
       // Charger le CSV

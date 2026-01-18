@@ -5,9 +5,9 @@ export async function GET() {
   try {
     const supabase = getServerClient()
     
-    // Fetch rental data from rental_index
+    // Fetch rental data from dld_rental_index
     const { data: rentalData, error: rentalError } = await supabase
-      .from('rental_index')
+      .from('dld_rental_index')
       .select('*')
       .order('period_date', { ascending: false })
       .limit(1000)
@@ -41,22 +41,20 @@ export async function GET() {
       txByComm[comm].count++
     })
 
-    // Group rental data by community (latest period)
-    const rentalByComm: Record<string, { avg_rent: number, median_rent: number, rent_count: number }> = {}
+    // Group rental data by community (weighted average by rent_count)
+    const rentalByComm: Record<string, { total_rent: number, total_count: number }> = {}
     rentalData?.forEach(r => {
       const comm = r.community
-      if (!comm) return
+      if (!comm || !r.avg_rent_aed || !r.rent_count) return
       if (!rentalByComm[comm]) {
         rentalByComm[comm] = {
-          avg_rent: r.avg_rent_aed || 0,
-          median_rent: r.median_rent_aed || 0,
-          rent_count: r.rent_count || 0
+          total_rent: r.avg_rent_aed * r.rent_count,
+          total_count: r.rent_count
         }
       } else {
-        // Aggregate if multiple entries
-        rentalByComm[comm].avg_rent += r.avg_rent_aed || 0
-        rentalByComm[comm].median_rent += r.median_rent_aed || 0
-        rentalByComm[comm].rent_count += r.rent_count || 0
+        // Weighted sum
+        rentalByComm[comm].total_rent += r.avg_rent_aed * r.rent_count
+        rentalByComm[comm].total_count += r.rent_count
       }
     })
 
@@ -77,8 +75,9 @@ export async function GET() {
       let grossYield = 0
       let dataSource = 'estimated'
 
-      if (rental && rental.avg_rent > 0) {
-        annualRent = rental.avg_rent * 12
+      if (rental && rental.total_count > 0) {
+        // Calculate weighted average annual rent
+        annualRent = rental.total_rent / rental.total_count
         grossYield = (annualRent / avgPropertyPrice) * 100
         dataSource = 'real'
       } else {
