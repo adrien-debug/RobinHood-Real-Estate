@@ -1,0 +1,246 @@
+2026-01-18 16:15:33.768 
+  [33m[1mWarning:[0m to view this Streamlit app on a browser, run it with the following
+  command:
+
+    streamlit run ingest_historical_to_csv.py [ARGUMENTS]
+2026-01-18 16:15:35.052 | INFO     | __main__:main:210 - ╔══════════════════════════════════════════════════════════╗
+2026-01-18 16:15:35.052 | INFO     | __main__:main:211 - ║                                                          ║
+2026-01-18 16:15:35.052 | INFO     | __main__:main:212 - ║     RÉCUPÉRATION DONNÉES HISTORIQUES → CSV              ║
+2026-01-18 16:15:35.052 | INFO     | __main__:main:213 - ║                                                          ║
+2026-01-18 16:15:35.052 | INFO     | __main__:main:214 - ╚══════════════════════════════════════════════════════════╝
+2026-01-18 16:15:35.052 | INFO     | __main__:main:215 - 
+2026-01-18 16:15:35.052 | INFO     | __main__:fetch_all_transactions:20 - ╔══════════════════════════════════════════════════════════╗
+2026-01-18 16:15:35.052 | INFO     | __main__:fetch_all_transactions:21 - ║  RÉCUPÉRATION TRANSACTIONS (12 mois)                  ║
+2026-01-18 16:15:35.052 | INFO     | __main__:fetch_all_transactions:22 - ╚══════════════════════════════════════════════════════════╝
+2026-01-18 16:15:35.052 | INFO     | __main__:fetch_all_transactions:29 - Période: 2025-01-23 → 2026-01-18
+2026-01-18 16:15:35.053 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-01-23 → 2025-02-22
+2026-01-18 16:15:35.053 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:15:35.053 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:15:36.540 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:15:37.815 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:15:39.285 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:15:40.522 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:15:41.787 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:15:43.036 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:15:44.342 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:15:45.840 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:15:47.076 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:15:48.506 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:15:48.506 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:15:50.510 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-02-22 → 2025-03-24
+2026-01-18 16:15:50.510 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:15:50.510 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:15:53.098 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:15:54.431 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:15:55.697 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:15:57.147 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:15:58.409 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:15:59.677 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:16:01.099 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:16:02.553 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:16:03.943 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:16:05.288 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:16:05.288 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:16:07.294 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-03-24 → 2025-04-23
+2026-01-18 16:16:07.294 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:16:07.294 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:16:08.517 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:16:09.763 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:16:11.030 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:16:12.306 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:16:13.545 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:16:14.829 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:16:16.078 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:16:17.349 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:16:18.790 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:16:20.461 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:16:20.461 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:16:22.462 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-04-23 → 2025-05-23
+2026-01-18 16:16:22.463 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:16:22.463 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:16:23.727 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:16:25.125 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:16:26.389 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:16:27.617 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:16:29.085 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:16:30.666 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:16:31.882 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:16:33.213 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:16:34.650 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:16:35.867 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:16:35.868 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:16:37.872 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-05-23 → 2025-06-22
+2026-01-18 16:16:37.872 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:16:37.872 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:16:39.491 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:16:40.736 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:16:41.986 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:16:43.233 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:16:44.809 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:16:46.137 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:16:47.752 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:16:49.138 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:16:51.547 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:16:53.059 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:16:53.059 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:16:55.063 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-06-22 → 2025-07-22
+2026-01-18 16:16:55.064 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:16:55.064 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:16:56.498 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:16:57.906 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:16:59.142 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:17:00.383 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:17:01.614 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:17:02.893 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:17:04.103 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:17:05.914 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:17:07.252 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:17:08.454 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:17:08.456 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:17:10.459 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-07-22 → 2025-08-21
+2026-01-18 16:17:10.460 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:17:10.460 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:17:11.883 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:17:13.311 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:17:14.575 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:17:16.035 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:17:17.488 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:17:18.748 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:17:21.422 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:17:22.889 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:17:24.312 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:17:25.532 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:17:25.532 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:17:27.535 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-08-21 → 2025-09-20
+2026-01-18 16:17:27.536 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:17:27.536 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:17:28.984 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:17:30.526 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:17:31.975 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:17:33.202 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:17:34.609 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:17:35.887 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:17:37.333 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:17:38.565 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:17:39.995 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:17:41.224 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:17:41.224 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:17:43.227 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-09-20 → 2025-10-20
+2026-01-18 16:17:43.227 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:17:43.227 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:17:44.465 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:17:46.067 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:17:47.635 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:17:48.955 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:17:50.941 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:17:53.067 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:17:54.309 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:17:55.715 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:17:56.982 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:17:58.258 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:17:58.258 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:18:00.263 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-10-20 → 2025-11-19
+2026-01-18 16:18:00.264 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:18:00.264 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:18:01.504 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:18:02.759 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:18:04.250 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:18:05.479 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:18:06.745 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:18:07.989 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:18:09.265 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:18:10.888 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:18:12.314 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:18:13.726 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:18:13.726 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:18:15.730 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-11-19 → 2025-12-19
+2026-01-18 16:18:15.731 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:18:15.731 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:18:17.110 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:18:18.339 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:18:19.572 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:18:22.441 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:18:23.853 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:18:25.139 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:18:26.416 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:18:27.843 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:18:29.096 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:18:30.365 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:18:30.365 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:18:32.370 | INFO     | __main__:fetch_all_transactions:37 - Récupération: 2025-12-19 → 2026-01-18
+2026-01-18 16:18:32.370 | INFO     | connectors.dld_transactions:fetch_transactions:77 - Utilisation de Bayut RapidAPI pour les transactions DLD
+2026-01-18 16:18:32.371 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 0
+2026-01-18 16:18:33.779 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 1
+2026-01-18 16:18:35.215 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 2
+2026-01-18 16:18:36.663 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 3
+2026-01-18 16:18:37.944 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 4
+2026-01-18 16:18:39.209 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 5
+2026-01-18 16:18:40.679 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 6
+2026-01-18 16:18:42.050 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 7
+2026-01-18 16:18:43.286 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 8
+2026-01-18 16:18:44.779 | INFO     | connectors.dld_transactions:_fetch_via_bayut:123 - Recuperation transactions Bayut : page 9
+2026-01-18 16:18:46.188 | INFO     | connectors.dld_transactions:_fetch_via_bayut:143 - 200 transactions DLD via Bayut
+2026-01-18 16:18:46.188 | INFO     | __main__:fetch_all_transactions:46 -   ✓ 200 transactions
+2026-01-18 16:18:48.193 | SUCCESS  | __main__:fetch_all_transactions:56 - ✓ TOTAL: 2400 transactions récupérées
+2026-01-18 16:18:48.194 | INFO     | __main__:main:219 - 
+2026-01-18 16:18:48.226 | SUCCESS  | __main__:save_to_csv:197 - ✓ 2400 lignes sauvegardées dans data/transactions_12months.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:save_to_csv:200 -   Taille: 292.5 KB
+2026-01-18 16:18:48.226 | INFO     | __main__:save_to_csv:201 -   Colonnes: 12
+2026-01-18 16:18:48.226 | INFO     | __main__:main:221 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:64 - ╔══════════════════════════════════════════════════════════╗
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:65 - ║  RÉCUPÉRATION ANNONCES (90 jours)                       ║
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:66 - ╚══════════════════════════════════════════════════════════╝
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: dubai-marina
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur dubai-marina: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: downtown-dubai
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur downtown-dubai: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: business-bay
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur business-bay: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: jumeirah-beach-residence-jbr
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur jumeirah-beach-residence-jbr: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: palm-jumeirah
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur palm-jumeirah: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: dubai-hills-estate
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur dubai-hills-estate: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: arabian-ranches
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur arabian-ranches: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: dubai-south
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur dubai-south: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: meydan-city
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur meydan-city: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_all_listings:86 - Récupération: dubai-creek-harbour
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_all_listings:107 -   ✗ Erreur dubai-creek-harbour: BayutAPIConnector.fetch_listings() got an unexpected keyword argument 'location'
+2026-01-18 16:18:48.226 | SUCCESS  | __main__:fetch_all_listings:109 - ✓ TOTAL: 0 annonces récupérées
+2026-01-18 16:18:48.226 | INFO     | __main__:main:225 - 
+2026-01-18 16:18:48.226 | WARNING  | __main__:save_to_csv:144 - Aucune donnée à sauvegarder pour listings_90days.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:main:227 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_rental_index:117 - ╔══════════════════════════════════════════════════════════╗
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_rental_index:118 - ║  RÉCUPÉRATION INDEX LOCATIF                             ║
+2026-01-18 16:18:48.226 | INFO     | __main__:fetch_rental_index:119 - ╚══════════════════════════════════════════════════════════╝
+2026-01-18 16:18:48.226 | ERROR    | __main__:fetch_rental_index:135 - ✗ Erreur: DLDRentalIndexConnector.fetch_rental_index() got an unexpected keyword argument 'year'
+2026-01-18 16:18:48.226 | INFO     | __main__:main:231 - 
+2026-01-18 16:18:48.226 | WARNING  | __main__:save_to_csv:144 - Aucune donnée à sauvegarder pour rental_index.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:main:233 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:main:238 - ╔══════════════════════════════════════════════════════════╗
+2026-01-18 16:18:48.226 | INFO     | __main__:main:239 - ║                                                          ║
+2026-01-18 16:18:48.226 | INFO     | __main__:main:240 - ║                  RÉSUMÉ FINAL                            ║
+2026-01-18 16:18:48.226 | INFO     | __main__:main:241 - ║                                                          ║
+2026-01-18 16:18:48.226 | INFO     | __main__:main:242 - ╚══════════════════════════════════════════════════════════╝
+2026-01-18 16:18:48.226 | INFO     | __main__:main:243 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:main:244 - Transactions:  2,400
+2026-01-18 16:18:48.226 | INFO     | __main__:main:245 - Annonces:      0
+2026-01-18 16:18:48.226 | INFO     | __main__:main:246 - Index locatif: 0
+2026-01-18 16:18:48.226 | INFO     | __main__:main:247 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:main:248 - Temps total:   0:03:13.173794
+2026-01-18 16:18:48.226 | INFO     | __main__:main:249 - 
+2026-01-18 16:18:48.226 | SUCCESS  | __main__:main:250 - ✓ DONNÉES SAUVEGARDÉES DANS ./data/
+2026-01-18 16:18:48.226 | INFO     | __main__:main:251 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:main:252 - Fichiers créés:
+2026-01-18 16:18:48.226 | INFO     | __main__:main:253 -   - data/transactions_12months.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:main:254 -   - data/listings_90days.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:main:255 -   - data/rental_index.csv
+2026-01-18 16:18:48.226 | INFO     | __main__:main:256 - 
+2026-01-18 16:18:48.226 | INFO     | __main__:main:257 - Tu peux maintenant:
+2026-01-18 16:18:48.226 | INFO     | __main__:main:258 -   1. Analyser les CSV avec Excel/Python
+2026-01-18 16:18:48.226 | INFO     | __main__:main:259 -   2. Importer dans Supabase quand la connexion est réparée
+2026-01-18 16:18:48.227 | INFO     | __main__:main:260 -   3. Utiliser pour entraîner des modèles ML

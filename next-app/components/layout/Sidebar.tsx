@@ -2,18 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  TrendingUp, 
-  MapPin, 
-  Target, 
-  Percent, 
-  Bell, 
+import {
+  LayoutDashboard,
+  TrendingUp,
+  MapPin,
+  Target,
+  Percent,
+  Bell,
   Settings,
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Building2
+  Building2,
+  Database
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Radar', href: '/radar', icon: Target },
   { name: 'Yield', href: '/yield', icon: Percent },
   { name: 'Floorplans', href: '/floorplans', icon: Building2 },
+  { name: 'Data Loader', href: '/data-loader', icon: Database },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Insights', href: '/insights', icon: BarChart3 },
   { name: 'Admin', href: '/admin', icon: Settings },
