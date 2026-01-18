@@ -193,22 +193,26 @@ export default function SalesPage() {
           subtitle="Today"
           value={transactions.length}
           color="accent"
+          showLive
         />
         <KpiCard
           title="Total Volume"
           subtitle="AED"
           value={formatCompact(stats.total_volume)}
+          showLive
         />
         <KpiCard
           title="Avg Price/sqft"
           subtitle="AED"
           value={Math.round(stats.avg_price_sqft).toLocaleString()}
+          showLive
         />
         <KpiCard
           title="Below Market"
           subtitle="Opportunities"
           value={formatPercent(stats.below_market_pct)}
           color="success"
+          showLive
         />
       </KpiGrid>
 

@@ -153,6 +153,7 @@ export default function InsightsPage() {
           value={Math.round(rsi)}
           color={rsi > 70 ? 'danger' : rsi < 30 ? 'success' : 'info'}
           icon={<Activity className="w-5 h-5" />}
+          showLive
         />
         <KpiCard
           title="Price Trend"
@@ -160,18 +161,21 @@ export default function InsightsPage() {
           value={formatPercent(priceTrend, true)}
           trend={priceTrend}
           color={priceTrend > 0 ? 'success' : 'danger'}
+          showLive
         />
         <KpiCard
           title="Total Volume"
           subtitle="Transactions"
           value={formatCompact(totalVolume)}
           icon={<BarChart3 className="w-5 h-5" />}
+          showLive
         />
         <KpiCard
           title="Market Regime"
           subtitle="Current state"
           value={regime.label}
           color={regime.label === 'Bullish' ? 'success' : regime.label === 'Overbought' ? 'danger' : 'warning'}
+          showLive
         />
       </KpiGrid>
 

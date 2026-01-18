@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { LiveIndicator } from './LiveIndicator'
 
 interface KpiCardProps {
   title: string
@@ -11,6 +12,7 @@ interface KpiCardProps {
   color?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
   icon?: React.ReactNode
   className?: string
+  showLive?: boolean
 }
 
 export function KpiCard({ 
@@ -20,7 +22,8 @@ export function KpiCard({
   trend, 
   color = 'default',
   icon,
-  className 
+  className,
+  showLive = false
 }: KpiCardProps) {
   const colorClasses = {
     default: 'border-border',
@@ -49,13 +52,16 @@ export function KpiCard({
       className
     )}>
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
-            {title}
-          </p>
-          {subtitle && (
-            <p className="text-[10px] text-text-disabled mt-0.5">{subtitle}</p>
-          )}
+        <div className="flex items-center gap-2">
+          <div>
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              {title}
+            </p>
+            {subtitle && (
+              <p className="text-[10px] text-text-disabled mt-0.5">{subtitle}</p>
+            )}
+          </div>
+          {showLive && <LiveIndicator size="sm" />}
         </div>
         {icon && (
           <div className="text-text-muted">{icon}</div>

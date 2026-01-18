@@ -74,6 +74,7 @@ export default function ArchitecturePage() {
           value={healthData?.dashboard.count.toLocaleString() || '—'}
           icon={healthData?.dashboard.status === 'ok' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
           color={healthData?.dashboard.status === 'ok' ? 'success' : 'danger'}
+          showLive
         />
         <KpiCard
           title="Zones API"
@@ -81,6 +82,7 @@ export default function ArchitecturePage() {
           value={healthData?.zones.count.toLocaleString() || '—'}
           icon={healthData?.zones.status === 'ok' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
           color={healthData?.zones.status === 'ok' ? 'success' : 'danger'}
+          showLive
         />
         <KpiCard
           title="Opportunities API"
@@ -88,6 +90,7 @@ export default function ArchitecturePage() {
           value={healthData?.opportunities.count.toLocaleString() || '—'}
           icon={healthData?.opportunities.status === 'ok' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
           color={healthData?.opportunities.status === 'ok' ? 'success' : 'danger'}
+          showLive
         />
         <KpiCard
           title="Transactions API"
@@ -95,6 +98,7 @@ export default function ArchitecturePage() {
           value={healthData?.transactions.count.toLocaleString() || '—'}
           icon={healthData?.transactions.status === 'ok' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
           color={healthData?.transactions.status === 'ok' ? 'success' : 'danger'}
+          showLive
         />
       </KpiGrid>
 

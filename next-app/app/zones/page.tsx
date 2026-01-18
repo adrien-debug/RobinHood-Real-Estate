@@ -161,18 +161,21 @@ export default function ZonesPage() {
           subtitle={topPriceZone?.community || 'N/A'}
           value={topPriceZone ? Math.round(topPriceZone.avg_price_sqft).toLocaleString() : 'N/A'}
           color="success"
+          showLive
         />
         <KpiCard
           title="Top Volume Zone"
           subtitle={topVolumeZone?.community || 'N/A'}
           value={topVolumeZone?.transaction_count || 0}
           color="info"
+          showLive
         />
         <KpiCard
           title="Most Stable Zone"
           subtitle={lowestVolatilityZone?.community || 'N/A'}
           value={lowestVolatilityZone ? formatPercent((lowestVolatilityZone.volatility || 0) * 100) : 'N/A'}
           color="accent"
+          showLive
         />
       </div>
 

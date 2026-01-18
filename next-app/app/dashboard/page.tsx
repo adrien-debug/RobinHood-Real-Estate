@@ -251,28 +251,33 @@ export default function DashboardPage() {
           subtitle="Transactions"
           value={kpis.transactions_last_day}
           icon={<Building2 className="w-5 h-5" />}
+          showLive
         />
         <KpiCard
           title="7 Days"
           subtitle="Transactions"
           value={kpis.transactions_7d}
           icon={<TrendingUp className="w-5 h-5" />}
+          showLive
         />
         <KpiCard
           title="30 Days"
           subtitle="Transactions"
           value={kpis.transactions_30d}
+          showLive
         />
         <KpiCard
           title="Volume 30D"
           subtitle="AED"
           value={formatCompact(kpis.volume_30d)}
           icon={<DollarSign className="w-5 h-5" />}
+          showLive
         />
         <KpiCard
           title="Median Price"
           subtitle="AED/sqft"
           value={Math.round(kpis.median_price_sqft).toLocaleString()}
+          showLive
         />
         <KpiCard
           title="Trend 7D"
@@ -280,6 +285,7 @@ export default function DashboardPage() {
           value={formatPercent(kpis.variation_7d_pct, true)}
           trend={kpis.variation_7d_pct}
           color={kpis.variation_7d_pct > 0 ? 'success' : kpis.variation_7d_pct < 0 ? 'danger' : 'default'}
+          showLive
         />
       </KpiGrid>
 

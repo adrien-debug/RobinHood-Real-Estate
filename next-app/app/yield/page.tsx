@@ -107,24 +107,28 @@ export default function YieldPage() {
           value={formatPercent(summary.avg_yield)}
           icon={<Percent className="w-5 h-5" />}
           color="accent"
+          showLive
         />
         <KpiCard
           title="Maximum Yield"
           subtitle="Best performer"
           value={formatPercent(summary.max_yield)}
           color="success"
+          showLive
         />
         <KpiCard
           title="Minimum Yield"
           subtitle="Lowest"
           value={formatPercent(summary.min_yield)}
           color="warning"
+          showLive
         />
         <KpiCard
           title="Zones Analyzed"
           subtitle="With data"
           value={zones.length}
           icon={<Building2 className="w-5 h-5" />}
+          showLive
         />
       </KpiGrid>
 

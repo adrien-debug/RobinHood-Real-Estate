@@ -158,29 +158,34 @@ export default function RadarPage() {
           value={stats.total}
           icon={<Target className="w-5 h-5" />}
           color="accent"
+          showLive
         />
         <KpiCard
           title="FLIP"
           subtitle="Strategy"
           value={stats.by_strategy.FLIP || 0}
           color="success"
+          showLive
         />
         <KpiCard
           title="RENT"
           subtitle="Strategy"
           value={stats.by_strategy.RENT || 0}
           color="info"
+          showLive
         />
         <KpiCard
           title="Avg Score"
           subtitle="Quality"
           value={`${Math.round(stats.avg_score)}%`}
           color="success"
+          showLive
         />
         <KpiCard
           title="Avg Discount"
           subtitle="Below market"
           value={formatPercent(stats.avg_discount)}
+          showLive
         />
       </KpiGrid>
 
