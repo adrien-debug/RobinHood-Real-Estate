@@ -221,11 +221,16 @@ target_date = st.date_input("", value=get_dubai_today(), max_value=get_dubai_tod
 
 # Get data
 try:
-    with st.spinner(""):
+    with st.spinner("Loading data..."):
         data = DataRefresher.get_dashboard_data(target_date)
 except Exception as e:
     st.error(f"Error: {str(e)}")
     st.stop()
+
+# Indicateur source des données
+data_source = data.get('data_source', 'DATABASE')
+if data_source == 'API_LIVE':
+    st.info("📡 Données live depuis l'API Bayut (base de données non initialisée)")
 
 # === KPIs ROW - 6 symmetric cards (Transaction Focus) ===
 kpis = data.get('kpis') or {}

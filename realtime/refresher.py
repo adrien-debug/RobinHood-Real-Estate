@@ -2,6 +2,7 @@
 Refresher pour Streamlit - Dashboard Data Provider
 
 Fournit les données pour le dashboard avec cache intelligent.
+Fallback sur API live si base de données vide.
 """
 from datetime import date, timedelta
 from typing import Dict, Any, List
@@ -28,8 +29,18 @@ class DataRefresher:
             return cached
         
         # Récupérer les données enrichies
+        kpis = DataRefresher._get_kpis(target_date)
+        
+        # Si pas de données DB, essayer l'API live
+        if (kpis.get('transactions_30d') or 0) == 0:
+            logger.info("Base vide - récupération données API live")
+            live_data = DataRefresher._get_live_api_data(target_date)
+            if live_data:
+                cache.set(cache_key, live_data, ttl=300)  # Cache 5 min pour API
+                return live_data
+        
         data = {
-            'kpis': DataRefresher._get_kpis(target_date),
+            'kpis': kpis,
             'transaction_stats': DataRefresher._get_transaction_stats(target_date),
             'top_neighborhoods': DataRefresher._get_top_neighborhoods(target_date),
             'property_types': DataRefresher._get_property_types_breakdown(target_date),
@@ -42,6 +53,121 @@ class DataRefresher:
         cache.set(cache_key, data)
         
         return data
+    
+    @staticmethod
+    def _get_live_api_data(target_date: date) -> Dict[str, Any]:
+        """Récupérer les données directement depuis l'API Bayut"""
+        try:
+            from connectors.dld_transactions import DLDTransactionsConnector
+            from collections import defaultdict
+            
+            connector = DLDTransactionsConnector()
+            
+            # Récupérer 30 jours de transactions
+            end_date = target_date
+            start_date = target_date - timedelta(days=30)
+            
+            transactions = connector.fetch_transactions(start_date, end_date)
+            
+            if not transactions:
+                logger.warning("Aucune transaction récupérée depuis l'API")
+                return None
+            
+            logger.info(f"API live: {len(transactions)} transactions récupérées")
+            
+            # Calculer les KPIs depuis les données API
+            tx_today = [t for t in transactions if t.transaction_date == target_date]
+            tx_7d = [t for t in transactions if t.transaction_date >= target_date - timedelta(days=7)]
+            tx_30d = transactions
+            
+            # Prix moyen et médian
+            prices = [t.price_per_sqft for t in tx_30d if t.price_per_sqft and t.price_per_sqft > 0]
+            avg_price = sum(prices) / len(prices) if prices else 0
+            median_price = sorted(prices)[len(prices)//2] if prices else 0
+            
+            # Volume total
+            volumes = [float(t.price_aed) for t in tx_30d if t.price_aed]
+            total_volume = sum(volumes)
+            
+            # Top neighborhoods
+            neighborhood_stats = defaultdict(lambda: {'count': 0, 'prices': [], 'volume': 0})
+            for t in tx_30d:
+                if t.community:
+                    neighborhood_stats[t.community]['count'] += 1
+                    if t.price_per_sqft and t.price_per_sqft > 0:
+                        neighborhood_stats[t.community]['prices'].append(t.price_per_sqft)
+                    if t.price_aed:
+                        neighborhood_stats[t.community]['volume'] += float(t.price_aed)
+            
+            top_neighborhoods = []
+            for community, stats in sorted(neighborhood_stats.items(), key=lambda x: x[1]['count'], reverse=True)[:10]:
+                prices_list = stats['prices']
+                top_neighborhoods.append({
+                    'community': community,
+                    'transaction_count': stats['count'],
+                    'avg_price_sqft': sum(prices_list) / len(prices_list) if prices_list else 0,
+                    'median_price_sqft': sorted(prices_list)[len(prices_list)//2] if prices_list else 0,
+                    'total_volume': stats['volume'],
+                    'avg_area': 0
+                })
+            
+            # Property types (rooms_bucket)
+            rooms_stats = defaultdict(lambda: {'count': 0, 'prices': [], 'volume': 0})
+            for t in tx_30d:
+                bucket = t.rooms_bucket or 'Unknown'
+                rooms_stats[bucket]['count'] += 1
+                if t.price_per_sqft and t.price_per_sqft > 0:
+                    rooms_stats[bucket]['prices'].append(t.price_per_sqft)
+                if t.price_aed:
+                    rooms_stats[bucket]['volume'] += float(t.price_aed)
+            
+            by_rooms = []
+            for bucket, stats in sorted(rooms_stats.items(), key=lambda x: x[1]['count'], reverse=True):
+                prices_list = stats['prices']
+                by_rooms.append({
+                    'rooms_bucket': bucket,
+                    'count': stats['count'],
+                    'avg_price_sqft': sum(prices_list) / len(prices_list) if prices_list else 0,
+                    'avg_price': stats['volume'] / stats['count'] if stats['count'] else 0,
+                    'total_volume': stats['volume']
+                })
+            
+            # Variation 7J vs semaine précédente
+            tx_prev_7d = [t for t in transactions 
+                         if target_date - timedelta(days=14) <= t.transaction_date < target_date - timedelta(days=7)]
+            variation = ((len(tx_7d) - len(tx_prev_7d)) / len(tx_prev_7d) * 100) if tx_prev_7d else 0
+            
+            return {
+                'kpis': {
+                    'transactions_today': len(tx_today),
+                    'transactions_7d': len(tx_7d),
+                    'transactions_30d': len(tx_30d),
+                    'volume_today': sum(float(t.price_aed) for t in tx_today if t.price_aed),
+                    'volume_7d': sum(float(t.price_aed) for t in tx_7d if t.price_aed),
+                    'volume_30d': total_volume,
+                    'avg_price_sqft': avg_price,
+                    'median_price_sqft': median_price,
+                    'variation_7d_pct': variation,
+                    'opportunities_count': 0,
+                    'avg_opportunity_score': 0,
+                    'transactions_count': len(tx_30d)
+                },
+                'transaction_stats': {'daily_transactions': [], 'total_days': 30},
+                'top_neighborhoods': top_neighborhoods,
+                'property_types': {
+                    'by_rooms': by_rooms,
+                    'by_type': [],
+                    'by_offplan': []
+                },
+                'top_opportunities': [],
+                'regimes': [],
+                'brief': None,
+                'data_source': 'API_LIVE'
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur récupération API live: {e}")
+            return None
     
     @staticmethod
     def _get_kpis(target_date: date) -> Dict:
