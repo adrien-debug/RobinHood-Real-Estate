@@ -447,7 +447,10 @@ Propriétaire - Usage interne uniquement
 - **Nouveau** : `get_emaar_data()` - Fonction helper rapide
 - **Nouveau** : Liste de 40+ projets Emaar connus (Dubai Marina, Downtown, Creek Harbour, etc.)
 - **Nouveau** : Statistiques agrégées Emaar (volume, prix, projets)
-- **Doc** : Liste complète des plateformes connectées à Emaar
+- **Nouveau** : `test_emaar_data.py` - Script de test complet avec export JSON
+- **Doc** : `docs/emaar_data_sources.md` - Guide complet des plateformes Emaar
+- **Doc** : `EMAAR_INTEGRATION.md` - Résumé intégration en français
+- **Doc** : Liste complète des 11 plateformes connectées à Emaar
 
 ### v1.3.0 (2026-01-18) - Multi-API Integration
 - **Nouveau** : PropertyFinder API (500K+ listings UAE)
