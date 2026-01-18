@@ -4,6 +4,7 @@
 
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- Schema (évite les conflits avec tables existantes)
@@ -13,8 +14,8 @@ SET search_path TO robin, public;
 -- ====================================================================
 -- TRANSACTIONS (DLD)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS transactions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_id VARCHAR(255) UNIQUE NOT NULL,
     transaction_date DATE NOT NULL,
     transaction_type VARCHAR(50), -- sale, mortgage, gift
@@ -46,18 +47,18 @@ CREATE TABLE IF NOT EXISTS transactions (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_transaction_date ON transactions (transaction_date DESC);
-CREATE INDEX IF NOT EXISTS idx_community ON transactions (community);
-CREATE INDEX IF NOT EXISTS idx_project ON transactions (project);
-CREATE INDEX IF NOT EXISTS idx_building ON transactions (building);
-CREATE INDEX IF NOT EXISTS idx_rooms_bucket ON transactions (rooms_bucket);
-CREATE INDEX IF NOT EXISTS idx_price_per_sqft ON transactions (price_per_sqft);
+CREATE INDEX IF NOT EXISTS idx_transaction_date ON robin.transactions (transaction_date DESC);
+CREATE INDEX IF NOT EXISTS idx_community ON robin.transactions (community);
+CREATE INDEX IF NOT EXISTS idx_project ON robin.transactions (project);
+CREATE INDEX IF NOT EXISTS idx_building ON robin.transactions (building);
+CREATE INDEX IF NOT EXISTS idx_rooms_bucket ON robin.transactions (rooms_bucket);
+CREATE INDEX IF NOT EXISTS idx_price_per_sqft ON robin.transactions (price_per_sqft);
 
 -- ====================================================================
 -- MORTGAGES (DLD)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS mortgages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.mortgages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     mortgage_id VARCHAR(255) UNIQUE NOT NULL,
     mortgage_date DATE NOT NULL,
     
@@ -75,14 +76,14 @@ CREATE TABLE IF NOT EXISTS mortgages (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_mortgage_date ON mortgages (mortgage_date DESC);
-CREATE INDEX IF NOT EXISTS idx_community_mortgage ON mortgages (community);
+CREATE INDEX IF NOT EXISTS idx_mortgage_date ON robin.mortgages (mortgage_date DESC);
+CREATE INDEX IF NOT EXISTS idx_community_mortgage ON robin.mortgages (community);
 
 -- ====================================================================
 -- RENTAL INDEX (DLD)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS rental_index (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.rental_index (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     period_date DATE NOT NULL,
     
     -- Location
@@ -104,14 +105,14 @@ CREATE TABLE IF NOT EXISTS rental_index (
     UNIQUE (period_date, community, project, property_type, rooms_bucket)
 );
 
-CREATE INDEX IF NOT EXISTS idx_rental_period ON rental_index (period_date DESC);
-CREATE INDEX IF NOT EXISTS idx_rental_community ON rental_index (community);
+CREATE INDEX IF NOT EXISTS idx_rental_period ON robin.rental_index (period_date DESC);
+CREATE INDEX IF NOT EXISTS idx_rental_community ON robin.rental_index (community);
 
 -- ====================================================================
 -- DEVELOPERS PIPELINE (supply future)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS developers_pipeline (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.developers_pipeline (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_name VARCHAR(255) NOT NULL,
     developer VARCHAR(255),
     
@@ -136,14 +137,14 @@ CREATE TABLE IF NOT EXISTS developers_pipeline (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_handover_date ON developers_pipeline (expected_handover_date);
-CREATE INDEX IF NOT EXISTS idx_developer_community ON developers_pipeline (community);
+CREATE INDEX IF NOT EXISTS idx_handover_date ON robin.developers_pipeline (expected_handover_date);
+CREATE INDEX IF NOT EXISTS idx_developer_community ON robin.developers_pipeline (community);
 
 -- ====================================================================
 -- LISTINGS (annonces autorisées)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS listings (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.listings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     listing_id VARCHAR(255) UNIQUE NOT NULL,
     listing_date DATE NOT NULL,
     
@@ -175,15 +176,15 @@ CREATE TABLE IF NOT EXISTS listings (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_listing_date ON listings (listing_date DESC);
-CREATE INDEX IF NOT EXISTS idx_listing_community ON listings (community);
-CREATE INDEX IF NOT EXISTS idx_listing_status ON listings (status);
+CREATE INDEX IF NOT EXISTS idx_listing_date ON robin.listings (listing_date DESC);
+CREATE INDEX IF NOT EXISTS idx_listing_community ON robin.listings (community);
+CREATE INDEX IF NOT EXISTS idx_listing_status ON robin.listings (status);
 
 -- ====================================================================
 -- MARKET BASELINES (rolling metrics)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS market_baselines (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.market_baselines (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     calculation_date DATE NOT NULL,
     
     -- Scope
@@ -216,14 +217,14 @@ CREATE TABLE IF NOT EXISTS market_baselines (
     UNIQUE (calculation_date, community, project, building, rooms_bucket, window_days)
 );
 
-CREATE INDEX IF NOT EXISTS idx_baseline_date ON market_baselines (calculation_date DESC);
-CREATE INDEX IF NOT EXISTS idx_baseline_scope ON market_baselines (community, project, building);
+CREATE INDEX IF NOT EXISTS idx_baseline_date ON robin.market_baselines (calculation_date DESC);
+CREATE INDEX IF NOT EXISTS idx_baseline_scope ON robin.market_baselines (community, project, building);
 
 -- ====================================================================
 -- MARKET REGIMES (classification institutionnelle)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS market_regimes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.market_regimes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     regime_date DATE NOT NULL,
     
     -- Scope
@@ -245,20 +246,20 @@ CREATE TABLE IF NOT EXISTS market_regimes (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_regime_date ON market_regimes (regime_date DESC);
-CREATE INDEX IF NOT EXISTS idx_regime_type ON market_regimes (regime);
-CREATE INDEX IF NOT EXISTS idx_regime_scope ON market_regimes (community, project);
+CREATE INDEX IF NOT EXISTS idx_regime_date ON robin.market_regimes (regime_date DESC);
+CREATE INDEX IF NOT EXISTS idx_regime_type ON robin.market_regimes (regime);
+CREATE INDEX IF NOT EXISTS idx_regime_scope ON robin.market_regimes (community, project);
 
 -- ====================================================================
 -- OPPORTUNITIES (deals détectés)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS opportunities (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.opportunities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     detection_date DATE NOT NULL,
     
     -- Property reference
-    transaction_id UUID REFERENCES transactions(id),
-    listing_id UUID REFERENCES listings(id),
+    transaction_id UUID REFERENCES robin.transactions(id),
+    listing_id UUID REFERENCES robin.listings(id),
     
     -- Location
     community VARCHAR(255),
@@ -292,16 +293,16 @@ CREATE TABLE IF NOT EXISTS opportunities (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_opp_date ON opportunities (detection_date DESC);
-CREATE INDEX IF NOT EXISTS idx_opp_score ON opportunities (global_score DESC);
-CREATE INDEX IF NOT EXISTS idx_opp_strategy ON opportunities (recommended_strategy);
-CREATE INDEX IF NOT EXISTS idx_opp_status ON opportunities (status);
+CREATE INDEX IF NOT EXISTS idx_opp_date ON robin.opportunities (detection_date DESC);
+CREATE INDEX IF NOT EXISTS idx_opp_score ON robin.opportunities (global_score DESC);
+CREATE INDEX IF NOT EXISTS idx_opp_strategy ON robin.opportunities (recommended_strategy);
+CREATE INDEX IF NOT EXISTS idx_opp_status ON robin.opportunities (status);
 
 -- ====================================================================
 -- ALERTS
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS alerts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.alerts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     alert_date TIMESTAMP DEFAULT NOW(),
     
     -- Alert type
@@ -313,7 +314,7 @@ CREATE TABLE IF NOT EXISTS alerts (
     message TEXT,
     
     -- Reference
-    opportunity_id UUID REFERENCES opportunities(id),
+    opportunity_id UUID REFERENCES robin.opportunities(id),
     community VARCHAR(255),
     
     -- Status
@@ -324,15 +325,15 @@ CREATE TABLE IF NOT EXISTS alerts (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_alert_date ON alerts (alert_date DESC);
-CREATE INDEX IF NOT EXISTS idx_alert_type ON alerts (alert_type);
-CREATE INDEX IF NOT EXISTS idx_alert_status ON alerts (is_read, is_dismissed);
+CREATE INDEX IF NOT EXISTS idx_alert_date ON robin.alerts (alert_date DESC);
+CREATE INDEX IF NOT EXISTS idx_alert_type ON robin.alerts (alert_type);
+CREATE INDEX IF NOT EXISTS idx_alert_status ON robin.alerts (is_read, is_dismissed);
 
 -- ====================================================================
 -- DAILY BRIEFS (CIO Agent)
 -- ====================================================================
-CREATE TABLE IF NOT EXISTS daily_briefs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS robin.daily_briefs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     brief_date DATE UNIQUE NOT NULL,
     
     -- Content
@@ -348,44 +349,43 @@ CREATE TABLE IF NOT EXISTS daily_briefs (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_brief_date ON daily_briefs (brief_date DESC);
+CREATE INDEX IF NOT EXISTS idx_brief_date ON robin.daily_briefs (brief_date DESC);
 
 -- ====================================================================
 -- VIEWS
 -- ====================================================================
 
 -- Vue : transactions récentes avec contexte marché
-CREATE OR REPLACE VIEW v_recent_transactions AS
+CREATE OR REPLACE VIEW robin.v_recent_transactions AS
 SELECT 
     t.*,
     mb.median_price_per_sqft as market_median_30d,
     ((t.price_per_sqft - mb.median_price_per_sqft) / mb.median_price_per_sqft * 100) as discount_pct,
     mr.regime as market_regime
-FROM transactions t
-LEFT JOIN market_baselines mb ON 
+FROM robin.transactions t
+LEFT JOIN robin.market_baselines mb ON 
     t.community = mb.community 
     AND t.rooms_bucket = mb.rooms_bucket
     AND mb.window_days = 30
     AND mb.calculation_date = CURRENT_DATE
-LEFT JOIN market_regimes mr ON
+LEFT JOIN robin.market_regimes mr ON
     t.community = mr.community
     AND mr.regime_date = CURRENT_DATE
 WHERE t.transaction_date >= CURRENT_DATE - INTERVAL '7 days'
 ORDER BY t.transaction_date DESC;
 
 -- Vue : opportunités actives avec détails
-CREATE OR REPLACE VIEW v_active_opportunities AS
+CREATE OR REPLACE VIEW robin.v_active_opportunities AS
 SELECT 
     o.*,
     t.transaction_date,
     t.property_type,
     t.area_sqft,
-    t.building,
     mr.regime as current_regime,
     mr.confidence_score as regime_confidence
-FROM opportunities o
-LEFT JOIN transactions t ON o.transaction_id = t.id
-LEFT JOIN market_regimes mr ON 
+FROM robin.opportunities o
+LEFT JOIN robin.transactions t ON o.transaction_id = t.id
+LEFT JOIN robin.market_regimes mr ON 
     o.community = mr.community 
     AND mr.regime_date = CURRENT_DATE
 WHERE o.status = 'active'

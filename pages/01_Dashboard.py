@@ -434,19 +434,19 @@ try:
     # Get zone performance data
     zone_data = db.execute_query("""
         SELECT
-            community,
-            AVG(price_per_sqft) as avg_price_sqft,
+            t.community,
+            AVG(t.price_per_sqft) as avg_price_sqft,
             COUNT(*) as transaction_count,
-            AVG(discount_pct) as avg_discount,
+            AVG(o.discount_pct) as avg_discount,
             AVG(
-                CASE WHEN discount_pct > 0 THEN 80 + (discount_pct * 0.5)
-                     ELSE 60 - (ABS(discount_pct) * 0.3) END
+                CASE WHEN o.discount_pct > 0 THEN 80 + (o.discount_pct * 0.5)
+                     ELSE 60 - (ABS(COALESCE(o.discount_pct, 0)) * 0.3) END
             ) as opportunity_score
         FROM transactions t
         LEFT JOIN opportunities o ON t.community = o.community
         WHERE t.transaction_date >= CURRENT_DATE - INTERVAL '90 days'
-        AND community IS NOT NULL
-        GROUP BY community
+        AND t.community IS NOT NULL
+        GROUP BY t.community
         HAVING COUNT(*) >= 3
         ORDER BY avg_price_sqft DESC
         LIMIT 20
