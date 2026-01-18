@@ -71,12 +71,13 @@ dubai-real-estate-intelligence/
 │
 ├── pages/                          # Pages Streamlit
 │   ├── 01_Dashboard.py             # Dashboard + Brief CIO
-│   ├── 02_Ventes_du_jour.py        # Transactions récentes
-│   ├── 03_Zones_Projets_Buildings.py # Analyse par zone
-│   ├── 04_Deal_Radar.py            # Opportunités scorées
-│   ├── 05_Location_Yield.py        # Rendements locatifs
-│   ├── 06_Alertes.py               # Alertes actives
-│   └── 07_Admin_Data.py            # Administration
+│   ├── 02_Sales.py                 # Transactions récentes
+│   ├── 03_Zones.py                 # Analyse par zone
+│   ├── 04_Radar.py                 # Opportunités scorées
+│   ├── 05_Yield.py                 # Rendements locatifs
+│   ├── 06_Alerts.py                # Alertes actives
+│   ├── 07_Admin.py                 # Administration
+│   └── 08_Market_Insights.py       # Intelligence marché
 │
 ├── sql/                            # Schémas SQL
 │   ├── schema.sql                  # Schéma principal
@@ -186,12 +187,13 @@ Accès : `http://localhost:8501`
 
 **Pages disponibles :**
 1. **Dashboard** : KPIs + Brief CIO + Top opportunités
-2. **Ventes du jour** : Transactions récentes avec filtres
-3. **Zones / Buildings** : Analyse par localisation + régimes
-4. **Deal Radar** : Opportunités scorées par stratégie
-5. **Location & Yield** : Rendements locatifs
-6. **Alertes** : Notifications actives
+2. **Sales** : Transactions récentes avec filtres
+3. **Zones** : Analyse par localisation + régimes
+4. **Radar** : Opportunités scorées par stratégie
+5. **Yield** : Rendements locatifs
+6. **Alerts** : Notifications actives
 7. **Admin** : Gestion des données + pipeline
+8. **Insights** : Intelligence marché macro
 
 ### Pipeline quotidien automatique
 
