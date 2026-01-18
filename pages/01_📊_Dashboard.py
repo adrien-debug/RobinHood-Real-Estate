@@ -1,15 +1,19 @@
 """
-Dashboard - Tech Company Style
-Clean, data-focused, professional with symmetric layout
+Dashboard - Bloomberg-Style Real Estate Intelligence
+Advanced analytics with projections, predictions, and market insights
 """
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 import plotly.graph_objects as go
-from datetime import date, timedelta
+import plotly.express as px
+from datetime import date, timedelta, datetime
+import numpy as np
+import pandas as pd
 from core.utils import get_dubai_today, format_currency, format_percentage
 from realtime.refresher import DataRefresher
 from core.styles import apply_plecto_style, kpi_card
-import pandas as pd
+from core.db import db
+import math
 
 st.set_page_config(page_title="Dashboard", page_icon="", layout="wide", initial_sidebar_state="collapsed")
 
@@ -18,6 +22,185 @@ st_autorefresh(interval=5 * 60 * 1000, key="dashboard_refresh")
 
 # Apply Tech style
 apply_plecto_style()
+
+# === ADVANCED ANALYTICS FUNCTIONS ===
+
+def calculate_market_rsi(prices, period=14):
+    """Calculate RSI-like indicator for market momentum"""
+    if len(prices) < period + 1:
+        return 50
+
+    gains = []
+    losses = []
+
+    for i in range(1, len(prices)):
+        change = prices[i] - prices[i-1]
+        if change > 0:
+            gains.append(change)
+            losses.append(0)
+        else:
+            gains.append(0)
+            losses.append(abs(change))
+
+    avg_gain = sum(gains[-period:]) / period if gains else 0
+    avg_loss = sum(losses[-period:]) / period if losses else 0
+
+    if avg_loss == 0:
+        return 100
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def generate_price_projections(historical_prices, periods=6):
+    """Generate 3-6 month price projections using trend analysis"""
+    if len(historical_prices) < 3:
+        return [historical_prices[-1]] * periods if historical_prices else [0] * periods
+
+    # Calculate trend using linear regression
+    x = np.arange(len(historical_prices))
+    y = np.array(historical_prices)
+
+    # Simple trend calculation
+    slope = np.polyfit(x, y, 1)[0]
+
+    # Add some volatility based on historical data
+    volatility = np.std(np.diff(y)) if len(y) > 1 else y[-1] * 0.05
+
+    projections = []
+    last_price = y[-1]
+
+    for i in range(1, periods + 1):
+        # Trend component
+        trend_projection = last_price + (slope * i)
+
+        # Add seasonal adjustment (simplified)
+        seasonal_factor = 1 + 0.02 * math.sin(2 * math.pi * i / 12)  # Monthly seasonality
+
+        # Add random component
+        random_factor = np.random.normal(0, volatility * 0.1)
+
+        projected_price = trend_projection * seasonal_factor + random_factor
+        projections.append(max(0, projected_price))  # No negative prices
+
+    return projections
+
+def create_market_heatmap(zone_data):
+    """Create interactive heatmap for zone analysis"""
+    if not zone_data:
+        return None
+
+    # Prepare data for heatmap
+    zones = []
+    prices = []
+    volumes = []
+    scores = []
+
+    for zone in zone_data[:20]:  # Top 20 zones
+        zones.append(zone.get('community', 'Unknown'))
+        prices.append(zone.get('avg_price_sqft', 0))
+        volumes.append(zone.get('transaction_count', 0))
+        scores.append(zone.get('opportunity_score', 50))
+
+    # Normalize data for visualization
+    max_price = max(prices) if prices else 1
+    max_volume = max(volumes) if volumes else 1
+
+    norm_prices = [p/max_price for p in prices]
+    norm_volumes = [v/max_volume for v in volumes]
+
+    # Create heatmap data
+    heatmap_data = []
+    for i, zone in enumerate(zones):
+        heatmap_data.append({
+            'Zone': zone,
+            'Price': prices[i],
+            'Volume': volumes[i],
+            'Score': scores[i],
+            'Price_Norm': norm_prices[i],
+            'Volume_Norm': norm_volumes[i]
+        })
+
+    return pd.DataFrame(heatmap_data)
+
+def analyze_market_regime(prices, volumes=None):
+    """Analyze current market regime using technical indicators"""
+    if len(prices) < 10:
+        return "INSUFFICIENT_DATA"
+
+    # Calculate moving averages
+    ma_short = np.mean(prices[-5:]) if len(prices) >= 5 else np.mean(prices)
+    ma_long = np.mean(prices[-20:]) if len(prices) >= 20 else np.mean(prices)
+
+    # Calculate momentum
+    momentum = (prices[-1] - prices[-5]) / prices[-5] if len(prices) >= 5 else 0
+
+    # Volume analysis (if available)
+    volume_trend = 0
+    if volumes and len(volumes) >= 5:
+        volume_trend = (volumes[-1] - np.mean(volumes[-5:])) / np.mean(volumes[-5:])
+
+    # Determine regime
+    if ma_short > ma_long * 1.02 and momentum > 0.02:
+        return "BULLISH"
+    elif ma_short < ma_long * 0.98 and momentum < -0.02:
+        return "BEARISH"
+    elif abs(momentum) < 0.01 and abs(ma_short - ma_long) / ma_long < 0.01:
+        return "SIDEWAYS"
+    else:
+        return "NEUTRAL"
+
+def generate_investment_recommendations(market_data, projections):
+    """Generate Bloomberg-style investment recommendations"""
+    recommendations = []
+
+    if not market_data or not projections:
+        return recommendations
+
+    # Current market analysis
+    current_price = projections[0] if projections else 0
+    projected_3m = projections[2] if len(projections) > 2 else current_price
+    projected_6m = projections[5] if len(projections) > 5 else current_price
+
+    # Price momentum
+    price_change_3m = ((projected_3m - current_price) / current_price) * 100 if current_price > 0 else 0
+    price_change_6m = ((projected_6m - current_price) / current_price) * 100 if current_price > 0 else 0
+
+    # Generate recommendations based on projections
+    if price_change_6m > 10:
+        recommendations.append({
+            'type': 'BUY',
+            'strength': 'STRONG',
+            'timeframe': '6M',
+            'reason': f'Projected +{price_change_6m:.1f}% return in 6 months',
+            'action': 'Accumulate positions, focus on undervalued assets'
+        })
+    elif price_change_6m > 5:
+        recommendations.append({
+            'type': 'BUY',
+            'strength': 'MODERATE',
+            'timeframe': '6M',
+            'reason': f'Moderate upside of +{price_change_6m:.1f}% expected',
+            'action': 'Selective buying in high-quality areas'
+        })
+    elif price_change_6m < -5:
+        recommendations.append({
+            'type': 'HOLD',
+            'strength': 'CAUTION',
+            'timeframe': '6M',
+            'reason': f'Downside risk of {price_change_6m:.1f}% projected',
+            'action': 'Wait for stabilization, consider defensive positions'
+        })
+    else:
+        recommendations.append({
+            'type': 'HOLD',
+            'strength': 'NEUTRAL',
+            'timeframe': '6M',
+            'reason': f'Stable market with {price_change_6m:+.1f}% expected change',
+            'action': 'Maintain current positions, monitor closely'
+        })
+
+    return recommendations
 
 # Sidebar with icons
 with st.sidebar:
@@ -70,6 +253,95 @@ with col5:
 
 with col6:
     st.markdown(kpi_card("Yield", "Average", "7.2%", "accent"), unsafe_allow_html=True)
+
+st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+
+# === MARKET PROJECTIONS & PREDICTIONS ===
+st.markdown('<div class="section-title">Market Projections & Predictions</div>', unsafe_allow_html=True)
+
+# Get historical data for projections
+try:
+    historical_data = db.execute_query("""
+        SELECT
+            DATE_TRUNC('month', transaction_date) as month,
+            AVG(price_per_sqft) as avg_price,
+            COUNT(*) as volume
+        FROM transactions
+        WHERE transaction_date >= CURRENT_DATE - INTERVAL '12 months'
+        GROUP BY DATE_TRUNC('month', transaction_date)
+        ORDER BY month
+    """)
+
+    if historical_data:
+        # Extract price series for analysis
+        prices = [d['avg_price'] for d in historical_data if d['avg_price']]
+        volumes = [d['volume'] for d in historical_data if d['volume']]
+
+        # Generate projections
+        price_projections = generate_price_projections(prices[-6:], 6)  # Last 6 months for trend
+        market_regime = analyze_market_regime(prices, volumes)
+
+        # Create projection chart
+        months = ['Current', '1M', '2M', '3M', '4M', '5M', '6M']
+        current_price = prices[-1] if prices else 0
+        projection_values = [current_price] + price_projections
+
+        fig_proj = go.Figure()
+
+        # Historical data
+        fig_proj.add_trace(go.Scatter(
+            x=list(range(len(prices))),
+            y=prices,
+            mode='lines+markers',
+            name='Historical',
+            line=dict(color='#6B7280', width=2),
+            marker=dict(size=6)
+        ))
+
+        # Projections
+        fig_proj.add_trace(go.Scatter(
+            x=list(range(len(prices)-1, len(prices)+len(price_projections))),
+            y=projection_values,
+            mode='lines+markers',
+            name='Projections',
+            line=dict(color='#00D9A3', width=3, dash='dash'),
+            marker=dict(size=8, symbol='diamond')
+        ))
+
+        fig_proj.update_layout(
+            title=dict(text=f'Market Price Projections - Regime: {market_regime}', font=dict(size=16, color='#FFFFFF')),
+            height=300, margin=dict(l=20, r=20, t=50, b=20),
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)', size=11),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Months'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='AED/sqft'),
+            showlegend=True,
+            legend=dict(x=0.02, y=0.98)
+        )
+
+        st.plotly_chart(fig_proj, use_container_width=True)
+
+        # Projection metrics
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+
+        with col_p1:
+            rsi = calculate_market_rsi(prices)
+            st.markdown(kpi_card("Market RSI", "Momentum", f"{rsi:.0f}", "green" if rsi > 60 else "red" if rsi < 40 else "accent"), unsafe_allow_html=True)
+
+        with col_p2:
+            change_3m = ((price_projections[2] - current_price) / current_price * 100) if current_price > 0 else 0
+            st.markdown(kpi_card("3M Projection", "Price Change", f"{change_3m:+.1f}%", "green" if change_3m > 0 else "red"), unsafe_allow_html=True)
+
+        with col_p3:
+            change_6m = ((price_projections[5] - current_price) / current_price * 100) if current_price > 0 else 0
+            st.markdown(kpi_card("6M Projection", "Price Change", f"{change_6m:+.1f}%", "green" if change_6m > 0 else "red"), unsafe_allow_html=True)
+
+        with col_p4:
+            regime_color = {'BULLISH': 'green', 'BEARISH': 'red', 'SIDEWAYS': 'accent', 'NEUTRAL': 'blue'}.get(market_regime, 'accent')
+            st.markdown(kpi_card("Market Regime", "Current", market_regime, regime_color), unsafe_allow_html=True)
+
+except Exception as e:
+    st.warning(f"Could not generate projections: {str(e)}")
 
 st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
@@ -154,6 +426,94 @@ with col_c:
         st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+
+# === MARKET HEATMAP ===
+st.markdown('<div class="section-title">Market Heatmap Analysis</div>', unsafe_allow_html=True)
+
+try:
+    # Get zone performance data
+    zone_data = db.execute_query("""
+        SELECT
+            community,
+            AVG(price_per_sqft) as avg_price_sqft,
+            COUNT(*) as transaction_count,
+            AVG(discount_pct) as avg_discount,
+            AVG(
+                CASE WHEN discount_pct > 0 THEN 80 + (discount_pct * 0.5)
+                     ELSE 60 - (ABS(discount_pct) * 0.3) END
+            ) as opportunity_score
+        FROM transactions t
+        LEFT JOIN dld_opportunities o ON t.community = o.community
+        WHERE t.transaction_date >= CURRENT_DATE - INTERVAL '90 days'
+        AND community IS NOT NULL
+        GROUP BY community
+        HAVING COUNT(*) >= 3
+        ORDER BY avg_price_sqft DESC
+        LIMIT 20
+    """)
+
+    if zone_data:
+        heatmap_df = create_market_heatmap(zone_data)
+
+        # Create interactive heatmap
+        fig_heatmap = px.scatter(
+            heatmap_df,
+            x='Price',
+            y='Volume',
+            size='Score',
+            color='Score',
+            hover_name='Zone',
+            size_max=50,
+            color_continuous_scale=['#EF4444', '#F59E0B', '#10B981'],
+            title='Zone Performance Heatmap'
+        )
+
+        fig_heatmap.update_layout(
+            height=350,
+            margin=dict(l=20, r=20, t=50, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)', size=11),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Avg Price (AED/sqft)'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Transaction Volume'),
+            coloraxis_colorbar=dict(
+                title="Score",
+                tickvals=[40, 60, 80],
+                ticktext=["Low", "Medium", "High"]
+            )
+        )
+
+        fig_heatmap.update_traces(
+            hovertemplate='<b>%{hovertext}</b><br>Price: %{x:,.0f} AED/sqft<br>Volume: %{y}<br>Score: %{marker.color:.0f}'
+        )
+
+        st.plotly_chart(fig_heatmap, use_container_width=True)
+
+        # Top performing zones table
+        col_h1, col_h2 = st.columns(2)
+
+        with col_h1:
+            st.markdown('<div class="section-title" style="font-size: 0.9rem;">Top Value Zones</div>', unsafe_allow_html=True)
+            top_value = heatmap_df.nlargest(5, 'Score')[['Zone', 'Price', 'Score']].round(0)
+            st.dataframe(
+                top_value,
+                use_container_width=True,
+                hide_index=True,
+                height=180,
+                column_config={
+                    'Score': st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.0f")
+                }
+            )
+
+        with col_h2:
+            st.markdown('<div class="section-title" style="font-size: 0.9rem;">High Volume Zones</div>', unsafe_allow_html=True)
+            top_volume = heatmap_df.nlargest(5, 'Volume')[['Zone', 'Volume', 'Price']].round({'Volume': 0, 'Price': 0})
+            st.dataframe(top_volume, use_container_width=True, hide_index=True, height=180)
+
+except Exception as e:
+    st.warning(f"Could not generate heatmap: {str(e)}")
+
+st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
 # === ROW 3: 2 symmetric columns - Table + Regimes/Brief ===
 col_left, col_right = st.columns(2)
@@ -309,9 +669,62 @@ with col_4:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# === ROW 5: AI INSIGHTS ===
+# === INVESTMENT RECOMMENDATIONS & AI INSIGHTS ===
 st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
-st.markdown('<div class="section-title">AI Insights</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Investment Recommendations & AI Insights</div>', unsafe_allow_html=True)
+
+# Generate investment recommendations
+try:
+    if 'price_projections' in locals() and price_projections:
+        recommendations = generate_investment_recommendations(data, price_projections)
+
+        if recommendations:
+            st.markdown('<div class="section-subtitle">BLOOMBERG-STYLE RECOMMENDATIONS</div>', unsafe_allow_html=True)
+
+            rec_cols = st.columns(len(recommendations))
+            for i, rec in enumerate(recommendations):
+                with rec_cols[i]:
+                    color_map = {
+                        'BUY': '#10B981',
+                        'HOLD': '#F59E0B',
+                        'SELL': '#EF4444'
+                    }
+                    strength_colors = {
+                        'STRONG': '#10B981',
+                        'MODERATE': '#3B82F6',
+                        'CAUTION': '#F59E0B',
+                        'NEUTRAL': '#6B7280'
+                    }
+
+                    st.markdown(f"""
+                    <div style="
+                        background: linear-gradient(135deg, rgba(19,29,50,0.95) 0%, rgba(15,26,46,0.95) 100%);
+                        border-radius: 12px;
+                        padding: 1.5rem;
+                        border-left: 4px solid {color_map.get(rec['type'], '#6B7280')};
+                        height: 220px;
+                        display: flex;
+                        flex-direction: column;
+                    ">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+                            <span style="font-size: 1.5rem;">
+                                {'📈' if rec['type'] == 'BUY' else '⏸️' if rec['type'] == 'HOLD' else '📉'}
+                            </span>
+                            <span style="color: {color_map.get(rec['type'], '#6B7280')}; font-weight: 700; font-size: 1rem;">{rec['type']} ({rec['strength']})</span>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">{rec['timeframe']}</span>
+                        </div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 0.85rem; line-height: 1.4; flex: 1;">
+                            <b>{rec['reason']}</b><br>{rec['action']}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+
+except Exception as e:
+    pass
+
+st.markdown('<div class="section-subtitle">AI MARKET INSIGHTS</div>', unsafe_allow_html=True)
 
 # Generate AI insights based on data
 def generate_ai_insights(opps, kpis_data, brief_data):
