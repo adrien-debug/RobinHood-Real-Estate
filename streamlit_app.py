@@ -40,25 +40,15 @@ if is_cloud and not is_configured:
     st.stop()
 
 # Logo SVG Robin
-ROBIN_LOGO = '''
-<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="24" r="22" stroke="#00D9A3" stroke-width="2" fill="none"/>
-    <path d="M14 32 L24 16 L34 32" stroke="#00D9A3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <path d="M18 26 L24 20 L30 26" stroke="#00D9A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="24" cy="32" r="2" fill="#00D9A3"/>
-</svg>
-'''
+ROBIN_LOGO = '<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" stroke="#00D9A3" stroke-width="2" fill="none"/><path d="M14 32 L24 16 L34 32" stroke="#00D9A3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 26 L24 20 L30 26" stroke="#00D9A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="24" cy="32" r="2" fill="#00D9A3"/></svg>'
 
 # Header with logo
-st.markdown(f"""
-<div style="text-align: center; padding: 2rem 0;">
-    <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
-        {ROBIN_LOGO}
-    </div>
-    <div style="font-size: 2.5rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Robin</div>
-    <div style="font-size: 1rem; color: rgba(255,255,255,0.5); letter-spacing: 0.05em;">DUBAI REAL ESTATE INTELLIGENCE</div>
-</div>
-""", unsafe_allow_html=True)
+header_html = f'''<div style="text-align: center; padding: 2rem 0;">
+<div style="display: flex; justify-content: center; margin-bottom: 1rem;">{ROBIN_LOGO}</div>
+<div style="font-size: 2.5rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Robin</div>
+<div style="font-size: 1rem; color: rgba(255,255,255,0.5); letter-spacing: 0.05em;">DUBAI REAL ESTATE INTELLIGENCE</div>
+</div>'''
+st.markdown(header_html, unsafe_allow_html=True)
 
 # Custom CSS for nav buttons with icons
 st.markdown("""
