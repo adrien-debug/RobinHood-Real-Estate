@@ -5,5 +5,13 @@ secondaryBackgroundColor = "#131D32"
 textColor = "#FFFFFF"
 font = "sans serif"
 
+[theme.sidebar]
+backgroundColor = "#0F1A2E"
+secondaryBackgroundColor = "#131D32"
+textColor = "#FFFFFF"
+widgetBackgroundColor = "#131D32"
+widgetBorderColor = "rgba(255,255,255,0.1)"
+skeletonBackgroundColor = "rgba(255,255,255,0.1)"
+
 [browser]
 gatherUsageStats = false

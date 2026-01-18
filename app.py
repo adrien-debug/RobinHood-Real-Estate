@@ -21,26 +21,40 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
     }
     
-    /* Sidebar styling */
+    /* Sidebar styling - ensure all colors are properly defined */
     [data-testid="stSidebar"] {
         background: #0F1A2E !important;
         border-right: 1px solid rgba(255,255,255,0.08) !important;
     }
-    
+
     [data-testid="stSidebarNav"] a {
         color: rgba(255,255,255,0.7) !important;
+        background-color: transparent !important;
         border-radius: 8px !important;
         padding: 0.8rem !important;
+        border: 1px solid transparent !important;
     }
-    
+
     [data-testid="stSidebarNav"] a:hover {
         color: #00D9A3 !important;
-        background: rgba(0, 217, 163, 0.15) !important;
+        background-color: rgba(0, 217, 163, 0.15) !important;
+        border-color: rgba(0, 217, 163, 0.3) !important;
     }
-    
+
     [data-testid="stSidebarNav"] a[aria-current="page"] {
-        background: rgba(0, 217, 163, 0.2) !important;
+        background-color: rgba(0, 217, 163, 0.2) !important;
         color: #00D9A3 !important;
+        border-color: #00D9A3 !important;
+    }
+
+    /* Fix for Streamlit theme colors */
+    [data-testid="stSidebar"] [data-testid="stWidget"] {
+        background-color: #131D32 !important;
+        border-color: rgba(255,255,255,0.1) !important;
+    }
+
+    [data-testid="stSidebar"] .stSkeleton {
+        background-color: rgba(255,255,255,0.1) !important;
     }
     
     .main-title {
