@@ -751,6 +751,7 @@ with col_3:
 with col_4:
     st.markdown('<div class="section-title" style="font-size: 0.85rem;">Quality Gauge</div>', unsafe_allow_html=True)
     
+    avg_score = kpis.get('avg_opportunity_score') or 0
     avg = avg_score if avg_score else 75
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
