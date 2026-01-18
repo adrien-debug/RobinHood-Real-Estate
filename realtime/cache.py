@@ -28,9 +28,18 @@ class InMemoryCache:
         logger.debug(f"Cache HIT : {key}")
         return entry['value']
     
-    def set(self, key: str, value: Any):
-        """Stocker une valeur dans le cache"""
-        expires_at = datetime.now() + timedelta(minutes=self.ttl_minutes)
+    def set(self, key: str, value: Any, ttl: Optional[int] = None):
+        """Stocker une valeur dans le cache
+        
+        Args:
+            key: Clé du cache
+            value: Valeur à stocker
+            ttl: TTL en secondes (optionnel, sinon utilise ttl_minutes par défaut)
+        """
+        if ttl is not None:
+            expires_at = datetime.now() + timedelta(seconds=ttl)
+        else:
+            expires_at = datetime.now() + timedelta(minutes=self.ttl_minutes)
         
         self._cache[key] = {
             'value': value,
