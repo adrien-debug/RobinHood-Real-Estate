@@ -12,7 +12,8 @@ import {
   Settings,
   BarChart3,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Building2
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Zones', href: '/zones', icon: MapPin },
   { name: 'Radar', href: '/radar', icon: Target },
   { name: 'Yield', href: '/yield', icon: Percent },
+  { name: 'Floorplans', href: '/floorplans', icon: Building2 },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Insights', href: '/insights', icon: BarChart3 },
   { name: 'Admin', href: '/admin', icon: Settings },

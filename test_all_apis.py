@@ -195,7 +195,7 @@ def test_dda_planning():
         
         # Test permis de construire
         logger.info("Récupération permis de construire (90 derniers jours)")
-        permits = connector.fetch_building_permits(days_back=90)
+        permits = connector.fetch_building_permits()
         
         logger.success(f"✓ {len(permits)} permis récupérés")
         

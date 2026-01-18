@@ -487,9 +487,9 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 2.0.0  
+**Version** : 2.3.0  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + 8 KPIs avancés + Next.js Frontend)
+**Status** : ✅ 100% Opérationnel - Données Live + Floorplans 3D (9 APIs + 45+ endpoints + 20 KPIs + Next.js + Visualisation 3D)
 
 ---
 
@@ -560,6 +560,43 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<auto-configured>
 ---
 
 ## 🔧 Changelog récent
+
+### v2.3.0 (2026-01-18) - Visualisation Floorplans 3D
+- **✅ NOUVELLE PAGE** : `/floorplans` - Visualisation plans d'étage 2D/3D
+- **Nouveau** : `components/FloorplanViewer.tsx` - Composant React pour floorplans
+- **Nouveau** : `app/floorplans/page.tsx` - Page complète avec recherche
+- **Fonctionnalités** : Modèles 3D interactifs Sketchfab, images 2D/3D, modal détaillé
+- **Navigation** : Ajout de "Floorplans" dans le menu latéral
+- **API** : Intégration complète endpoint `/floorplans` Bayut RapidAPI
+- **Configuration** : `NEXT_PUBLIC_BAYUT_API_KEY` ajoutée à `.env.local`
+
+### v2.2.0 (2026-01-18) - Nouveaux Connecteurs et KPIs
+- **✅ NOUVEAUX CONNECTEURS** : 4 connecteurs DLD additionnels
+- **Nouveau** : `connectors/dld_developers.py` - Promoteurs immobiliers enregistrés
+- **Nouveau** : `connectors/dld_valuation.py` - Évaluations officielles DLD
+- **Nouveau** : `connectors/dld_lkp_areas.py` - Hiérarchie officielle des zones
+- **Nouveau** : `pipelines/compute_additional_kpis.py` - 12 nouveaux KPIs
+- **Nouveau** : `test_new_features.py` - Tests complets des nouvelles fonctionnalités
+- **Nouveau** : `NOUVEAUTES_v2.2.0.md` - Documentation complète des ajouts
+- **Implémenté** : 5/12 nouveaux KPIs (DOM, Turnover, Absorption, Yield, Offplan)
+- **Testé** : 4/5 tests passent (DLD Developers, Valuation, LKP Areas, KPIs)
+- **Total APIs** : 9 APIs (5 live + 4 mock)
+- **Total Endpoints** : 45+ endpoints disponibles
+- **Total KPIs** : 20 KPIs (8 existants + 12 nouveaux)
+
+### v2.1.0 (2026-01-18) - 100% Données Live + LED Verte
+- **✅ VALIDATION COMPLÈTE** : Tous les mock-ups supprimés, uniquement données live
+- **Nouveau** : LED verte sur page d'accueil Next.js (port 3000) - status API en temps réel
+- **Nouveau** : `lib/supabase.ts` - Client Supabase pour Next.js
+- **Nouveau** : `lib/utils.ts` - Utilitaires frontend (formatage, dates, etc.)
+- **Nouveau** : `INVENTAIRE_APIS_KPIS.md` - Inventaire complet APIs, KPIs et granularités
+- **Nouveau** : `PROMPT_OPUS_DEEP_THINKING.md` - Prompt Opus 4.5 avec checklist complète
+- **Testé** : 5/5 APIs fonctionnelles (DLD Transactions, Rental Index, Bayut, Makani, DDA)
+- **Vérifié** : Calculs KPIs, scores et baselines - 100% corrects
+- **Vérifié** : Connexion Supabase Next.js - données live affichées
+- **Status** : 200 transactions DLD live via Bayut RapidAPI
+- **Status** : 25 annonces Bayut live récupérées
+- **Status** : Frontend Next.js connecté à Supabase avec indicateur visuel
 
 ### v1.4.0 (2026-01-18) - KPIs Avancés et Pipeline Enrichi
 - **Nouveau** : 8 KPIs avancés (TLS, LAD, RSG, SPI, GPI, RCWM, ORD, APS)
