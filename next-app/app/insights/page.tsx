@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { LoadingPage } from '@/components/ui/Loading'
+import { Select } from '@/components/ui/Select'
 import { AreaChart, BarChart, LineChart } from '@/components/charts'
 import { formatCompact, formatPercent } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Activity, BarChart3 } from 'lucide-react'
@@ -12,6 +13,7 @@ import { useAutoRefresh } from '@/lib/useAutoRefresh'
 export default function InsightsPage() {
   const AUTO_REFRESH_MS = 5000
   const [loading, setLoading] = useState(true)
+  const [periodDays, setPeriodDays] = useState('30')
   const [marketData, setMarketData] = useState<{
     historical: Array<{ week: string; avg_price: number; volume: number }>
     zones: Array<{ community: string; avg_price_sqft: number; transaction_count: number }>
@@ -24,13 +26,14 @@ export default function InsightsPage() {
   const fetchMarketData = async () => {
     try {
       setLoading(true)
+      const days = parseInt(periodDays, 10)
       
       // Fetch historical data
       const [histRes, zonesRes] = await Promise.all([
         fetch('/api/transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'get_historical', days: 180 })
+          body: JSON.stringify({ action: 'get_historical', days: Number.isFinite(days) ? days : 30 })
         }),
         fetch('/api/zones')
       ])
@@ -51,7 +54,8 @@ export default function InsightsPage() {
 
   useAutoRefresh({
     intervalMs: AUTO_REFRESH_MS,
-    onTick: fetchMarketData
+    onTick: fetchMarketData,
+    deps: [periodDays]
   })
 
   if (loading && !marketData) return <LoadingPage />
@@ -65,8 +69,12 @@ export default function InsightsPage() {
     ? historical.reduce((sum, h) => sum + h.avg_price, 0) / historical.length 
     : 0
   
-  const recentPrice = historical.slice(-4).reduce((sum, h) => sum + h.avg_price, 0) / 4
-  const olderPrice = historical.slice(0, 4).reduce((sum, h) => sum + h.avg_price, 0) / 4
+  const periodLabel = periodDays === '30' ? '1 month' : periodDays === '90' ? '3 months' : '6 months'
+  const hasTrendWindow = historical.length >= 8
+  const recentSlice = hasTrendWindow ? historical.slice(-4) : []
+  const olderSlice = hasTrendWindow ? historical.slice(0, 4) : []
+  const recentPrice = recentSlice.length ? recentSlice.reduce((sum, h) => sum + h.avg_price, 0) / recentSlice.length : 0
+  const olderPrice = olderSlice.length ? olderSlice.reduce((sum, h) => sum + h.avg_price, 0) / olderSlice.length : 0
   const priceTrend = olderPrice > 0 ? ((recentPrice - olderPrice) / olderPrice) * 100 : 0
 
   // Calculate market RSI (simplified)
@@ -118,9 +126,23 @@ export default function InsightsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Market Insights</h1>
-        <p className="text-text-muted text-sm mt-1">AI-powered market intelligence and predictions</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Market Insights</h1>
+          <p className="text-text-muted text-sm mt-1">AI-powered market intelligence and predictions</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Select
+            value={periodDays}
+            onChange={setPeriodDays}
+            options={[
+              { value: '30', label: 'Month (30d)' },
+              { value: '90', label: 'Quarter (90d)' },
+              { value: '180', label: '6 Months (180d)' }
+            ]}
+            className="w-44"
+          />
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -134,7 +156,7 @@ export default function InsightsPage() {
         />
         <KpiCard
           title="Price Trend"
-          subtitle="6 month change"
+          subtitle={`${periodLabel} change`}
           value={formatPercent(priceTrend, true)}
           trend={priceTrend}
           color={priceTrend > 0 ? 'success' : 'danger'}
@@ -156,7 +178,7 @@ export default function InsightsPage() {
       {/* Price Evolution */}
       <Card>
         <CardTitle>Price Evolution</CardTitle>
-        <CardSubtitle>Average price per sqft over time</CardSubtitle>
+        <CardSubtitle>Average price per sqft over time ({periodLabel})</CardSubtitle>
         <AreaChart
           data={priceChartData}
           dataKey="price"
@@ -169,7 +191,7 @@ export default function InsightsPage() {
       {/* Volume Trend */}
       <Card>
         <CardTitle>Transaction Volume</CardTitle>
-        <CardSubtitle>Weekly transaction count</CardSubtitle>
+        <CardSubtitle>Weekly transaction count ({periodLabel})</CardSubtitle>
         <BarChart
           data={volumeChartData}
           dataKey="volume"

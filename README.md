@@ -531,6 +531,7 @@ Accès : `http://localhost:3000`
 | Page | Route | Description |
 |------|-------|-------------|
 | Dashboard | `/dashboard` | Live monitoring (refresh 5s), KPIs, charts, opportunités, régimes |
+| Architecture | `/architecture` | Diagramme HTML, endpoints, provenance data |
 | Sales | `/sales` | Transactions, analytics, tendances |
 | Zones | `/zones` | Analyse par zone, heatmap, signaux |
 | Radar | `/radar` | Opportunités scorées, signaux trading |
