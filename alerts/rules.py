@@ -16,7 +16,7 @@ class AlertRules:
         query = """
         SELECT id, community, building, rooms_bucket,
                discount_pct, global_score, recommended_strategy
-        FROM dld_opportunities
+        FROM opportunities
         WHERE detection_date = %s
             AND discount_pct >= %s
             AND status = 'active'
@@ -53,8 +53,8 @@ class AlertRules:
             mr_today.regime as current_regime,
             mr_yesterday.regime as previous_regime,
             mr_today.confidence_score
-        FROM dld_market_regimes mr_today
-        LEFT JOIN dld_market_regimes mr_yesterday ON
+        FROM market_regimes mr_today
+        LEFT JOIN market_regimes mr_yesterday ON
             mr_today.community = mr_yesterday.community
             AND mr_yesterday.regime_date = %s - INTERVAL '1 day'
         WHERE mr_today.regime_date = %s
@@ -89,7 +89,7 @@ class AlertRules:
         """Alertes : zones avec volume élevé de transactions"""
         query = """
         SELECT community, COUNT(*) as tx_count, AVG(price_per_sqft) as avg_price
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date = %s
         GROUP BY community
         HAVING COUNT(*) >= %s

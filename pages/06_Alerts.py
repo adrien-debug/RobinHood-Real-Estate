@@ -27,7 +27,7 @@ def generate_predictive_alerts(market_data):
     # Get recent market data
     recent_prices = db.execute_query("""
         SELECT transaction_date, AVG(price_per_sqft) as avg_price
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '30 days'
         GROUP BY transaction_date
         ORDER BY transaction_date DESC
@@ -63,7 +63,7 @@ def generate_predictive_alerts(market_data):
     # Volume spike detection
     volume_data = db.execute_query("""
         SELECT transaction_date, COUNT(*) as volume
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '7 days'
         GROUP BY transaction_date
         ORDER BY transaction_date DESC
@@ -87,7 +87,7 @@ def generate_predictive_alerts(market_data):
     # Regime change alerts
     regime_data = db.execute_query("""
         SELECT regime, confidence_score, regime_date
-        FROM dld_market_regimes
+        FROM market_regimes
         WHERE regime_date >= CURRENT_DATE - INTERVAL '2 days'
         ORDER BY regime_date DESC
         LIMIT 2
@@ -153,7 +153,11 @@ LIMIT 50
 
 # Simple query without filters for now
 alerts = db.execute_query("""
-SELECT * FROM active_alerts
+SELECT 
+    id, alert_type as rule_code, severity, title, message, 
+    community, created_at
+FROM alerts
+WHERE is_dismissed = FALSE
 ORDER BY created_at DESC
 LIMIT 50
 """)

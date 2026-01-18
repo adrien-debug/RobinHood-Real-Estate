@@ -108,7 +108,6 @@ Si tu vois une erreur de connexion DB, suis ces étapes :
 2. **Ajoute cette configuration** :
    ```toml
    DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
-   TABLE_PREFIX = "dld_"
    TIMEZONE = "Asia/Dubai"
    ```
 
@@ -159,7 +158,6 @@ DATABASE_URL=postgresql://user:password@localhost:5432/dubai_real_estate
 # Option B : Supabase (recommandé)
 # Utilise le même DATABASE_URL que Streamlit Cloud
 DATABASE_URL=postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
-TABLE_PREFIX=dld_
 ```
 
 ### 4. Initialisation
@@ -428,13 +426,28 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.2.1  
+**Version** : 1.2.2  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (Audit complet effectué)
+**Status** : ✅ Opérationnel (Alertes corrigées)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.2.2 (2026-01-18) - Fix Système Alertes
+- **Fix** : Correction des noms de tables SQL dans tout le projet
+- **Fix** : Remplacement `dld_transactions` → `transactions` (cohérent avec schéma)
+- **Fix** : Remplacement `dld_opportunities` → `opportunities`
+- **Fix** : Remplacement `dld_market_regimes` → `market_regimes`
+- **Fix** : Remplacement `dld_market_baselines` → `market_baselines`
+- **Fix** : Remplacement `active_alerts` → `alerts` (table existante)
+- **Fix** : Correction page `06_Alerts.py` - requêtes fonctionnelles
+- **Fix** : Correction `alerts/rules.py` - noms de tables cohérents
+- **Fix** : Correction 14+ fichiers avec références SQL incorrectes
+
+**Fichiers corrigés** :
+- `streamlit_app.py`, `pages/01-08_*.py`, `ai_agents/chief_investment_officer.py`
+- `alerts/rules.py`, `realtime/refresher.py`, `pipelines/compute_scores.py`
 
 ### v1.2.1 (2026-01-18) - Audit & Données Réalistes
 - **Fix** : Import `Dict` manquant dans `listings_placeholder.py`

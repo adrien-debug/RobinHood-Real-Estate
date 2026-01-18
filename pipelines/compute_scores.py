@@ -130,7 +130,7 @@ def _get_market_context(
     
     # Baseline 30j
     query_baseline = """
-    SELECT * FROM dld_market_baselines
+    SELECT * FROM market_baselines
     WHERE calculation_date = %s
         AND community = %s
         AND COALESCE(project, '') = COALESCE(%s, '')
@@ -147,7 +147,7 @@ def _get_market_context(
     
     # Régime de marché
     query_regime = """
-    SELECT * FROM dld_market_regimes
+    SELECT * FROM market_regimes
     WHERE regime_date = %s
         AND community = %s
         AND COALESCE(project, '') = COALESCE(%s, '')

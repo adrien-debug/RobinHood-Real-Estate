@@ -27,7 +27,7 @@ def analyze_market_cycles():
             DATE_TRUNC('month', transaction_date) as month,
             AVG(price_per_sqft) as avg_price,
             COUNT(*) as volume
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '24 months'
         GROUP BY DATE_TRUNC('month', transaction_date)
         ORDER BY month
@@ -110,7 +110,7 @@ def calculate_market_sentiment():
                 DATE_TRUNC('week', transaction_date) as week,
                 AVG(price_per_sqft) as avg_price,
                 COUNT(*) as volume
-            FROM dld_transactions
+            FROM transactions
             WHERE transaction_date >= CURRENT_DATE - INTERVAL '12 weeks'
             GROUP BY DATE_TRUNC('week', transaction_date)
             ORDER BY week

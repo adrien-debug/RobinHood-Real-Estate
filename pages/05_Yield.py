@@ -190,7 +190,7 @@ SELECT
     momentum,
     transaction_count as tx_count,
     volatility
-FROM dld_market_baselines
+FROM market_baselines
 WHERE calculation_date = %s
     AND window_days = 30
     AND transaction_count >= %s
@@ -208,7 +208,7 @@ if not yields:
         rooms_bucket,
         AVG(price_per_sqft) as avg_price,
         COUNT(*) as tx_count
-    FROM dld_transactions
+    FROM transactions
     WHERE transaction_date >= %s - INTERVAL '30 days'
         AND price_per_sqft IS NOT NULL
     GROUP BY community, rooms_bucket
@@ -329,7 +329,7 @@ if yields:
     # Get historical data for scenario modeling
     scenario_data = db.execute_query("""
         SELECT transaction_date, AVG(price_per_sqft) as avg_price
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '6 months'
         GROUP BY transaction_date
         ORDER BY transaction_date

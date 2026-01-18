@@ -64,7 +64,7 @@ class ChiefInvestmentOfficer:
         SELECT COUNT(*) as count, 
                AVG(price_per_sqft) as avg_price,
                community
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date = %s
         GROUP BY community
         ORDER BY count DESC
@@ -75,7 +75,7 @@ class ChiefInvestmentOfficer:
         # Changements de régime
         query_regime = """
         SELECT community, project, regime, confidence_score
-        FROM dld_market_regimes
+        FROM market_regimes
         WHERE regime_date = %s
         ORDER BY confidence_score DESC
         LIMIT 10
@@ -87,7 +87,7 @@ class ChiefInvestmentOfficer:
         SELECT id, community, building, rooms_bucket,
                discount_pct, global_score, recommended_strategy,
                market_regime
-        FROM dld_opportunities
+        FROM opportunities
         WHERE detection_date = %s
             AND status = 'active'
         ORDER BY global_score DESC
@@ -99,7 +99,7 @@ class ChiefInvestmentOfficer:
         query_baseline = """
         SELECT community, rooms_bucket, 
                median_price_per_sqft, momentum, transaction_count
-        FROM dld_market_baselines
+        FROM market_baselines
         WHERE calculation_date = %s
             AND window_days = 30
         ORDER BY transaction_count DESC

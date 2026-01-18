@@ -24,7 +24,7 @@ def calculate_system_health_metrics():
     # Data freshness
     try:
         latest_transaction = db.execute_query("""
-            SELECT MAX(transaction_date) as latest_date FROM dld_transactions
+            SELECT MAX(transaction_date) as latest_date FROM transactions
         """)
         days_since_update = (get_dubai_today() - latest_transaction[0]['latest_date']).days if latest_transaction else 999
         metrics['data_freshness'] = days_since_update
@@ -38,7 +38,7 @@ def calculate_system_health_metrics():
     try:
         opportunities = db.execute_query("""
             SELECT COUNT(*) as total, AVG(global_score) as avg_score
-            FROM dld_opportunities
+            FROM opportunities
             WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days'
         """)
         if opportunities:
@@ -63,8 +63,8 @@ def generate_performance_forecasts():
             SELECT
                 DATE_TRUNC('week', transaction_date) as week,
                 COUNT(*) as volume
-            FROM dld_transactions
-            WHERE transaction_date >= CURRENT_DATE - INTERVAL '8 weeks'
+            FROM transactions
+        WHERE transaction_date >= CURRENT_DATE - INTERVAL '8 weeks'
             GROUP BY DATE_TRUNC('week', transaction_date)
             ORDER BY week DESC
             LIMIT 8
@@ -86,8 +86,8 @@ def generate_performance_forecasts():
             SELECT
                 DATE_TRUNC('month', transaction_date) as month,
                 AVG(price_per_sqft) as avg_price
-            FROM dld_transactions
-            WHERE transaction_date >= CURRENT_DATE - INTERVAL '6 months'
+            FROM transactions
+        WHERE transaction_date >= CURRENT_DATE - INTERVAL '6 months'
             GROUP BY DATE_TRUNC('month', transaction_date)
             ORDER BY month DESC
             LIMIT 6
@@ -115,12 +115,12 @@ st.markdown('<div class="section-subtitle">Real-time metrics</div>', unsafe_allo
 
 # Get counts
 tables = [
-    ('dld_transactions', 'Transactions'),
-    ('dld_opportunities', 'Opportunities'),
-    ('dld_daily_briefs', 'Daily Briefs'),
+    ('transactions', 'Transactions'),
+    ('opportunities', 'Opportunities'),
+    ('daily_briefs', 'Daily Briefs'),
     ('market_baselines', 'Baselines'),
     ('market_regimes', 'Regimes'),
-    ('active_alerts', 'Alerts')
+    ('alerts', 'Alerts')
 ]
 
 counts = {}
@@ -237,7 +237,7 @@ with col_left:
     
     recent_tx = db.execute_query("""
         SELECT transaction_date, community, rooms_bucket, price_aed
-        FROM dld_transactions
+        FROM transactions
         ORDER BY transaction_date DESC, created_at DESC
         LIMIT 10
     """)

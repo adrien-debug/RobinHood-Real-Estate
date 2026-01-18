@@ -140,9 +140,9 @@ from core.db import db
 try:
     stats = db.execute_query("""
         SELECT 
-            (SELECT COUNT(*) FROM dld_transactions WHERE transaction_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_tx,
-            (SELECT COUNT(*) FROM dld_opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_opps,
-            (SELECT AVG(global_score) FROM dld_opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as avg_score
+            (SELECT COUNT(*) FROM transactions WHERE transaction_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_tx,
+            (SELECT COUNT(*) FROM opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_opps,
+            (SELECT AVG(global_score) FROM opportunities WHERE detection_date >= CURRENT_DATE - INTERVAL '7 days') as avg_score
     """)
     
     if stats:

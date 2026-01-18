@@ -147,7 +147,7 @@ with col1:
     target_date = st.date_input("Date", value=get_dubai_today())
 
 with col2:
-    communities = db.execute_query("SELECT DISTINCT community FROM dld_transactions WHERE community IS NOT NULL ORDER BY community")
+    communities = db.execute_query("SELECT DISTINCT community FROM transactions WHERE community IS NOT NULL ORDER BY community")
     community_list = [c['community'] for c in communities]
     selected_community = st.selectbox("Community", ["All"] + community_list)
 
@@ -212,7 +212,7 @@ if transactions:
             AVG(price_per_sqft) as avg_price,
             COUNT(*) as volume,
             AVG(area_sqft) as avg_area
-        FROM dld_transactions
+        FROM transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '90 days'
         GROUP BY DATE_TRUNC('week', transaction_date)
         ORDER BY week
