@@ -93,9 +93,14 @@ class Database:
                 if host in local_hosts:
                     try:
                         with self._connection.cursor() as cur:
-                            cur.execute("SET search_path TO public")
+                            cur.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'robin'")
+                            if cur.fetchone():
+                                cur.execute("SET search_path TO robin, public")
+                                logger.info("Search path défini sur robin, public (DB locale)")
+                            else:
+                                cur.execute("SET search_path TO public")
+                                logger.info("Search path défini sur public (DB locale)")
                         self._connection.commit()
-                        logger.info("Search path défini sur public (DB locale)")
                     except Exception as e:
                         logger.warning(f"Search path local: {e}")
                         try:
@@ -112,6 +117,7 @@ class Database:
                                 cur.execute("SET search_path TO robin, public")
                                 logger.info("Search path défini sur robin, public")
                             else:
+                                cur.execute("SET search_path TO public")
                                 logger.info("Schéma robin non trouvé, utilisation de public")
                         self._connection.commit()
                     except Exception as e:

@@ -6,6 +6,10 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
+-- Schema (évite les conflits avec tables existantes)
+CREATE SCHEMA IF NOT EXISTS robin;
+SET search_path TO robin, public;
+
 -- ====================================================================
 -- TRANSACTIONS (DLD)
 -- ====================================================================
