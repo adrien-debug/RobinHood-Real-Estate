@@ -232,39 +232,58 @@ class BayutAPIConnector:
         property_type: Optional[str],
         days_back: int
     ) -> List[Listing]:
-        """Générer des données mock pour développement"""
+        """Générer des données mock réalistes pour développement"""
         import random
-        
-        communities = ["Dubai Marina", "Downtown Dubai", "Palm Jumeirah", "Business Bay", "JBR"]
-        if community:
-            communities = [community]
-        
-        property_types = ["apartment", "villa", "townhouse"]
-        if property_type:
-            property_types = [property_type]
+        from core.dubai_mock_data import get_random_project, ROOM_TYPES
         
         listings = []
         for i in range(40):
-            rooms = random.choice([0, 1, 2, 3, 4])
-            area = Decimal(random.randint(600, 3500))
-            price = area * Decimal(random.randint(1400, 2800))
-            original_price = price * Decimal(random.uniform(1.0, 1.20))
+            # Obtenir un projet réaliste
+            project_data = get_random_project(community)
+            
+            rooms_count, rooms_bucket = random.choice(ROOM_TYPES)
+            
+            # Surface réaliste selon le type
+            if rooms_count == 0:  # Studio
+                area = Decimal(random.randint(350, 550))
+            elif rooms_count == 1:
+                area = Decimal(random.randint(600, 900))
+            elif rooms_count == 2:
+                area = Decimal(random.randint(900, 1400))
+            else:
+                area = Decimal(random.randint(1400, 3500))
+            
+            # Prix réaliste basé sur la communauté
+            min_price, max_price = project_data["price_range"]
+            price_sqft = Decimal(random.randint(min_price, max_price))
+            price = area * price_sqft
+            
+            # Léger markup pour les annonces (vendeurs demandent plus)
+            markup = Decimal(random.uniform(1.02, 1.15))
+            original_price = price * markup
             
             days_market = random.randint(1, 180)
             price_changes = random.randint(0, 3) if days_market > 30 else 0
             
+            # Réduction de prix si changements
+            if price_changes > 0:
+                price = original_price * Decimal(random.uniform(0.92, 0.98))
+            
+            # Type de propriété réaliste
+            prop_type = property_type or random.choice(project_data["property_types"])
+            
             listing = Listing(
-                listing_id=f"BAYUT-MOCK-{i:04d}",
+                listing_id=f"BAY-{date.today().strftime('%Y%m')}-{i:04d}",
                 listing_date=date.today() - timedelta(days=random.randint(1, days_back)),
                 source="bayut",
                 
-                community=random.choice(communities),
-                project=f"Project {random.randint(1, 15)}",
-                building=f"Building {random.randint(1, 25)}",
+                community=project_data["community"],
+                project=project_data["project"],
+                building=project_data["building"],
                 
-                property_type=random.choice(property_types),
-                rooms_count=rooms,
-                rooms_bucket=normalize_rooms_bucket(rooms),
+                property_type=prop_type,
+                rooms_count=rooms_count,
+                rooms_bucket=rooms_bucket,
                 area_sqft=area,
                 
                 asking_price_aed=price,
@@ -276,7 +295,7 @@ class BayutAPIConnector:
                 days_on_market=days_market,
                 
                 status="active",
-                url=f"https://www.bayut.com/property/mock-{i}"
+                url=f"https://www.bayut.com/property/{project_data['project'].lower().replace(' ', '-')}-{i}"
             )
             listings.append(listing)
         

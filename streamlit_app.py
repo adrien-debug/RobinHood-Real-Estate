@@ -77,6 +77,19 @@ with col6:
     if st.button("🔔 Alerts", use_container_width=True):
         st.switch_page("pages/06_🔔_Alerts.py")
 
+col7, col8, col9 = st.columns(3)
+
+with col7:
+    if st.button("⚙️ Admin", use_container_width=True):
+        st.switch_page("pages/07_⚙️_Admin.py")
+
+with col8:
+    if st.button("📈 Insights", use_container_width=True):
+        st.switch_page("pages/08_📈_Market_Insights.py")
+
+with col9:
+    pass  # Placeholder for future feature
+
 st.markdown("<div style='height: 2rem'></div>", unsafe_allow_html=True)
 
 # Quick stats

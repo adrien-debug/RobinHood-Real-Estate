@@ -91,8 +91,9 @@ def check_api_keys():
     env_vars = read_env_file()
     
     if not env_vars:
-        logger.error("✗ Impossible de lire le fichier .env")
-        return
+        logger.error("✗ Fichier .env vide ou impossible à lire")
+        logger.info("Ajoute tes clés API dans le fichier .env")
+        return [], []  # Retourne un tuple vide au lieu de None
     
     # Liste des clés API à vérifier
     api_keys = {
@@ -291,7 +292,15 @@ def main():
     # Vérifier les clés API
     configured, missing = check_api_keys()
     
-    # Fournir des instructions
+    # Cas où le fichier .env est vide ou non lisible
+    if not configured and not missing:
+        logger.warning("")
+        logger.warning("Le fichier .env semble vide ou ne contient que des commentaires.")
+        logger.info("Ajoute tes clés API, puis relance ce script.")
+        provide_instructions()
+        return
+    
+    # Fournir des instructions si des clés manquent
     if missing:
         provide_instructions()
         

@@ -216,44 +216,64 @@ class DLDTransactionsConnector:
             return "other"
     
     def _generate_mock_data(self, start_date: Optional[date], end_date: Optional[date]) -> List[Transaction]:
-        """Générer des données mock pour développement"""
+        """Générer des données mock réalistes pour développement"""
         from decimal import Decimal
         import random
+        from core.dubai_mock_data import get_random_project, ROOM_TYPES
         
         if not end_date:
             end_date = date.today()
         if not start_date:
             start_date = end_date - timedelta(days=1)
         
-        communities = ["Dubai Marina", "Downtown Dubai", "Palm Jumeirah", "Business Bay", "JBR"]
-        projects = ["Marina Heights", "Burj Khalifa Residences", "Golden Mile", "Executive Towers"]
-        property_types = ["apartment", "villa", "townhouse"]
-        
         transactions = []
         for i in range(50):
-            rooms = random.choice([0, 1, 2, 3, 4])
-            area = Decimal(random.randint(500, 3000))
-            price = area * Decimal(random.randint(1200, 2500))
+            # Obtenir un projet réaliste
+            project_data = get_random_project()
+            
+            rooms_count, rooms_bucket = random.choice(ROOM_TYPES)
+            
+            # Surface réaliste selon le type
+            if rooms_count == 0:  # Studio
+                area = Decimal(random.randint(350, 550))
+            elif rooms_count == 1:
+                area = Decimal(random.randint(600, 900))
+            elif rooms_count == 2:
+                area = Decimal(random.randint(900, 1400))
+            else:
+                area = Decimal(random.randint(1400, 3500))
+            
+            # Prix réaliste basé sur la communauté
+            min_price, max_price = project_data["price_range"]
+            price_sqft = Decimal(random.randint(min_price, max_price))
+            price = area * price_sqft
+            
+            # Type de propriété réaliste pour la zone
+            property_type = random.choice(project_data["property_types"])
+            
+            # Date de transaction variée
+            days_offset = random.randint(0, (end_date - start_date).days) if end_date > start_date else 0
+            tx_date = start_date + timedelta(days=days_offset)
             
             transaction = Transaction(
-                transaction_id=f"MOCK-{start_date}-{i:04d}",
-                transaction_date=start_date,
-                transaction_type="sale",
+                transaction_id=f"DLD-{tx_date.strftime('%Y%m%d')}-{i:04d}",
+                transaction_date=tx_date,
+                transaction_type=random.choice(["sale", "resale"]),
                 
-                community=random.choice(communities),
-                project=random.choice(projects),
-                building=f"Building {random.randint(1, 20)}",
-                unit_number=f"{random.randint(1, 50)}{random.randint(1, 9)}",
+                community=project_data["community"],
+                project=project_data["project"],
+                building=project_data["building"],
+                unit_number=f"{random.randint(1, 50)}{random.randint(0, 9):02d}",
                 
-                property_type=random.choice(property_types),
-                rooms_count=rooms,
-                rooms_bucket=normalize_rooms_bucket(rooms),
+                property_type=property_type,
+                rooms_count=rooms_count,
+                rooms_bucket=rooms_bucket,
                 area_sqft=area,
                 
                 price_aed=price,
-                price_per_sqft=calculate_price_per_sqft(price, area),
+                price_per_sqft=price_sqft,
                 
-                is_offplan=random.choice([True, False])
+                is_offplan=random.random() < 0.25  # 25% offplan
             )
             transactions.append(transaction)
         

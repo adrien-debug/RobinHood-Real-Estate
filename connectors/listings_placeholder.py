@@ -1,7 +1,7 @@
 """
 Connecteur Listings - Annonces autorisées UNIQUEMENT
 """
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import date, timedelta
 import httpx
 from loguru import logger
@@ -87,31 +87,45 @@ class ListingsConnector:
         return listings
     
     def _generate_mock_data(self) -> List[Dict]:
-        """Données mock"""
+        """Données mock réalistes"""
         from decimal import Decimal
         import random
-        
-        communities = ["Dubai Marina", "Downtown Dubai", "Palm Jumeirah", "Business Bay"]
-        property_types = ["apartment", "villa"]
-        rooms_buckets = ["studio", "1BR", "2BR", "3BR+"]
+        from core.dubai_mock_data import get_random_project, ROOM_TYPES
         
         listings = []
         for i in range(30):
-            area = Decimal(random.randint(500, 2500))
-            price = area * Decimal(random.randint(1300, 2800))
+            # Obtenir un projet réaliste
+            project_data = get_random_project()
+            
+            rooms_count, rooms_bucket = random.choice(ROOM_TYPES)
+            
+            # Surface réaliste selon le type
+            if rooms_count == 0:  # Studio
+                area = Decimal(random.randint(350, 550))
+            elif rooms_count == 1:
+                area = Decimal(random.randint(600, 900))
+            elif rooms_count == 2:
+                area = Decimal(random.randint(900, 1400))
+            else:
+                area = Decimal(random.randint(1400, 3500))
+            
+            # Prix réaliste basé sur la communauté
+            min_price, max_price = project_data["price_range"]
+            price_sqft = Decimal(random.randint(min_price, max_price))
+            price = area * price_sqft
             original_price = price * Decimal(random.uniform(1.0, 1.15))
             
             listing = {
-                "listing_id": f"LIST-MOCK-{i:04d}",
+                "listing_id": f"LST-{date.today().strftime('%Y%m')}-{i:04d}",
                 "listing_date": date.today() - timedelta(days=random.randint(1, 90)),
-                "community": random.choice(communities),
-                "project": f"Project {random.randint(1, 10)}",
-                "building": f"Building {random.randint(1, 20)}",
-                "property_type": random.choice(property_types),
-                "rooms_bucket": random.choice(rooms_buckets),
+                "community": project_data["community"],
+                "project": project_data["project"],
+                "building": project_data["building"],
+                "property_type": random.choice(project_data["property_types"]),
+                "rooms_bucket": rooms_bucket,
                 "area_sqft": area,
                 "asking_price_aed": price,
-                "asking_price_per_sqft": price / area,
+                "asking_price_per_sqft": price_sqft,
                 "original_price_aed": original_price,
                 "price_changes": random.randint(0, 3),
                 "last_price_change_date": date.today() - timedelta(days=random.randint(1, 30)) if random.random() > 0.5 else None,

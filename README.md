@@ -28,6 +28,7 @@ dubai-real-estate-intelligence/
 ├── core/                           # Core système
 │   ├── config.py                   # Configuration centralisée
 │   ├── db.py                       # Connexion PostgreSQL
+│   ├── dubai_mock_data.py          # Données réalistes Dubai (projets, zones)
 │   ├── models.py                   # Modèles Pydantic
 │   └── utils.py                    # Utilitaires
 │
@@ -424,13 +425,21 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.2.0  
-**Date** : 2026-01-17  
-**Status** : ✅ Opérationnel (Stack data optimal prêt)
+**Version** : 1.2.1  
+**Date** : 2026-01-18  
+**Status** : ✅ Opérationnel (Audit complet effectué)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.2.1 (2026-01-18) - Audit & Données Réalistes
+- 🔧 **Fix** : Import `Dict` manquant dans `listings_placeholder.py`
+- 🔧 **Fix** : `st.set_page_config` manquant dans `Market_Insights.py`
+- 🆕 **Données MOCK réalistes** : Vrais noms de projets Dubai (Marina Heights, Burj Vista, Oceana, etc.)
+- 🆕 **Fichier** : `core/dubai_mock_data.py` - Référentiel de projets immobiliers Dubai
+- ✅ **Menu complet** : 8 pages + navigation alignée
+- ✅ **Nettoyage** : Unification `app.py` / `streamlit_app.py`
 
 ### v1.2.0 (2026-01-17) - Stack Data Optimal
 - 🆕 **Bayut API** : Connecteur pour lead indicators (annonces live)
