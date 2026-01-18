@@ -486,9 +486,9 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 2.3.0  
+**Version** : 2.4.0  
 **Date** : 2026-01-18  
-**Status** : ✅ 100% Opérationnel - Données Live + Floorplans 3D (9 APIs + 45+ endpoints + 20 KPIs + Next.js + Visualisation 3D)
+**Status** : ✅ 100% Next.js - Migration Complète (9 APIs + 45+ endpoints + 20 KPIs + 10 pages Next.js + Visualisation 3D)
 
 ---
 
