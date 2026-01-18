@@ -530,13 +530,32 @@ Accès : `http://localhost:3000`
 
 ### Configuration
 
-1. Copier `.env.example` vers `.env.local`
-2. Configurer les variables Supabase :
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   ```
-3. Lancer avec `npm run dev`
+Le fichier `.env.local` est configuré automatiquement avec les credentials Supabase :
+
+```bash
+cd next-app
+npm install
+npm run dev
+```
+
+Accès : `http://localhost:3000`
+
+**Variables d'environnement (`.env.local`)** :
+```
+NEXT_PUBLIC_SUPABASE_URL=https://tnnsfheflydiuhiduntn.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<auto-configured>
+```
+
+### Tables Supabase utilisées
+
+| Table | Description |
+|-------|-------------|
+| `dld_transactions` | 30 transactions immobilières |
+| `dld_opportunities` | 5 opportunités d'investissement |
+| `dld_market_regimes` | Régimes de marché par zone |
+| `dld_market_baselines` | Baselines de prix par zone |
+| `dld_daily_briefs` | Briefs quotidiens CIO |
+| `dld_alerts` | Alertes marché |
 
 ---
 

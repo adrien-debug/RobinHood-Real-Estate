@@ -14,9 +14,8 @@ export async function GET(request: NextRequest) {
     
     // Build query
     let query = supabase
-      .from('opportunities')
+      .from('dld_opportunities')
       .select('*')
-      .eq('detection_date', date)
       .gte('global_score', minScore)
       .order('global_score', { ascending: false })
       .limit(limit)

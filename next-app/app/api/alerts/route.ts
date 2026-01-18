@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const supabase = getServerClient()
     
     let query = supabase
-      .from('alerts')
+      .from('dld_alerts')
       .select('*')
       .eq('is_dismissed', false)
       .order('created_at', { ascending: false })
@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof is_dismissed === 'boolean') updates.is_dismissed = is_dismissed
     
     const { error } = await supabase
-      .from('alerts')
+      .from('dld_alerts')
       .update(updates)
       .eq('id', id)
     

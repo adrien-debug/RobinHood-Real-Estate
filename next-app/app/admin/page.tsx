@@ -45,21 +45,56 @@ export default function AdminPage() {
   const runPipeline = async () => {
     setIsRunning(true)
     
+    const stepActions = [
+      { name: 'Ingest Transactions', action: 'sync_transactions' },
+      { name: 'Ingest Mortgages', action: null },
+      { name: 'Compute Features', action: null },
+      { name: 'Compute Baselines', action: 'compute_baselines' },
+      { name: 'Compute Regimes', action: 'compute_regimes' },
+      { name: 'Compute KPIs', action: null },
+      { name: 'Detect Anomalies', action: null },
+      { name: 'Compute Scores', action: null },
+      { name: 'Generate Brief', action: 'generate_alerts' },
+    ]
+    
     for (let i = 0; i < pipelineSteps.length; i++) {
       setPipelineSteps(prev => prev.map((step, idx) => 
         idx === i ? { ...step, status: 'running' } : step
       ))
       
-      // Simulate step execution
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000))
+      let success = true
+      let message = 'Completed'
       
-      const success = Math.random() > 0.1 // 90% success rate
+      const action = stepActions[i].action
+      if (action) {
+        try {
+          const response = await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action })
+          })
+          const result = await response.json()
+          if (result.error) {
+            success = false
+            message = result.error
+          } else {
+            message = `Completed (${result.count || 0} items)`
+          }
+        } catch (e) {
+          success = false
+          message = 'API call failed'
+        }
+      } else {
+        // Skip steps without actions
+        await new Promise(resolve => setTimeout(resolve, 500))
+        message = 'Skipped'
+      }
       
       setPipelineSteps(prev => prev.map((step, idx) => 
         idx === i ? { 
           ...step, 
           status: success ? 'success' : 'error',
-          message: success ? 'Completed' : 'Failed - check logs'
+          message
         } : step
       ))
       
@@ -70,14 +105,20 @@ export default function AdminPage() {
   }
 
   const checkConnections = async () => {
-    // Simulate connection checks
-    setDbStatus('connected')
-    setApiStatus({
-      bayut: true,
-      dld: false, // Not configured
-      propertyfinder: true,
-      supabase: true,
-    })
+    try {
+      const response = await fetch('/api/sync')
+      const data = await response.json()
+      
+      setDbStatus(data.status === 'ok' ? 'connected' : 'disconnected')
+      setApiStatus({
+        bayut: data.api_configured?.bayut || false,
+        dld: false,
+        propertyfinder: false,
+        supabase: true,
+      })
+    } catch {
+      setDbStatus('disconnected')
+    }
   }
 
   const getStatusIcon = (status: PipelineStep['status']) => {

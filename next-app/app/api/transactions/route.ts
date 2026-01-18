@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
     
     // Build query
     let query = supabase
-      .from('transactions')
+      .from('dld_transactions')
       .select('*', { count: 'exact' })
-      .eq('transaction_date', date)
+      .gte('transaction_date', getDateMinusDays(date, 7))
       .order('price_per_sqft', { ascending: false })
     
     if (community && community !== 'All') {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     
     if (action === 'get_communities') {
       const { data, error } = await supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('community')
         .not('community', 'is', null)
         .order('community')
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     if (action === 'get_historical') {
       const days = body.days || 90
       const { data, error } = await supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('transaction_date, price_per_sqft, area_sqft')
         .gte('transaction_date', getDateMinusDays(new Date().toISOString().split('T')[0], days))
         .not('price_per_sqft', 'is', null)

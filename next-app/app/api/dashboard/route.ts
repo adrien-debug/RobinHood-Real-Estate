@@ -9,111 +9,170 @@ export async function GET(request: NextRequest) {
     
     const supabase = getServerClient()
     
+    // First, get the latest transaction date to use for "last day" KPI
+    const { data: latestTxData } = await supabase
+      .from('dld_transactions')
+      .select('transaction_date')
+      .order('transaction_date', { ascending: false })
+      .limit(1)
+      .single()
+    
+    const latestDate = latestTxData?.transaction_date || targetDate
+    
     // Fetch KPIs
     const [
-      todayTx,
+      lastDayTx,
       weekTx,
       monthTx,
       priceStats,
+      priceStats7dAgo,
       opportunities,
       neighborhoods,
       propertyTypes,
       regimes,
       brief
     ] = await Promise.all([
-      // Transactions today
+      // Transactions on latest day (not today if no data)
       supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('*', { count: 'exact', head: true })
-        .eq('transaction_date', targetDate),
+        .eq('transaction_date', latestDate),
       
       // Transactions 7 days
       supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('*', { count: 'exact', head: true })
-        .gte('transaction_date', getDateMinusDays(targetDate, 7)),
+        .gte('transaction_date', getDateMinusDays(latestDate, 7)),
       
-      // Transactions 30 days
+      // Transactions 30 days with volume
       supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('price_aed, price_per_sqft', { count: 'exact' })
-        .gte('transaction_date', getDateMinusDays(targetDate, 30)),
+        .gte('transaction_date', getDateMinusDays(latestDate, 30)),
       
-      // Price stats (30 days)
+      // Price stats (last 7 days)
       supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('price_per_sqft')
-        .gte('transaction_date', getDateMinusDays(targetDate, 30))
+        .gte('transaction_date', getDateMinusDays(latestDate, 7))
+        .not('price_per_sqft', 'is', null),
+      
+      // Price stats (7-14 days ago for variation)
+      supabase
+        .from('dld_transactions')
+        .select('price_per_sqft')
+        .gte('transaction_date', getDateMinusDays(latestDate, 14))
+        .lt('transaction_date', getDateMinusDays(latestDate, 7))
         .not('price_per_sqft', 'is', null),
       
       // Top opportunities
       supabase
-        .from('opportunities')
+        .from('dld_opportunities')
         .select('*')
-        .eq('detection_date', targetDate)
         .order('global_score', { ascending: false })
         .limit(10),
       
-      // Top neighborhoods (30 days)
-      supabase.rpc('get_top_neighborhoods', { 
-        p_date: targetDate,
-        p_days: 30,
-        p_limit: 10 
-      }),
+      // Top neighborhoods (30 days) - direct query instead of RPC
+      supabase
+        .from('dld_transactions')
+        .select('community, price_per_sqft')
+        .gte('transaction_date', getDateMinusDays(latestDate, 30))
+        .not('community', 'is', null),
       
-      // Property types distribution
-      supabase.rpc('get_property_types_distribution', {
-        p_date: targetDate,
-        p_days: 30
-      }),
+      // Property types distribution - direct query
+      supabase
+        .from('dld_transactions')
+        .select('rooms_bucket, price_per_sqft')
+        .gte('transaction_date', getDateMinusDays(latestDate, 30))
+        .not('rooms_bucket', 'is', null),
       
       // Market regimes
       supabase
-        .from('market_regimes')
+        .from('dld_market_regimes')
         .select('*')
-        .eq('regime_date', targetDate)
         .order('confidence_score', { ascending: false })
         .limit(5),
       
       // Daily brief
       supabase
-        .from('daily_briefs')
+        .from('dld_daily_briefs')
         .select('*')
-        .eq('brief_date', targetDate)
+        .order('brief_date', { ascending: false })
+        .limit(1)
         .single()
     ])
 
     // Calculate stats
-    const prices = priceStats.data?.map(p => p.price_per_sqft).filter(Boolean) as number[] || []
-    const medianPrice = prices.length > 0 ? calculateMedian(prices) : 0
-    const avgPrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0
+    const prices7d = priceStats.data?.map(p => Number(p.price_per_sqft)).filter(Boolean) as number[] || []
+    const prices7to14d = priceStats7dAgo.data?.map(p => Number(p.price_per_sqft)).filter(Boolean) as number[] || []
     
-    const volume30d = monthTx.data?.reduce((sum, tx) => sum + (tx.price_aed || 0), 0) || 0
+    const medianPrice = prices7d.length > 0 ? calculateMedian(prices7d) : 0
+    const avgPrice = prices7d.length > 0 ? prices7d.reduce((a, b) => a + b, 0) / prices7d.length : 0
     
-    // Calculate 7d variation (simplified)
-    const variation7d = calculateVariation(prices.slice(0, 100), prices.slice(100)) // Rough estimation
+    const volume30d = monthTx.data?.reduce((sum, tx) => sum + (Number(tx.price_aed) || 0), 0) || 0
+    
+    // Calculate 7d variation vs previous 7 days
+    const variation7d = calculateVariation(prices7d, prices7to14d)
+    
+    // Process neighborhoods data
+    const neighborhoodMap: Record<string, { count: number; prices: number[] }> = {}
+    for (const tx of (neighborhoods.data || [])) {
+      if (!tx.community) continue
+      if (!neighborhoodMap[tx.community]) {
+        neighborhoodMap[tx.community] = { count: 0, prices: [] }
+      }
+      neighborhoodMap[tx.community].count++
+      if (tx.price_per_sqft) neighborhoodMap[tx.community].prices.push(Number(tx.price_per_sqft))
+    }
+    const topNeighborhoods = Object.entries(neighborhoodMap)
+      .map(([community, data]) => ({
+        community,
+        transaction_count: data.count,
+        avg_price_sqft: data.prices.length > 0 ? data.prices.reduce((a, b) => a + b, 0) / data.prices.length : 0
+      }))
+      .sort((a, b) => b.transaction_count - a.transaction_count)
+      .slice(0, 10)
+
+    // Process property types data
+    const roomsMap: Record<string, { count: number; prices: number[] }> = {}
+    for (const tx of (propertyTypes.data || [])) {
+      if (!tx.rooms_bucket) continue
+      if (!roomsMap[tx.rooms_bucket]) {
+        roomsMap[tx.rooms_bucket] = { count: 0, prices: [] }
+      }
+      roomsMap[tx.rooms_bucket].count++
+      if (tx.price_per_sqft) roomsMap[tx.rooms_bucket].prices.push(Number(tx.price_per_sqft))
+    }
+    const byRooms = Object.entries(roomsMap)
+      .map(([rooms_bucket, data]) => ({
+        rooms_bucket,
+        count: data.count,
+        avg_price_sqft: data.prices.length > 0 ? data.prices.reduce((a, b) => a + b, 0) / data.prices.length : 0
+      }))
+      .sort((a, b) => b.count - a.count)
     
     // Prepare response
     const response = {
       kpis: {
-        transactions_today: todayTx.count || 0,
+        transactions_last_day: lastDayTx.count || 0,
         transactions_7d: weekTx.count || 0,
         transactions_30d: monthTx.count || 0,
         volume_30d: volume30d,
-        median_price_sqft: medianPrice,
-        avg_price_sqft: avgPrice,
-        variation_7d_pct: variation7d,
+        median_price_sqft: Math.round(medianPrice * 100) / 100,
+        avg_price_sqft: Math.round(avgPrice * 100) / 100,
+        variation_7d_pct: Math.round(variation7d * 100) / 100,
         avg_opportunity_score: opportunities.data?.length 
-          ? opportunities.data.reduce((sum, o) => sum + (o.global_score || 0), 0) / opportunities.data.length 
+          ? Math.round((opportunities.data.reduce((sum, o) => sum + (Number(o.global_score) || 0), 0) / opportunities.data.length) * 10) / 10
           : 0
       },
       top_opportunities: opportunities.data || [],
-      top_neighborhoods: neighborhoods.data || [],
+      top_neighborhoods: topNeighborhoods,
       property_types: {
-        by_rooms: propertyTypes.data || []
+        by_rooms: byRooms
       },
       regimes: regimes.data || [],
       brief: brief.data || null,
+      latest_date: latestDate,
       target_date: targetDate
     }
     

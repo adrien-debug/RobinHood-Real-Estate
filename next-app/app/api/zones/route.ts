@@ -14,28 +14,25 @@ export async function GET(request: NextRequest) {
       const [baselines, regime, priceHistory] = await Promise.all([
         // Market baselines for community
         supabase
-          .from('market_baselines')
+          .from('dld_market_baselines')
           .select('*')
-          .eq('calculation_date', date)
           .eq('community', community)
-          .eq('window_days', 30)
           .order('transaction_count', { ascending: false }),
         
         // Market regime
         supabase
-          .from('market_regimes')
+          .from('dld_market_regimes')
           .select('*')
-          .eq('regime_date', date)
           .eq('community', community)
+          .limit(1)
           .single(),
         
         // Price history (30 days)
         supabase
-          .from('transactions')
+          .from('dld_transactions')
           .select('transaction_date, price_per_sqft')
           .eq('community', community)
           .gte('transaction_date', getDateMinusDays(date, 30))
-          .lte('transaction_date', date)
           .not('price_per_sqft', 'is', null)
           .order('transaction_date')
       ])
@@ -53,7 +50,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Get zone comparison data
       const { data, error } = await supabase
-        .from('transactions')
+        .from('dld_transactions')
         .select('community, price_per_sqft')
         .gte('transaction_date', getDateMinusDays(date, 90))
         .not('community', 'is', null)

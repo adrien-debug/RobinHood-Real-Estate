@@ -19,7 +19,7 @@ import {
 
 interface DashboardData {
   kpis: {
-    transactions_today: number
+    transactions_last_day: number
     transactions_7d: number
     transactions_30d: number
     volume_30d: number
@@ -28,6 +28,7 @@ interface DashboardData {
     variation_7d_pct: number
     avg_opportunity_score: number
   }
+  latest_date?: string
   top_opportunities: Array<{
     id: number
     community: string
@@ -140,9 +141,9 @@ export default function DashboardPage() {
       {/* KPIs Row */}
       <KpiGrid>
         <KpiCard
-          title="Today"
+          title="Last Day"
           subtitle="Transactions"
-          value={kpis.transactions_today}
+          value={kpis.transactions_last_day}
           icon={<Building2 className="w-5 h-5" />}
         />
         <KpiCard
