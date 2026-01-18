@@ -7,7 +7,7 @@ Signaux en avance sur le marché :
 - Projets d'infrastructure
 - Zones de développement prioritaire
 
-⚠️ Ces données sont des lead indicators précieux pour anticiper
+[WARNING] Ces données sont des lead indicators précieux pour anticiper
 l'évolution du marché avant que les transactions ne reflètent les changements.
 
 API : Dubai Municipality / DDA
@@ -57,7 +57,7 @@ class DDAConnector:
             Liste de permis de construire
         """
         if not self.api_key:
-            logger.warning("⚠️  DDA_API_KEY non configurée - utilisation de données MOCK")
+            logger.warning("[WARNING]  DDA_API_KEY non configurée - utilisation de données MOCK")
             logger.warning("Pour connecter DDA API : https://www.dm.gov.ae/open-data")
             return self._generate_mock_permits(start_date, end_date, community)
         
@@ -82,7 +82,7 @@ class DDAConnector:
             if community:
                 params["community"] = community
             
-            logger.info(f"🔄 Récupération permis de construire DDA : {start_date} → {end_date}")
+            logger.info(f"[LOADING] Récupération permis de construire DDA : {start_date} → {end_date}")
             
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.get(url, headers=headers, params=params)
@@ -90,17 +90,17 @@ class DDAConnector:
                 data = response.json()
             
             permits = self._parse_permits(data)
-            logger.info(f"✅ {len(permits)} permis de construire récupérés")
+            logger.info(f"[SUCCESS] {len(permits)} permis de construire récupérés")
             return permits
         
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP DDA API : {e}")
+            logger.error(f"[ERROR] Erreur HTTP DDA API : {e}")
             if hasattr(e, 'response') and e.response is not None:
                 logger.error(f"Réponse : {e.response.text[:500]}")
             logger.warning("Fallback sur données MOCK")
             return self._generate_mock_permits(start_date, end_date, community)
         except Exception as e:
-            logger.error(f"❌ Erreur DDA API : {e}")
+            logger.error(f"[ERROR] Erreur DDA API : {e}")
             logger.warning("Fallback sur données MOCK")
             return self._generate_mock_permits(start_date, end_date, community)
     
@@ -121,7 +121,7 @@ class DDAConnector:
             Liste de changements de zonage
         """
         if not self.api_key:
-            logger.warning("⚠️  DDA_API_KEY non configurée - utilisation de données MOCK")
+            logger.warning("[WARNING]  DDA_API_KEY non configurée - utilisation de données MOCK")
             return self._generate_mock_zoning(start_date, end_date)
         
         if not end_date:
@@ -141,7 +141,7 @@ class DDAConnector:
                 "end_date": end_date.isoformat()
             }
             
-            logger.info(f"🔄 Récupération changements de zonage DDA : {start_date} → {end_date}")
+            logger.info(f"[LOADING] Récupération changements de zonage DDA : {start_date} → {end_date}")
             
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.get(url, headers=headers, params=params)
@@ -149,15 +149,15 @@ class DDAConnector:
                 data = response.json()
             
             changes = self._parse_zoning(data)
-            logger.info(f"✅ {len(changes)} changements de zonage récupérés")
+            logger.info(f"[SUCCESS] {len(changes)} changements de zonage récupérés")
             return changes
         
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP DDA API : {e}")
+            logger.error(f"[ERROR] Erreur HTTP DDA API : {e}")
             logger.warning("Fallback sur données MOCK")
             return self._generate_mock_zoning(start_date, end_date)
         except Exception as e:
-            logger.error(f"❌ Erreur DDA API : {e}")
+            logger.error(f"[ERROR] Erreur DDA API : {e}")
             logger.warning("Fallback sur données MOCK")
             return self._generate_mock_zoning(start_date, end_date)
     
@@ -209,7 +209,7 @@ class DDAConnector:
                 permits.append(permit)
                 
             except Exception as e:
-                logger.warning(f"⚠️  Erreur parsing permis {item.get('permit_id', 'N/A')} : {e}")
+                logger.warning(f"[WARNING]  Erreur parsing permis {item.get('permit_id', 'N/A')} : {e}")
                 continue
         
         return permits
@@ -256,7 +256,7 @@ class DDAConnector:
                 changes.append(change)
                 
             except Exception as e:
-                logger.warning(f"⚠️  Erreur parsing zonage {item.get('change_id', 'N/A')} : {e}")
+                logger.warning(f"[WARNING]  Erreur parsing zonage {item.get('change_id', 'N/A')} : {e}")
                 continue
         
         return changes

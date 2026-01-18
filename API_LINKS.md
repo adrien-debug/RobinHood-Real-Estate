@@ -1,50 +1,50 @@
-# 🔗 Liens Directs pour Obtenir les APIs
+# Liens Directs pour Obtenir les APIs
 
-## 📋 Quick Access
+## Quick Access
 
 Tous les liens dont tu as besoin pour obtenir les clés API du stack data optimal.
 
 ---
 
-## 1. Dubai Pulse (DLD Transactions & Rental Index) ✅
+## 1. Dubai Pulse (DLD Transactions & Rental Index) [CONNECTE]
 
 ### Liens principaux
-- **Portal** : https://www.dubaipulse.gov.ae
-- **DLD Transactions API** : https://www.dubaipulse.gov.ae/data/dld-transactions/dld_transactions-open-api
-- **DLD Rental Index API** : https://www.dubaipulse.gov.ae/data/dld-transactions/dld_rental_index-open-api
-- **DLD Buildings API** : https://www.gslb.dubaipulse.gov.ae/data/dld-registration/dld_buildings-open-api
+- Portal : https://www.dubaipulse.gov.ae
+- DLD Transactions API : https://www.dubaipulse.gov.ae/data/dld-transactions/dld_transactions-open-api
+- DLD Rental Index API : https://www.dubaipulse.gov.ae/data/dld-transactions/dld_rental_index-open-api
+- DLD Buildings API : https://www.gslb.dubaipulse.gov.ae/data/dld-registration/dld_buildings-open-api
 
 ### Contact
-- **Email** : info@dubaipulse.gov.ae
-- **Support** : Via formulaire sur le site
+- Email : info@dubaipulse.gov.ae
+- Support : Via formulaire sur le site
 
 ### Statut
-✅ **Déjà connecté** - Vérifier que les clés fonctionnent
+[CONNECTE] Deja connecte - Verifier que les cles fonctionnent
 
 ---
 
-## 2. Bayut API (Lead Indicators) 🆕
+## 2. Bayut API (Lead Indicators) [NOUVEAU]
 
 ### Liens principaux
-- **Partnerships** : https://www.bayut.com/partnerships
-- **Contact** : https://www.bayut.com/contact-us
-- **Site principal** : https://www.bayut.com
+- Partnerships : https://www.bayut.com/partnerships
+- Contact : https://www.bayut.com/contact-us
+- Site principal : https://www.bayut.com
 
 ### Contact
-- **Email** : partnerships@bayut.com
-- **Téléphone** : +971 4 447 1400
+- Email : partnerships@bayut.com
+- Telephone : +971 4 447 1400
 
 ### Alternative : Smart Indexes
-- **Site** : https://smartindexes.com
-- **API Docs** : https://smartindexes.com/knowledge-base/property-price-indexes-api
-- **Email** : info@smartindexes.com
+- Site : https://smartindexes.com
+- API Docs : https://smartindexes.com/knowledge-base/property-price-indexes-api
+- Email : info@smartindexes.com
 
 ### Statut
-🆕 **Nouveau connecteur** - Accès à obtenir
+[NOUVEAU] Nouveau connecteur - Acces a obtenir
 
 ---
 
-## 3. Makani Geocoding (Matching & Localisation) 🆕
+## 3. Makani Geocoding (Matching & Localisation) [NOUVEAU]
 
 ### Liens principaux
 - **GeoHub Dubai** : https://geohub.dubaipulse.gov.ae
@@ -62,27 +62,27 @@ Tous les liens dont tu as besoin pour obtenir les clés API du stack data optima
 - **Téléphone** : +971 4 221 5555
 
 ### Statut
-🆕 **Nouveau connecteur** - Accès à obtenir
+[NOUVEAU] Nouveau connecteur - Acces a obtenir
 
 ---
 
-## 4. DDA Planning & Zoning (Signaux en avance) 🆕
+## 4. DDA Planning & Zoning (Signaux en avance) [NOUVEAU]
 
 ### Liens principaux
-- **Dubai Municipality Open Data** : https://www.dm.gov.ae/open-data
-- **Open Data Portal** : https://www.dm.gov.ae/open-data2
+- Dubai Municipality Open Data : https://www.dm.gov.ae/open-data
+- Open Data Portal : https://www.dm.gov.ae/open-data2
 
 ### Contact
-- **Email** : dm@dm.gov.ae
-- **Téléphone** : +971 4 221 5555
-- **Support** : Via formulaire sur le site
+- Email : dm@dm.gov.ae
+- Telephone : +971 4 221 5555
+- Support : Via formulaire sur le site
 
 ### Statut
-🆕 **Nouveau connecteur** - Accès à obtenir
+[NOUVEAU] Nouveau connecteur - Acces a obtenir
 
 ---
 
-## 📊 Comparaison des options
+## Comparaison des options
 
 | Source | Officiel | Alternatif | Coût Officiel | Coût Alternatif | Délai Officiel | Délai Alternatif |
 |--------|----------|------------|---------------|-----------------|----------------|------------------|
@@ -93,32 +93,32 @@ Tous les liens dont tu as besoin pour obtenir les clés API du stack data optima
 
 ---
 
-## 🚀 Stratégie recommandée
+## Strategie recommandee
 
 ### Option 1 : Tout officiel (Gratuit mais lent)
-1. ✅ Dubai Pulse (déjà fait)
-2. 🔄 Bayut Partnerships (2-4 semaines)
-3. 🔄 GeoHub Makani (2-8 semaines)
-4. 🔄 Dubai Municipality DDA (2-4 semaines)
+1. [CONNECTE] Dubai Pulse (deja fait)
+2. [EN COURS] Bayut Partnerships (2-4 semaines)
+3. [EN COURS] GeoHub Makani (2-8 semaines)
+4. [EN COURS] Dubai Municipality DDA (2-4 semaines)
 
-**Total** : Gratuit | Délai : 2-8 semaines
+Total : Gratuit | Delai : 2-8 semaines
 
 ---
 
-### Option 2 : Hybride (Rapide et abordable) ⭐ RECOMMANDÉ
-1. ✅ Dubai Pulse (déjà fait)
-2. ⚡ Smart Indexes (Bayut + Makani) - Immédiat
-3. 🔄 Dubai Municipality DDA (2-4 semaines)
+### Option 2 : Hybride (Rapide et abordable) [RECOMMANDE]
+1. [CONNECTE] Dubai Pulse (deja fait)
+2. [RAPIDE] Smart Indexes (Bayut + Makani) - Immediat
+3. [EN COURS] Dubai Municipality DDA (2-4 semaines)
 
-**Total** : ~$199/mois | Délai : Immédiat (sauf DDA)
+Total : ~$199/mois | Delai : Immediat (sauf DDA)
 
 ---
 
 ### Option 3 : Tout Smart Indexes (Le plus rapide)
-1. ✅ Dubai Pulse (déjà fait)
-2. ⚡ Smart Indexes Plan Enterprise (tout inclus)
+1. [CONNECTE] Dubai Pulse (deja fait)
+2. [RAPIDE] Smart Indexes Plan Enterprise (tout inclus)
 
-**Total** : Sur devis (~$500-1000/mois) | Délai : Immédiat
+Total : Sur devis (~$500-1000/mois) | Delai : Immediat
 
 ---
 
@@ -143,7 +143,7 @@ Tous les liens dont tu as besoin pour obtenir les clés API du stack data optima
 
 ---
 
-## 📧 Templates d'emails
+## Templates d'emails
 
 ### Pour Bayut Partnerships
 

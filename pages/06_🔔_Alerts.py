@@ -208,7 +208,7 @@ if alerts:
                 margin-bottom: 1rem;
             ">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span style="font-size: 1.2rem;">{'🚨' if alert['severity'] == 'high' else '⚠️' if alert['severity'] == 'medium' else 'ℹ️'}</span>
+                    <span style="font-size: 1.2rem;">{'[CRITICAL]' if alert['severity'] == 'high' else '[WARNING]' if alert['severity'] == 'medium' else '[INFO]'}</span>
                     <span style="color: {color}; font-weight: 700; font-size: 1rem;">{alert['title']}</span>
                     <span style="background: {color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">{alert['severity'].upper()}</span>
                 </div>

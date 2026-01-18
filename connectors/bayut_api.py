@@ -15,6 +15,7 @@ from loguru import logger
 from core.config import settings
 from core.models import Listing
 from core.utils import normalize_location_name, normalize_rooms_bucket, calculate_price_per_sqft
+from core.api_manager import get_api_status
 
 
 class BayutAPIConnector:
@@ -36,7 +37,7 @@ class BayutAPIConnector:
         self.timeout = 30.0
     
     def fetch_listings(
-        self, 
+        self,
         community: Optional[str] = None,
         property_type: Optional[str] = None,
         status: str = "active",
@@ -44,66 +45,79 @@ class BayutAPIConnector:
     ) -> List[Listing]:
         """
         Récupérer les annonces Bayut
-        
+
         Args:
             community: Filtrer par communauté (ex: "Dubai Marina")
             property_type: Filtrer par type (apartment, villa, townhouse)
             status: Statut (active, sold, rented)
             days_back: Jours en arrière pour les nouvelles annonces
-            
+
         Returns:
             Liste d'annonces
         """
-        if not self.api_key:
-            logger.warning("⚠️  BAYUT_API_KEY non configurée - utilisation de données MOCK")
-            logger.warning("Pour connecter Bayut API : https://www.bayut.com/partnerships")
+        # Utiliser le gestionnaire d'APIs intelligent
+        if get_api_status('bayut'):
+            logger.info("Bayut API disponible - utilisation du mode reel")
+            return self._fetch_real_data(community, property_type, status, days_back)
+        else:
+            logger.info("Bayut API non disponible - utilisation de donnees mock")
             return self._generate_mock_data(community, property_type, days_back)
-        
+
+
+    def _fetch_real_data(
+        self,
+        community: Optional[str],
+        property_type: Optional[str],
+        status: str,
+        days_back: int
+    ) -> List[Listing]:
+        """Récupération des vraies données API"""
+
         try:
             url = f"{self.base_url}/properties"
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             # Paramètres de requête
             params = {
                 "status": status,
                 "purpose": "for-sale",  # Ventes uniquement
                 "limit": 1000
             }
-            
+
             if community:
                 params["location"] = community
-            
+
             if property_type:
                 params["property_type"] = property_type
-            
+
             # Filtrer par date de publication
             if days_back:
                 from_date = (date.today() - timedelta(days=days_back)).isoformat()
                 params["listed_after"] = from_date
-            
-            logger.info(f"🔄 Récupération annonces Bayut : {community or 'toutes zones'}")
-            
+
+            logger.info(f"Recuperation annonces Bayut : {community or 'toutes zones'}")
+
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.get(url, headers=headers, params=params)
                 response.raise_for_status()
                 data = response.json()
-            
+
             listings = self._parse_response(data)
-            logger.info(f"✅ {len(listings)} annonces Bayut récupérées")
+            logger.info(f"{len(listings)} annonces Bayut recuperees")
             return listings
-        
+
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP Bayut API : {e}")
+            logger.error(f"Erreur HTTP Bayut API : {e}")
             if hasattr(e, 'response') and e.response is not None:
-                logger.error(f"Réponse : {e.response.text[:500]}")
-            logger.warning("Fallback sur données MOCK")
+                logger.error(f"Reponse : {e.response.text[:500]}")
+            logger.warning("Fallback sur donnees MOCK")
             return self._generate_mock_data(community, property_type, days_back)
         except Exception as e:
-            logger.error(f"❌ Erreur Bayut API : {e}")
-            logger.warning("Fallback sur données MOCK")
+            logger.error(f"Erreur Bayut API : {e}")
+            logger.warning("Fallback sur donnees MOCK")
             return self._generate_mock_data(community, property_type, days_back)
     
     def _parse_response(self, data: dict) -> List[Listing]:

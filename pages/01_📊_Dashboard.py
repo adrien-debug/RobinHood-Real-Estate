@@ -708,7 +708,7 @@ try:
                     ">
                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
                             <span style="font-size: 1.5rem;">
-                                {'📈' if rec['type'] == 'BUY' else '⏸️' if rec['type'] == 'HOLD' else '📉'}
+                                {'[UP]' if rec['type'] == 'BUY' else '[HOLD]' if rec['type'] == 'HOLD' else '[DOWN]'}
                             </span>
                             <span style="color: {color_map.get(rec['type'], '#6B7280')}; font-weight: 700; font-size: 1rem;">{rec['type']} ({rec['strength']})</span>
                             <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">{rec['timeframe']}</span>
@@ -735,7 +735,7 @@ def generate_ai_insights(opps, kpis_data, brief_data):
     if kpis_data.get('avg_price_sqft', 0) > 1800:
         insights.append({
             'type': 'trend',
-            'icon': '📈',
+            'icon': '[TREND]',
             'title': 'Strong Market',
             'text': f"Avg price at AED {kpis_data.get('avg_price_sqft', 0):,.0f}/sqft indicates seller's market. Consider aggressive bidding on undervalued assets.",
             'action': 'Review FLIP opportunities',
@@ -757,7 +757,7 @@ def generate_ai_insights(opps, kpis_data, brief_data):
         if len(high_score) >= 3:
             insights.append({
                 'type': 'opportunity',
-                'icon': '🎯',
+                'icon': '[TARGET]',
                 'title': f'{len(high_score)} High-Score Deals',
                 'text': f"Multiple opportunities scoring 80+. Focus on {high_score[0].get('community', 'top zones')} for best risk/reward.",
                 'action': 'Prioritize today',
@@ -769,7 +769,7 @@ def generate_ai_insights(opps, kpis_data, brief_data):
         if avg_disc > 15:
             insights.append({
                 'type': 'value',
-                'icon': '💰',
+                'icon': '[VALUE]',
                 'title': 'Deep Value Detected',
                 'text': f"Average {avg_disc:.1f}% discount vs market. Indicates motivated sellers or pricing inefficiencies.",
                 'action': 'Execute quickly',
@@ -782,7 +782,7 @@ def generate_ai_insights(opps, kpis_data, brief_data):
         if 'supply' in risk.lower():
             insights.append({
                 'type': 'risk',
-                'icon': '⚠️',
+                'icon': '[WARNING]',
                 'title': 'Supply Risk',
                 'text': risk[:100] + '...' if len(risk) > 100 else risk,
                 'action': 'Avoid over-leveraging',

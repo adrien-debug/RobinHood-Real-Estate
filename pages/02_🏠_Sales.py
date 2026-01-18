@@ -565,7 +565,7 @@ if transactions:
         # Insight 1: Market positioning
         if dist_analysis['skewness'] > 0.5:
             insights.append({
-                'icon': '📈',
+                'icon': '[TREND]',
                 'title': 'Right-Skewed Market',
                 'text': 'Premium segment driving price distribution. Focus on luxury positioning.',
                 'color': '#10B981'

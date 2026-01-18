@@ -20,6 +20,7 @@ from loguru import logger
 from core.config import settings
 from core.models import MakaniAddress
 from core.utils import normalize_location_name
+from core.api_manager import get_api_status
 
 
 class MakaniGeocodingConnector:
@@ -47,19 +48,31 @@ class MakaniGeocodingConnector:
     ) -> Optional[MakaniAddress]:
         """
         Rechercher une adresse Makani
-        
+
         Args:
             community: Nom de la communauté (ex: "Dubai Marina")
             project: Nom du projet (ex: "Marina Heights")
             building: Nom du bâtiment (ex: "Tower A")
-            
+
         Returns:
             MakaniAddress ou None si non trouvé
         """
-        if not self.api_key:
-            logger.warning("⚠️  MAKANI_API_KEY non configurée - utilisation de données MOCK")
-            logger.warning("Pour connecter Makani API : https://geohub.dubaipulse.gov.ae")
+        # Utiliser le gestionnaire d'APIs intelligent
+        if get_api_status('makani'):
+            logger.info("Makani API disponible - utilisation du mode reel")
+            return self._fetch_real_address(community, project, building)
+        else:
+            logger.info("Makani API non disponible - utilisation de donnees mock")
             return self._generate_mock_address(community, project, building)
+
+
+    def _fetch_real_address(
+        self,
+        community: Optional[str],
+        project: Optional[str],
+        building: Optional[str]
+    ) -> Optional[MakaniAddress]:
+        """Récupération des vraies données API"""
         
         try:
             # Construire la requête de recherche
@@ -87,7 +100,7 @@ class MakaniGeocodingConnector:
                 "limit": 1
             }
             
-            logger.debug(f"🔍 Recherche Makani : {search_query}")
+            logger.debug(f"[SEARCH] Recherche Makani : {search_query}")
             
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.get(url, headers=headers, params=params)
@@ -99,14 +112,14 @@ class MakaniGeocodingConnector:
                 return None
             
             address = self._parse_address(data["results"][0])
-            logger.debug(f"✅ Adresse Makani trouvée : {address.makani_number}")
+            logger.debug(f"[SUCCESS] Adresse Makani trouvée : {address.makani_number}")
             return address
         
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP Makani API : {e}")
+            logger.error(f"[ERROR] Erreur HTTP Makani API : {e}")
             return None
         except Exception as e:
-            logger.error(f"❌ Erreur Makani API : {e}")
+            logger.error(f"[ERROR] Erreur Makani API : {e}")
             return None
     
     def get_by_makani_number(self, makani_number: str) -> Optional[MakaniAddress]:
@@ -120,7 +133,7 @@ class MakaniGeocodingConnector:
             MakaniAddress ou None
         """
         if not self.api_key:
-            logger.warning("⚠️  MAKANI_API_KEY non configurée")
+            logger.warning("[WARNING]  MAKANI_API_KEY non configurée")
             return None
         
         try:
@@ -136,14 +149,14 @@ class MakaniGeocodingConnector:
                 data = response.json()
             
             address = self._parse_address(data)
-            logger.debug(f"✅ Adresse Makani récupérée : {makani_number}")
+            logger.debug(f"[SUCCESS] Adresse Makani récupérée : {makani_number}")
             return address
         
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP Makani API : {e}")
+            logger.error(f"[ERROR] Erreur HTTP Makani API : {e}")
             return None
         except Exception as e:
-            logger.error(f"❌ Erreur Makani API : {e}")
+            logger.error(f"[ERROR] Erreur Makani API : {e}")
             return None
     
     def reverse_geocode(self, latitude: float, longitude: float) -> Optional[MakaniAddress]:
@@ -158,7 +171,7 @@ class MakaniGeocodingConnector:
             MakaniAddress ou None
         """
         if not self.api_key:
-            logger.warning("⚠️  MAKANI_API_KEY non configurée")
+            logger.warning("[WARNING]  MAKANI_API_KEY non configurée")
             return None
         
         try:
@@ -178,14 +191,14 @@ class MakaniGeocodingConnector:
                 data = response.json()
             
             address = self._parse_address(data)
-            logger.debug(f"✅ Reverse geocoding réussi : {address.makani_number}")
+            logger.debug(f"[SUCCESS] Reverse geocoding réussi : {address.makani_number}")
             return address
         
         except httpx.HTTPError as e:
-            logger.error(f"❌ Erreur HTTP Makani API : {e}")
+            logger.error(f"[ERROR] Erreur HTTP Makani API : {e}")
             return None
         except Exception as e:
-            logger.error(f"❌ Erreur Makani API : {e}")
+            logger.error(f"[ERROR] Erreur Makani API : {e}")
             return None
     
     def _parse_address(self, data: dict) -> MakaniAddress:

@@ -1,12 +1,12 @@
-# Guide d'Accès aux APIs - Stack Data Optimal
+# Guide d'Acces aux APIs - Stack Data Optimal
 
-## 🎯 Vue d'ensemble
+## Vue d'ensemble
 
-Ce guide te montre **exactement comment obtenir les clés API** pour chaque source de données du stack optimal.
+Ce guide te montre exactement comment obtenir les cles API pour chaque source de donnees du stack optimal.
 
 ---
 
-## 1. DLD Transactions & Rental Index (Dubai Pulse) ✅
+## 1. DLD Transactions & Rental Index (Dubai Pulse) [CONNECTE]
 
 **Statut** : Déjà connecté, mais voici comment obtenir/renouveler l'accès.
 
@@ -41,12 +41,12 @@ Ce guide te montre **exactement comment obtenir les clés API** pour chaque sour
 
 ### APIs disponibles avec ces credentials
 
-- ✅ `dld_transactions-open-api` (transactions immobilières)
-- ✅ `dld_rental_index-open-api` (index locatif)
-- ✅ `dld_buildings-open-api` (bâtiments)
-- ✅ `dld_residential_sale_index-open-api` (index de vente)
-- ✅ `dld_lkp_areas-open-api` (zones/communautés)
-- ✅ `dld_lkp_transaction_procedures-open-api` (types de transactions)
+- [CONNECTE] dld_transactions-open-api (transactions immobilieres)
+- [CONNECTE] dld_rental_index-open-api (index locatif)
+- [CONNECTE] dld_buildings-open-api (batiments)
+- [CONNECTE] dld_residential_sale_index-open-api (index de vente)
+- [CONNECTE] dld_lkp_areas-open-api (zones/communautes)
+- [CONNECTE] dld_lkp_transaction_procedures-open-api (types de transactions)
 
 ### Authentification OAuth 2.0
 
@@ -62,7 +62,7 @@ Notre connecteur gère automatiquement l'authentification :
 
 ---
 
-## 2. Bayut API (Lead Indicators) 🆕
+## 2. Bayut API (Lead Indicators) [NOUVEAU]
 
 **Statut** : Nouveau connecteur créé, accès à obtenir.
 
@@ -143,7 +143,7 @@ listings = bayut.fetch_listings()  # Retourne données MOCK
 
 ---
 
-## 3. Makani Geocoding (Matching & Localisation) 🆕
+## 3. Makani Geocoding (Matching & Localisation) [NOUVEAU]
 
 **Statut** : Nouveau connecteur créé, accès à obtenir.
 
@@ -221,7 +221,7 @@ address = makani.search_address("Dubai Marina", "Marina Heights", "Tower A")
 
 ---
 
-## 4. DDA Planning & Zoning (Signaux en avance) 🆕
+## 4. DDA Planning & Zoning (Signaux en avance) [NOUVEAU]
 
 **Statut** : Nouveau connecteur créé, accès à obtenir.
 
@@ -306,13 +306,13 @@ permits = dda.fetch_building_permits(days_back=90)
 
 ### Phase 1 : Immédiat (0-7 jours)
 
-1. ✅ **Dubai Pulse (DLD)** - Déjà connecté
-   - Vérifier que les clés fonctionnent
+1. [CONNECTE] Dubai Pulse (DLD) - Deja connecte
+   - Verifier que les cles fonctionnent
    - Tester les APIs en production
 
-2. 🔄 **Mode MOCK pour les autres**
+2. [MOCK] Mode MOCK pour les autres
    - Tous les nouveaux connecteurs fonctionnent en MOCK
-   - Permet de tester l'intégration immédiatement
+   - Permet de tester l'integration immediatement
 
 ### Phase 2 : Court terme (1-4 semaines)
 
@@ -368,14 +368,14 @@ permits = dda.fetch_building_permits(days_back=90)
 
 ## 8. Checklist de configuration
 
-### ✅ Avant de demander l'accès
+### Avant de demander l'acces
 
 - [ ] Préparer une description claire du projet
 - [ ] Définir le volume estimé de requêtes/jour
 - [ ] Confirmer l'usage non-commercial (si applicable)
 - [ ] Préparer les coordonnées de l'organisation
 
-### ✅ Après réception des clés
+### Apres reception des cles
 
 - [ ] Ajouter les clés dans `.env`
 - [ ] Tester les connecteurs en mode réel
@@ -383,7 +383,7 @@ permits = dda.fetch_building_permits(days_back=90)
 - [ ] Configurer le cache si nécessaire
 - [ ] Monitorer les erreurs dans les logs
 
-### ✅ Maintenance continue
+### Maintenance continue
 
 - [ ] Surveiller l'expiration des tokens
 - [ ] Renouveler les clés si nécessaire
@@ -463,4 +463,4 @@ Cordialement,
 
 **Dernière mise à jour** : 2026-01-17  
 **Version** : 1.0  
-**Statut** : ✅ Guide complet prêt
+Statut : [TERMINE] Guide complet pret

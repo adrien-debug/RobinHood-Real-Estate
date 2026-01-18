@@ -651,7 +651,7 @@ if opportunities:
                 ">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
                         <span style="font-size: 1.5rem;">
-                            {'🚀' if recommendation['action'] == 'AGGRESSIVE_BUY' else '✅' if recommendation['action'] == 'BUY' else '👀' if recommendation['action'] == 'MONITOR' else '❌'}
+                            {'[AGGRESSIVE]' if recommendation['action'] == 'AGGRESSIVE_BUY' else '[BUY]' if recommendation['action'] == 'BUY' else '[MONITOR]' if recommendation['action'] == 'MONITOR' else '[AVOID]'}
                         </span>
                         <span style="color: {color}; font-weight: 700; font-size: 1.1rem;">{recommendation['action'].replace('_', ' ')}</span>
                     </div>
