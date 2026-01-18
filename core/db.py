@@ -40,6 +40,7 @@ class Database:
         parsed = urlparse(self.connection_string)
         host = parsed.hostname or ""
         user = parsed.username or ""
+        local_hosts = {"localhost", "127.0.0.1", "::1"}
 
         if host.endswith(".pooler.supabase.com"):
             if user == "postgres" or not user.startswith("postgres."):
@@ -58,6 +59,12 @@ class Database:
                     "DATABASE_URL Supabase (db.*) avec user inattendu. "
                     "Attendu: postgres ou postgres.<PROJECT_REF>."
                 )
+
+        if host in local_hosts and settings.table_prefix:
+            logger.warning(
+                "DATABASE_URL local détecté avec TABLE_PREFIX non vide. "
+                "Pour une DB locale, TABLE_PREFIX devrait être vide."
+            )
 
     def connect(self):
         """Établir la connexion"""
@@ -79,23 +86,40 @@ class Database:
                 
                 self._validate_connection_string()
                 self._connection = psycopg.connect(self.connection_string)
-                # Try to set search_path to robin schema (Supabase), fallback to public only
-                try:
-                    with self._connection.cursor() as cur:
-                        # Check if robin schema exists
-                        cur.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'robin'")
-                        if cur.fetchone():
-                            cur.execute("SET search_path TO robin, public")
-                            logger.info("Search path défini sur robin, public")
-                        else:
-                            logger.info("Schéma robin non trouvé, utilisation de public")
-                    self._connection.commit()
-                except Exception as e:
-                    logger.warning(f"Vérification schéma: {e}")
+                # Configure search_path based on host type
+                parsed = urlparse(self.connection_string)
+                host = parsed.hostname or ""
+                local_hosts = {"localhost", "127.0.0.1", "::1"}
+                if host in local_hosts:
                     try:
-                        self._connection.rollback()
-                    except Exception:
-                        pass
+                        with self._connection.cursor() as cur:
+                            cur.execute("SET search_path TO public")
+                        self._connection.commit()
+                        logger.info("Search path défini sur public (DB locale)")
+                    except Exception as e:
+                        logger.warning(f"Search path local: {e}")
+                        try:
+                            self._connection.rollback()
+                        except Exception:
+                            pass
+                else:
+                    # Try to set search_path to robin schema (Supabase), fallback to public only
+                    try:
+                        with self._connection.cursor() as cur:
+                            # Check if robin schema exists
+                            cur.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'robin'")
+                            if cur.fetchone():
+                                cur.execute("SET search_path TO robin, public")
+                                logger.info("Search path défini sur robin, public")
+                            else:
+                                logger.info("Schéma robin non trouvé, utilisation de public")
+                        self._connection.commit()
+                    except Exception as e:
+                        logger.warning(f"Vérification schéma: {e}")
+                        try:
+                            self._connection.rollback()
+                        except Exception:
+                            pass
                 logger.info("Connexion PostgreSQL établie")
             except psycopg.OperationalError as e:
                 error_msg = (

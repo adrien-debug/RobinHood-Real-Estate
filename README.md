@@ -151,9 +151,10 @@ cp env.example .env
 #### 3. Configuration PostgreSQL
 
 ```bash
-# Option A : PostgreSQL local
+# Option A : PostgreSQL local (direct)
 createdb dubai_real_estate
 DATABASE_URL=postgresql://user:password@localhost:5432/dubai_real_estate
+TABLE_PREFIX=
 
 # Option B : Supabase (recommandé)
 # Utilise le même DATABASE_URL que Streamlit Cloud
@@ -426,13 +427,18 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.2.3  
+**Version** : 1.2.4  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (Navigation simplifiée)
+**Status** : ✅ Opérationnel (DB locale directe)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.2.4 (2026-01-18) - DB locale directe
+- **Fix** : Search path forcé sur `public` en local
+- **Fix** : Warning si `TABLE_PREFIX` non vide en local
+- **Doc** : Ajout `TABLE_PREFIX` dans `env.example`
 
 ### v1.2.3 (2026-01-18) - Navigation
 - **Fix** : Suppression de la grille de boutons sur la page d'accueil pour éviter le menu en double
