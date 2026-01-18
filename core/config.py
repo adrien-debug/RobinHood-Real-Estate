@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     # Zyla Labs UAE Real Estate API
     zylalabs_api_key: str = get_secret("ZYLALABS_API_KEY", "")
     
+    # UAE Real Estate Data-Real Time API via RapidAPI
+    uae_realtime_api_key: str = get_secret("UAE_REALTIME_API_KEY", "")
+    
     # Makani Geocoding (Dubai Municipality)
     makani_api_key: str = get_secret("MAKANI_API_KEY", "")
     makani_api_url: str = get_secret("MAKANI_API_URL", "https://api.dubaipulse.gov.ae/makani")

@@ -235,3 +235,11 @@ class Database:
 
 # Instance globale
 db = Database()
+
+
+def get_db_connection():
+    """
+    Obtenir une connexion à la base de données
+    Compatible avec les anciens scripts
+    """
+    return db.connect()

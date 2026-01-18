@@ -235,6 +235,75 @@ class BayutAPIConnector:
             logger.error(f"Erreur Bayut transactions : {e}")
             return []
     
+    def search_properties(
+        self,
+        location: Optional[str] = None,
+        purpose: str = "for-sale",
+        category: str = "residential",
+        developer_ids: Optional[List[int]] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        beds: Optional[int] = None,
+        limit: int = 20
+    ) -> List[Dict]:
+        """
+        Rechercher des propriétés sur Bayut
+        
+        Args:
+            location: Nom de la localisation
+            purpose: "for-sale" ou "for-rent"
+            category: "residential" ou "commercial"
+            developer_ids: Liste d'IDs de développeurs
+            price_min: Prix minimum
+            price_max: Prix maximum
+            beds: Nombre de chambres
+            limit: Nombre max de résultats
+            
+        Returns:
+            Liste de propriétés
+        """
+        if not self.api_key:
+            logger.warning("BAYUT_API_KEY non configurée")
+            return []
+        
+        try:
+            url = f"{self.base_url}/properties_search"
+            headers = self._get_headers()
+            
+            body = {
+                "purpose": purpose,
+                "category": category,
+                "index": "latest"
+            }
+            
+            if developer_ids:
+                body["developer_ids"] = developer_ids
+            
+            if price_min:
+                body["price_min"] = price_min
+            if price_max:
+                body["price_max"] = price_max
+            
+            if beds:
+                body["beds"] = beds
+            
+            params = {"page": 0}
+            
+            logger.info(f"Recherche propriétés Bayut : {location or 'toutes zones'}")
+            
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(url, headers=headers, json=body, params=params)
+                response.raise_for_status()
+                data = response.json()
+            
+            results = data.get("results", [])[:limit]
+            logger.info(f"{len(results)} propriétés trouvées")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Erreur recherche propriétés Bayut : {e}")
+            return []
+    
     def search_locations(self, query: str, page: int = 0) -> List[Dict]:
         """
         Rechercher des localisations par nom
@@ -304,6 +373,7 @@ class BayutAPIConnector:
     
     def search_new_projects(
         self,
+        location: Optional[str] = None,
         categories: Optional[List[str]] = None,
         location_ids: Optional[List[int]] = None,
         developer_ids: Optional[List[int]] = None,
@@ -313,6 +383,7 @@ class BayutAPIConnector:
         price_max: Optional[float] = None,
         area_min: Optional[float] = None,
         area_max: Optional[float] = None,
+        limit: int = 20,
         completion_date: Optional[str] = None,
         max_prehandover_percent: Optional[int] = None,
         page: int = 0
@@ -321,6 +392,7 @@ class BayutAPIConnector:
         Rechercher les nouveaux projets immobiliers (off-plan)
         
         Args:
+            location: Nom de la localisation (ignoré, utilisez location_ids)
             categories: villas, apartments, townhouses, penthouse, etc.
             location_ids: IDs de localisation
             developer_ids: IDs des promoteurs
@@ -328,6 +400,7 @@ class BayutAPIConnector:
             rooms: Liste de chambres autorisées [0,1,2,3]
             price_min/max: Fourchette de prix AED
             area_min/max: Fourchette de surface sqft
+            limit: Nombre max de résultats
             completion_date: Date de complétion (DD-MM-YYYY)
             max_prehandover_percent: % max avant remise des clés
             page: Page de résultats
@@ -375,7 +448,7 @@ class BayutAPIConnector:
                 response.raise_for_status()
                 data = response.json()
             
-            results = data.get("results", [])
+            results = data.get("results", [])[:limit]
             logger.info(f"{len(results)} projets off-plan trouvés")
             return results
             

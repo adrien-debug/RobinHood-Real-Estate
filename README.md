@@ -41,6 +41,7 @@ dubai-real-estate-intelligence/
 │   ├── propertyfinder_api.py       # PropertyFinder API
 │   ├── zylalabs_api.py             # Zyla Labs API
 │   ├── emaar_helper.py             # Helper Emaar (projets, listings, transactions)
+│   ├── uae_realtime_api.py         # UAE Real Estate Data-Real Time API
 │   ├── developers_pipeline.py      # Pipeline développeurs
 │   └── listings_placeholder.py     # Annonces (API autorisée)
 │
@@ -226,9 +227,10 @@ python realtime/poller.py
 2. **Bayut API** ✅ **Connecté** - 15 endpoints (annonces, transactions, projets, agents, agences, promoteurs)
 3. **PropertyFinder API** ✅ **Connecté** - 500K+ listings UAE
 4. **Zyla Labs API** ✅ **Connecté** - Market stats, recherche, propriétés récentes
-5. **Emaar Helper** ✅ **Nouveau** - Accès direct aux données Emaar (projets, listings, transactions)
-6. **DLD Rental Index API** 🔄 **À activer** - Rendement & pression locative
-7. **Makani + GeoHub** 🆕 **Nouveau** - Matching + scoring localisation
+5. **UAE RealTime API** ✅ **Connecté** - Agents directory, propriétés temps réel, transactions
+6. **Emaar Helper** ✅ **Nouveau** - Accès direct aux données Emaar (projets, listings, transactions)
+7. **DLD Rental Index API** 🔄 **À activer** - Rendement & pression locative
+8. **Makani + GeoHub** 🆕 **Nouveau** - Matching + scoring localisation
 
 **Mini check-list "anti faux signaux"** :
 - ✅ Transactions ≠ Listings : les "bons coups" se confirment sur DLD closings, pas sur annonces
@@ -433,13 +435,20 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.3.1  
+**Version** : 1.3.2  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (3 APIs + 25+ endpoints + Helper Emaar)
+**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + Helper Emaar)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.3.2 (2026-01-18) - UAE RealTime API
+- **Nouveau** : `connectors/uae_realtime_api.py` - UAE Real Estate Data-Real Time API
+- **Nouveau** : Agents directory temps réel
+- **Nouveau** : Properties search temps réel  
+- **Nouveau** : Transactions temps réel
+- **Config** : Ajout `UAE_REALTIME_API_KEY`
 
 ### v1.3.1 (2026-01-18) - Emaar Helper
 - **Nouveau** : `connectors/emaar_helper.py` - Helper centralisé pour données Emaar
