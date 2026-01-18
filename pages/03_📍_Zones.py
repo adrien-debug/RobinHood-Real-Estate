@@ -21,29 +21,70 @@ apply_plecto_style()
 
 def calculate_zone_volatility(price_history, window=7):
     """Calculate price volatility for a zone"""
-    if len(price_history) < window:
+    if not price_history or len(price_history) < window:
         return 0
 
-    prices = [p['avg_price'] for p in price_history]
-    returns = np.diff(prices) / prices[:-1]
-    volatility = np.std(returns) * np.sqrt(252)  # Annualized volatility
-    return volatility
+    # Extract and validate prices
+    prices = []
+    for p in price_history:
+        price = p.get('avg_price')
+        if price is not None and isinstance(price, (int, float)) and price > 0:
+            prices.append(float(price))
+
+    if len(prices) < window:
+        return 0
+
+    try:
+        returns = np.diff(prices) / prices[:-1]
+        if len(returns) > 0:
+            volatility = np.std(returns) * np.sqrt(252)  # Annualized volatility
+            return volatility
+        else:
+            return 0
+    except (ZeroDivisionError, ValueError, TypeError):
+        return 0
 
 def predict_zone_performance(zone_data, periods=3):
     """Predict zone performance using trend analysis"""
     if not zone_data or len(zone_data) < 3:
         return {}
 
-    # Extract price series
-    prices = [d.get('avg_price', 0) for d in zone_data if d.get('avg_price')]
-    volumes = [d.get('count', 0) for d in zone_data if d.get('count')]
+    # Extract price series - ensure all values are numeric and valid
+    prices = []
+    volumes = []
+
+    for d in zone_data:
+        price = d.get('avg_price')
+        if price is not None and isinstance(price, (int, float)) and price > 0:
+            prices.append(float(price))
+
+        volume = d.get('count')
+        if volume is not None and isinstance(volume, (int, float)) and volume >= 0:
+            volumes.append(float(volume))
 
     if len(prices) < 3:
         return {}
 
-    # Calculate trends
-    price_trend = np.polyfit(range(len(prices)), prices, 1)[0]
-    volume_trend = np.polyfit(range(len(volumes)), volumes, 1)[0] if volumes else 0
+    # Ensure all prices are valid numbers
+    try:
+        prices = [float(p) for p in prices if p is not None and p > 0]
+        volumes = [float(v) for v in volumes if v is not None and v >= 0]
+    except (ValueError, TypeError):
+        return {}
+
+    if len(prices) < 3:
+        return {}
+
+    # Calculate trends with error handling
+    try:
+        price_trend = np.polyfit(range(len(prices)), prices, 1)[0]
+    except (np.RankWarning, ValueError, TypeError):
+        price_trend = 0.0
+
+    try:
+        volume_trend = np.polyfit(range(len(volumes)), volumes, 1)[0] if len(volumes) >= 2 else 0
+    except (np.RankWarning, ValueError, TypeError):
+        volume_trend = 0.0
 
     # Generate predictions
     last_price = prices[-1]

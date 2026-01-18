@@ -36,7 +36,10 @@ def calculate_volume_correlations(volume_data):
     # Volume trend analysis
     if len(df) >= 7:
         volumes = df['volume'].values
-        correlations['volume_trend'] = np.polyfit(range(len(volumes)), volumes, 1)[0]
+        try:
+            correlations['volume_trend'] = np.polyfit(range(len(volumes)), volumes, 1)[0]
+        except (np.RankWarning, ValueError, TypeError):
+            correlations['volume_trend'] = 0.0
 
     return correlations
 
@@ -58,7 +61,10 @@ def predict_price_trends(historical_data, days_ahead=30):
             smoothed.append(alpha * prices[i] + (1 - alpha) * smoothed[-1])
 
         # Trend calculation
-        trend = np.polyfit(range(len(smoothed)), smoothed, 1)[0]
+        try:
+            trend = np.polyfit(range(len(smoothed)), smoothed, 1)[0]
+        except (np.RankWarning, ValueError, TypeError):
+            trend = 0.0
 
         # Generate predictions
         last_price = smoothed[-1]

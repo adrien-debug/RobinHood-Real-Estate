@@ -34,12 +34,29 @@ def analyze_market_cycles():
     if len(cycle_data) < 12:
         return {'current_phase': 'INSUFFICIENT_DATA', 'confidence': 0}
 
-    prices = [d['avg_price'] for d in cycle_data]
-    volumes = [d['volume'] for d in cycle_data]
+    # Extract and validate prices and volumes
+    prices = []
+    volumes = []
+
+    for d in cycle_data:
+        price = d.get('avg_price')
+        if price is not None and isinstance(price, (int, float)) and price > 0:
+            prices.append(float(price))
+
+        volume = d.get('volume')
+        if volume is not None and isinstance(volume, (int, float)) and volume >= 0:
+            volumes.append(float(volume))
+
+    if len(prices) < 6 or len(volumes) < 2:
+        return {'current_phase': 'INSUFFICIENT_DATA', 'confidence': 0}
 
     # Calculate cycle indicators
     price_momentum = (prices[-1] - prices[-6]) / prices[-6] if len(prices) >= 6 else 0
-    volume_trend = np.polyfit(range(len(volumes)), volumes, 1)[0]
+
+    try:
+        volume_trend = np.polyfit(range(len(volumes)), volumes, 1)[0]
+    except (np.RankWarning, ValueError, TypeError):
+        volume_trend = 0.0
 
     # Determine market phase
     if price_momentum > 0.05 and volume_trend > 0:
