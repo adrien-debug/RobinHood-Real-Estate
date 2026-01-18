@@ -536,7 +536,7 @@ Accès : `http://localhost:3000`
 | Sales | `/sales` | Transactions, analytics, tendances |
 | Zones | `/zones` | Analyse par zone, heatmap, signaux |
 | Radar | `/radar` | Opportunités scorées, signaux trading |
-| Yield | `/yield` | Rendements locatifs par zone |
+| Yield | `/yield` | Rendements locatifs par zone (données réelles + estimées) |
 | Alerts | `/alerts` | Notifications marché |
 | Insights | `/insights` | Intelligence marché, RSI, prédictions |
 | Admin | `/admin` | Configuration, pipeline, status |

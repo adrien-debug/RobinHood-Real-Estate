@@ -16,11 +16,16 @@ interface YieldData {
     estimated_rent: number
     gross_yield: number
     transaction_count: number
+    data_source?: string
+    rent_data_available?: boolean
   }>
   summary: {
     avg_yield: number
     max_yield: number
     min_yield: number
+    zones_with_real_data?: number
+    zones_with_estimated_data?: number
+    total_zones?: number
   }
 }
 
@@ -36,31 +41,28 @@ export default function YieldPage() {
   const fetchYieldData = async () => {
     try {
       setLoading(true)
-      // Fetch zones data and calculate yields
-      const res = await fetch('/api/zones')
+      const res = await fetch('/api/yield')
       const json = await res.json()
       
-      // Calculate estimated yields (using typical Dubai ratios)
-      const zonesWithYield = (json.zones || []).map((z: { community: string; avg_price_sqft: number; transaction_count: number }) => {
-        // Estimate annual rent as percentage of price (typical 5-8% for Dubai)
-        const estimatedRentPerSqft = z.avg_price_sqft * 0.06 // 6% base yield
-        const grossYield = (estimatedRentPerSqft / z.avg_price_sqft) * 100
-        return {
-          ...z,
-          estimated_rent: estimatedRentPerSqft,
-          gross_yield: grossYield + (Math.random() * 2 - 1) // Add some variation
-        }
-      })
+      if (json.error) {
+        console.error('Yield API error:', json.error)
+        return
+      }
 
-      const yields = zonesWithYield.map((z: { gross_yield: number }) => z.gross_yield)
+      // Map API response to component state
+      const zonesWithYield = (json.zones || []).map((z: any) => ({
+        community: z.community,
+        avg_price_sqft: z.avg_price_sqft,
+        estimated_rent: z.monthly_rent,
+        gross_yield: z.gross_yield,
+        transaction_count: z.transaction_count,
+        data_source: z.data_source,
+        rent_data_available: z.rent_data_available
+      }))
       
       setData({
         zones: zonesWithYield,
-        summary: {
-          avg_yield: yields.length > 0 ? yields.reduce((a: number, b: number) => a + b, 0) / yields.length : 0,
-          max_yield: yields.length > 0 ? Math.max(...yields) : 0,
-          min_yield: yields.length > 0 ? Math.min(...yields) : 0
-        }
+        summary: json.summary
       })
     } catch (err) {
       console.error('Failed to fetch yield data:', err)
@@ -96,7 +98,9 @@ export default function YieldPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-text-primary">Rental Yield Analysis</h1>
-        <p className="text-text-muted text-sm mt-1">Estimated gross yields by zone</p>
+        <p className="text-text-muted text-sm mt-1">
+          Gross yields by zone • {summary.zones_with_real_data || 0} zones with real rental data, {summary.zones_with_estimated_data || 0} estimated
+        </p>
       </div>
 
       {/* KPIs */}
@@ -166,7 +170,12 @@ export default function YieldPage() {
               <tbody>
                 {topYieldZones.map((zone, index) => (
                   <tr key={index}>
-                    <td className="font-medium text-text-primary">{zone.community}</td>
+                    <td>
+                      <div className="font-medium text-text-primary">{zone.community}</div>
+                      {zone.rent_data_available && (
+                        <div className="text-xs text-success">✓ Real data</div>
+                      )}
+                    </td>
                     <td>{Math.round(zone.avg_price_sqft).toLocaleString()} AED</td>
                     <td>{Math.round(zone.estimated_rent).toLocaleString()} AED</td>
                     <td className="text-success font-semibold">
@@ -236,7 +245,12 @@ export default function YieldPage() {
             <tbody>
               {zones.map((zone, index) => (
                 <tr key={index}>
-                  <td className="font-medium text-text-primary">{zone.community}</td>
+                  <td>
+                    <div className="font-medium text-text-primary">{zone.community}</div>
+                    {zone.rent_data_available && (
+                      <div className="text-xs text-success">✓ Real rental data</div>
+                    )}
+                  </td>
                   <td>{Math.round(zone.avg_price_sqft).toLocaleString()} AED</td>
                   <td>{Math.round(zone.estimated_rent * 12).toLocaleString()} AED</td>
                   <td className={zone.gross_yield >= 6 ? 'text-success' : zone.gross_yield >= 5 ? 'text-accent' : 'text-warning'}>
