@@ -227,32 +227,137 @@ except Exception as e:
     st.error(f"Error: {str(e)}")
     st.stop()
 
-# === KPIs ROW - 6 symmetric cards ===
+# === KPIs ROW - 6 symmetric cards (Transaction Focus) ===
 kpis = data.get('kpis') or {}
-num_deals = kpis.get('transactions_count') or 0
-avg_price = (kpis.get('avg_price_sqft') or 0) / 1000
-opportunities = kpis.get('opportunities_count') or 0
-avg_score = kpis.get('avg_opportunity_score') or 0
+tx_today = kpis.get('transactions_today') or 0
+tx_7d = kpis.get('transactions_7d') or 0
+tx_30d = kpis.get('transactions_30d') or 0
+volume_30d = (kpis.get('volume_30d') or 0) / 1_000_000_000  # En milliards
+median_price = (kpis.get('median_price_sqft') or kpis.get('avg_price_sqft') or 0)
+variation = kpis.get('variation_7d_pct') or 0
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
-    st.markdown(kpi_card("Deals", "This month", str(num_deals)), unsafe_allow_html=True)
+    st.markdown(kpi_card("Today", "Transactions", str(tx_today)), unsafe_allow_html=True)
 
 with col2:
-    st.markdown(kpi_card("Avg Price", "AED/sqft", f"{avg_price:.1f}k"), unsafe_allow_html=True)
+    st.markdown(kpi_card("7 Days", "Transactions", str(tx_7d)), unsafe_allow_html=True)
 
 with col3:
-    st.markdown(kpi_card("Opportunities", "Active", str(opportunities)), unsafe_allow_html=True)
+    st.markdown(kpi_card("30 Days", "Transactions", str(tx_30d)), unsafe_allow_html=True)
 
 with col4:
-    st.markdown(kpi_card("Avg Score", "Quality", f"{avg_score:.0f}%", "green"), unsafe_allow_html=True)
+    st.markdown(kpi_card("Volume 30D", "AED Billion", f"{volume_30d:.2f}B"), unsafe_allow_html=True)
 
 with col5:
-    st.markdown(kpi_card("Alerts", "Active", "12"), unsafe_allow_html=True)
+    st.markdown(kpi_card("Median Price", "AED/sqft", f"{median_price:,.0f}"), unsafe_allow_html=True)
 
 with col6:
-    st.markdown(kpi_card("Yield", "Average", "7.2%", "accent"), unsafe_allow_html=True)
+    trend_color = "green" if variation > 0 else "red" if variation < 0 else "accent"
+    st.markdown(kpi_card("Trend 7D", "vs prev week", f"{variation:+.1f}%", trend_color), unsafe_allow_html=True)
+
+st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+
+# === TOP NEIGHBORHOODS & PROPERTY TYPES ===
+st.markdown('<div class="section-title">Market Activity - Top Neighborhoods & Property Types</div>', unsafe_allow_html=True)
+
+col_neigh, col_types = st.columns(2)
+
+# Top Neighborhoods
+with col_neigh:
+    st.markdown('<div class="section-subtitle">Top 10 Neighborhoods (30 days)</div>', unsafe_allow_html=True)
+    
+    neighborhoods = data.get('top_neighborhoods', [])
+    if neighborhoods:
+        # Préparer les données
+        neigh_names = [n.get('community', 'Unknown')[:20] for n in neighborhoods[:10]]
+        neigh_counts = [n.get('transaction_count', 0) for n in neighborhoods[:10]]
+        neigh_prices = [n.get('avg_price_sqft', 0) for n in neighborhoods[:10]]
+        
+        # Graphique barres horizontales
+        fig_neigh = go.Figure()
+        
+        fig_neigh.add_trace(go.Bar(
+            y=neigh_names[::-1],
+            x=neigh_counts[::-1],
+            orientation='h',
+            marker_color='#10B981',
+            text=[f"{c} tx" for c in neigh_counts[::-1]],
+            textposition='outside',
+            textfont=dict(color='#FFFFFF', size=11),
+            hovertemplate='<b>%{y}</b><br>Transactions: %{x}<br>Avg Price: %{customdata:,.0f} AED/sqft<extra></extra>',
+            customdata=neigh_prices[::-1]
+        ))
+        
+        fig_neigh.update_layout(
+            height=350,
+            margin=dict(l=10, r=60, t=10, b=10),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='rgba(255,255,255,0.7)', size=10),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)', title=''),
+            yaxis=dict(gridcolor='rgba(0,0,0,0)', tickfont=dict(size=10))
+        )
+        
+        st.plotly_chart(fig_neigh, use_container_width=True)
+    else:
+        st.info("No neighborhood data available")
+
+# Property Types
+with col_types:
+    st.markdown('<div class="section-subtitle">Best Selling Property Types (30 days)</div>', unsafe_allow_html=True)
+    
+    property_types = data.get('property_types', {})
+    rooms_data = property_types.get('by_rooms', [])
+    
+    if rooms_data:
+        # Filtrer les Unknown et trier
+        rooms_filtered = [r for r in rooms_data if r.get('rooms_bucket') and r.get('rooms_bucket') != 'Unknown']
+        
+        if rooms_filtered:
+            room_names = [r.get('rooms_bucket', 'Other') for r in rooms_filtered]
+            room_counts = [r.get('count', 0) for r in rooms_filtered]
+            room_prices = [r.get('avg_price_sqft', 0) for r in rooms_filtered]
+            
+            # Double axe : barres pour count, ligne pour prix
+            fig_types = go.Figure()
+            
+            # Barres pour le nombre de transactions
+            fig_types.add_trace(go.Bar(
+                x=room_names,
+                y=room_counts,
+                name='Transactions',
+                marker_color=['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][:len(room_names)],
+                text=room_counts,
+                textposition='outside',
+                textfont=dict(color='#FFFFFF', size=12)
+            ))
+            
+            fig_types.update_layout(
+                height=350,
+                margin=dict(l=10, r=10, t=10, b=30),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='rgba(255,255,255,0.7)', size=11),
+                xaxis=dict(gridcolor='rgba(0,0,0,0)'),
+                yaxis=dict(gridcolor='rgba(255,255,255,0.05)', title='Transactions'),
+                showlegend=False,
+                bargap=0.3
+            )
+            
+            st.plotly_chart(fig_types, use_container_width=True)
+            
+            # Tableau récapitulatif
+            type_df = pd.DataFrame({
+                'Type': room_names,
+                'Transactions': room_counts,
+                'Avg Price (AED/sqft)': [f"{p:,.0f}" for p in room_prices],
+                'Share %': [f"{c/sum(room_counts)*100:.1f}%" for c in room_counts]
+            })
+            st.dataframe(type_df, use_container_width=True, hide_index=True, height=150)
+    else:
+        st.info("No property type data available")
 
 st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 

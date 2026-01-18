@@ -1,8 +1,10 @@
 """
-Refresher pour Streamlit
+Refresher pour Streamlit - Dashboard Data Provider
+
+Fournit les données pour le dashboard avec cache intelligent.
 """
-from datetime import date
-from typing import Dict, Any
+from datetime import date, timedelta
+from typing import Dict, Any, List
 from loguru import logger
 from core.db import db
 from realtime.cache import cache
@@ -25,9 +27,12 @@ class DataRefresher:
         if cached:
             return cached
         
-        # Récupérer les données
+        # Récupérer les données enrichies
         data = {
             'kpis': DataRefresher._get_kpis(target_date),
+            'transaction_stats': DataRefresher._get_transaction_stats(target_date),
+            'top_neighborhoods': DataRefresher._get_top_neighborhoods(target_date),
+            'property_types': DataRefresher._get_property_types_breakdown(target_date),
             'top_opportunities': DataRefresher._get_top_opportunities(target_date),
             'regimes': DataRefresher._get_regimes(target_date),
             'brief': DataRefresher._get_daily_brief(target_date)
@@ -40,26 +45,182 @@ class DataRefresher:
     
     @staticmethod
     def _get_kpis(target_date: date) -> Dict:
-        """KPIs principaux"""
-        query_tx = """
-        SELECT COUNT(*) as count, AVG(price_per_sqft) as avg_price
+        """KPIs principaux enrichis"""
+        # Transactions aujourd'hui
+        query_today = """
+        SELECT COUNT(*) as count, 
+               COALESCE(AVG(price_per_sqft), 0) as avg_price,
+               COALESCE(SUM(price_aed), 0) as volume
         FROM transactions
         WHERE transaction_date = %s
         """
-        tx_data = db.execute_query(query_tx, (target_date,))
+        today_data = db.execute_query(query_today, (target_date,))
         
+        # Transactions 7 jours
+        query_7d = """
+        SELECT COUNT(*) as count, 
+               COALESCE(AVG(price_per_sqft), 0) as avg_price,
+               COALESCE(SUM(price_aed), 0) as volume,
+               PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqft) as median_price
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '7 days'
+            AND transaction_date <= %s
+        """
+        data_7d = db.execute_query(query_7d, (target_date, target_date))
+        
+        # Transactions 30 jours
+        query_30d = """
+        SELECT COUNT(*) as count, 
+               COALESCE(AVG(price_per_sqft), 0) as avg_price,
+               COALESCE(SUM(price_aed), 0) as volume,
+               PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqft) as median_price
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '30 days'
+            AND transaction_date <= %s
+        """
+        data_30d = db.execute_query(query_30d, (target_date, target_date))
+        
+        # Période précédente pour variation
+        query_prev_7d = """
+        SELECT COUNT(*) as count
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '14 days'
+            AND transaction_date < %s - INTERVAL '7 days'
+        """
+        prev_7d = db.execute_query(query_prev_7d, (target_date, target_date))
+        
+        # Opportunités
         query_opp = """
         SELECT COUNT(*) as count, AVG(global_score) as avg_score
         FROM opportunities
-        WHERE detection_date = %s AND status = 'active'
+        WHERE detection_date >= %s - INTERVAL '7 days' AND status = 'active'
         """
         opp_data = db.execute_query(query_opp, (target_date,))
         
+        # Calcul variation
+        tx_7d = data_7d[0]['count'] if data_7d else 0
+        tx_prev_7d = prev_7d[0]['count'] if prev_7d else 0
+        variation_pct = ((tx_7d - tx_prev_7d) / tx_prev_7d * 100) if tx_prev_7d > 0 else 0
+        
         return {
-            'transactions_count': tx_data[0]['count'] if tx_data else 0,
-            'avg_price_sqft': tx_data[0]['avg_price'] if tx_data else 0,
+            'transactions_today': today_data[0]['count'] if today_data else 0,
+            'transactions_7d': tx_7d,
+            'transactions_30d': data_30d[0]['count'] if data_30d else 0,
+            'volume_today': today_data[0]['volume'] if today_data else 0,
+            'volume_7d': data_7d[0]['volume'] if data_7d else 0,
+            'volume_30d': data_30d[0]['volume'] if data_30d else 0,
+            'avg_price_sqft': data_30d[0]['avg_price'] if data_30d else 0,
+            'median_price_sqft': data_30d[0]['median_price'] if data_30d else 0,
+            'variation_7d_pct': variation_pct,
             'opportunities_count': opp_data[0]['count'] if opp_data else 0,
-            'avg_opportunity_score': opp_data[0]['avg_score'] if opp_data else 0
+            'avg_opportunity_score': opp_data[0]['avg_score'] if opp_data else 0,
+            # Legacy compatibility
+            'transactions_count': data_30d[0]['count'] if data_30d else 0
+        }
+    
+    @staticmethod
+    def _get_transaction_stats(target_date: date) -> Dict:
+        """Statistiques détaillées des transactions"""
+        query = """
+        WITH daily_stats AS (
+            SELECT 
+                transaction_date,
+                COUNT(*) as tx_count,
+                AVG(price_per_sqft) as avg_price,
+                SUM(price_aed) as volume
+            FROM transactions
+            WHERE transaction_date >= %s - INTERVAL '30 days'
+                AND transaction_date <= %s
+            GROUP BY transaction_date
+            ORDER BY transaction_date
+        )
+        SELECT 
+            transaction_date as date,
+            tx_count,
+            avg_price,
+            volume
+        FROM daily_stats
+        """
+        daily_data = db.execute_query(query, (target_date, target_date))
+        
+        return {
+            'daily_transactions': daily_data or [],
+            'total_days': len(daily_data) if daily_data else 0
+        }
+    
+    @staticmethod
+    def _get_top_neighborhoods(target_date: date, limit: int = 10) -> List[Dict]:
+        """Top quartiers par volume de transactions"""
+        query = """
+        SELECT 
+            community,
+            COUNT(*) as transaction_count,
+            AVG(price_per_sqft) as avg_price_sqft,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqft) as median_price_sqft,
+            SUM(price_aed) as total_volume,
+            AVG(area_sqft) as avg_area
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '30 days'
+            AND transaction_date <= %s
+            AND community IS NOT NULL
+        GROUP BY community
+        HAVING COUNT(*) >= 2
+        ORDER BY transaction_count DESC
+        LIMIT %s
+        """
+        return db.execute_query(query, (target_date, target_date, limit)) or []
+    
+    @staticmethod
+    def _get_property_types_breakdown(target_date: date) -> Dict:
+        """Répartition par type de propriété (rooms_bucket)"""
+        # Par rooms_bucket (Studio, 1BR, 2BR, 3BR+)
+        query_rooms = """
+        SELECT 
+            COALESCE(rooms_bucket, 'Unknown') as rooms_bucket,
+            COUNT(*) as count,
+            AVG(price_per_sqft) as avg_price_sqft,
+            AVG(price_aed) as avg_price,
+            SUM(price_aed) as total_volume
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '30 days'
+            AND transaction_date <= %s
+        GROUP BY rooms_bucket
+        ORDER BY count DESC
+        """
+        rooms_data = db.execute_query(query_rooms, (target_date, target_date)) or []
+        
+        # Par property_type (apartment, villa, townhouse)
+        query_types = """
+        SELECT 
+            COALESCE(property_type, 'other') as property_type,
+            COUNT(*) as count,
+            AVG(price_per_sqft) as avg_price_sqft,
+            AVG(price_aed) as avg_price
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '30 days'
+            AND transaction_date <= %s
+        GROUP BY property_type
+        ORDER BY count DESC
+        """
+        types_data = db.execute_query(query_types, (target_date, target_date)) or []
+        
+        # Offplan vs Ready
+        query_offplan = """
+        SELECT 
+            is_offplan,
+            COUNT(*) as count,
+            AVG(price_per_sqft) as avg_price_sqft
+        FROM transactions
+        WHERE transaction_date >= %s - INTERVAL '30 days'
+            AND transaction_date <= %s
+        GROUP BY is_offplan
+        """
+        offplan_data = db.execute_query(query_offplan, (target_date, target_date)) or []
+        
+        return {
+            'by_rooms': rooms_data,
+            'by_type': types_data,
+            'by_offplan': offplan_data
         }
     
     @staticmethod
