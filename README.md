@@ -21,15 +21,34 @@ Fournir une intelligence de marché de niveau institutionnel pour l'immobilier �
 
 ```
 dubai-real-estate-intelligence/
-├── app.py                          # Application Streamlit principale
-├── requirements.txt                # Dépendances Python
-├── env.example                     # Variables d'environnement
+├── next-app/                       # Frontend Next.js 14
+│   ├── app/                        # App Router
+│   │   ├── page.tsx                # Page d'accueil avec LED status
+│   │   ├── dashboard/              # Dashboard KPIs
+│   │   ├── sales/                  # Transactions
+│   │   ├── zones/                  # Analyse zones
+│   │   ├── radar/                  # Opportunités
+│   │   ├── yield/                  # Rendements
+│   │   ├── floorplans/             # Visualisation 3D (nouveau)
+│   │   ├── alerts/                 # Alertes
+│   │   ├── insights/               # Market Intelligence
+│   │   ├── admin/                  # Administration
+│   │   └── api/                    # API Routes
+│   ├── components/                 # Composants React
+│   │   ├── charts/                 # Graphiques Recharts
+│   │   ├── layout/                 # Header, Sidebar
+│   │   ├── ui/                     # UI Components
+│   │   └── FloorplanViewer.tsx    # Viewer 3D (nouveau)
+│   ├── lib/                        # Utilitaires
+│   │   ├── supabase.ts             # Client Supabase
+│   │   └── utils.ts                # Helpers
+│   └── package.json                # Dépendances Node.js
 │
 ├── core/                           # Core système
 │   ├── config.py                   # Configuration centralisée
 │   ├── db.py                       # Connexion PostgreSQL
-│   ├── dubai_mock_data.py          # Données réalistes Dubai (projets, zones)
-│   ├── icons.py                    # Icônes SVG vectorielles
+│   ├── dubai_mock_data.py          # Données réalistes Dubai
+│   ├── icons.py                    # Icônes SVG
 │   ├── models.py                   # Modèles Pydantic
 │   └── utils.py                    # Utilitaires
 │
@@ -37,26 +56,31 @@ dubai-real-estate-intelligence/
 │   ├── dld_transactions.py         # DLD Transactions
 │   ├── dld_mortgages.py            # DLD Hypothèques
 │   ├── dld_rental_index.py         # DLD Index locatif
+│   ├── dld_buildings.py            # DLD Buildings
+│   ├── dld_developers.py           # DLD Developers (nouveau)
+│   ├── dld_valuation.py            # DLD Valuation (nouveau)
+│   ├── dld_lkp_areas.py            # DLD LKP Areas (nouveau)
 │   ├── bayut_api.py                # Bayut RapidAPI (15 endpoints)
 │   ├── propertyfinder_api.py       # PropertyFinder API
 │   ├── zylalabs_api.py             # Zyla Labs API
-│   ├── emaar_helper.py             # Helper Emaar (projets, listings, transactions)
-│   ├── uae_realtime_api.py         # UAE Real Estate Data-Real Time API
+│   ├── emaar_helper.py             # Helper Emaar
+│   ├── uae_realtime_api.py         # UAE Real Estate API
 │   ├── developers_pipeline.py      # Pipeline développeurs
-│   └── listings_placeholder.py     # Annonces (API autorisée)
+│   └── listings_placeholder.py     # Annonces
 │
 ├── pipelines/                      # Pipelines de données
 │   ├── ingest_transactions.py      # Ingestion transactions
 │   ├── ingest_mortgages.py         # Ingestion hypothèques
-│   ├── ingest_rental_index.py      # Ingestion index locatif (nouveau)
-│   ├── compute_features.py         # Features normalisées (nouveau)
+│   ├── ingest_rental_index.py      # Ingestion index locatif
+│   ├── compute_features.py         # Features normalisées
 │   ├── compute_market_baselines.py # Calcul baselines
 │   ├── compute_market_regimes.py   # Calcul régimes
-│   ├── compute_kpis.py             # 8 KPIs avancés (nouveau)
+│   ├── compute_kpis.py             # 8 KPIs avancés
+│   ├── compute_additional_kpis.py  # 12 KPIs additionnels (nouveau)
 │   ├── detect_anomalies.py         # Détection anomalies
 │   ├── compute_scores.py           # Scoring multi-stratégies
-│   ├── compute_risk_summary.py     # Résumé risques (nouveau)
-│   └── quality_logger.py           # Logs qualité (nouveau)
+│   ├── compute_risk_summary.py     # Résumé risques
+│   └── quality_logger.py           # Logs qualité
 │
 ├── strategies/                     # Stratégies de scoring
 │   ├── base.py                     # Classe de base
@@ -77,24 +101,14 @@ dubai-real-estate-intelligence/
 ├── realtime/                       # Temps réel
 │   ├── poller.py                   # Polling continu
 │   ├── cache.py                    # Cache intelligent
-│   └── refresher.py                # Refresher Streamlit
-│
-├── pages/                          # Pages Streamlit
-│   ├── 01_Dashboard.py             # Dashboard + Brief CIO
-│   ├── 02_Sales.py                 # Transactions récentes
-│   ├── 03_Zones.py                 # Analyse par zone
-│   ├── 04_Radar.py                 # Opportunités scorées
-│   ├── 05_Yield.py                 # Rendements locatifs
-│   ├── 06_Alerts.py                # Alertes actives
-│   ├── 07_Admin.py                 # Administration
-│   └── 08_Market_Insights.py       # Intelligence marché
+│   └── refresher.py                # Refresher
 │
 ├── sql/                            # Schémas SQL
 │   ├── schema.sql                  # Schéma principal
 │   ├── baselines.sql               # Fonctions baselines
 │   ├── regimes.sql                 # Fonctions régimes
 │   ├── opportunities.sql           # Fonctions opportunités
-│   └── features_kpis.sql           # Tables features, KPIs, qualité, risques (nouveau)
+│   └── features_kpis.sql           # Tables features, KPIs
 │
 └── jobs/                           # Jobs automatisés
     └── daily_run.py                # Job quotidien
@@ -104,42 +118,16 @@ dubai-real-estate-intelligence/
 
 ## 🚀 Déploiement
 
-### ☁️ Streamlit Cloud (Production)
-
-**L'app est déployée sur** : https://adrien-debug-robinhood-real-estate-app-5mafql.streamlit.app/
-
-#### Configuration Requise
-
-Si tu vois une erreur de connexion DB, suis ces étapes :
-
-1. **Ouvre les secrets Streamlit Cloud**
-   - Va sur https://share.streamlit.io/
-   - Clique sur "Manage app" → Settings → Secrets
-
-2. **Ajoute cette configuration** :
-   ```toml
-   DATABASE_URL = "postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
-   TIMEZONE = "Asia/Dubai"
-   ```
-
-3. **Sauvegarde et redémarre**
-   - Clique sur "Save"
-   - Clique sur "Reboot app"
-   - Attends 60 secondes
-
-📖 **Guide complet** : Voir `STREAMLIT_CLOUD_CONFIG.md`
-
----
-
 ### 💻 Installation Locale
 
 #### 1. Prérequis
 
-- Python 3.11+
-- PostgreSQL 14+ ou Supabase
+- **Python 3.11+** (Backend)
+- **Node.js 18+** (Frontend Next.js)
+- **PostgreSQL 14+** ou Supabase
 - OpenAI API Key (optionnel, pour agent CIO)
 
-#### 2. Installation
+#### 2. Installation Backend
 
 ```bash
 # Cloner le repo
@@ -149,7 +137,7 @@ cd dubai-real-estate-intelligence
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # ou
-venv\Scripts\activate  # Windows
+venv\Scriptsctivate  # Windows
 
 # Installer les dépendances
 pip install -r requirements.txt
@@ -159,51 +147,62 @@ cp env.example .env
 # Éditer .env avec vos clés API
 ```
 
-#### 3. Configuration PostgreSQL
+#### 3. Installation Frontend Next.js
 
 ```bash
-# Option A : PostgreSQL local (direct)
+cd next-app
+
+# Installer les dépendances
+npm install
+
+# Copier et configurer les variables d'environnement
+cp env.example.txt .env.local
+# Éditer .env.local avec vos clés API
+```
+
+#### 4. Configuration Database
+
+```bash
+# Option A : PostgreSQL local
 createdb dubai_real_estate
 DATABASE_URL=postgresql://user:password@localhost:5432/dubai_real_estate
-TABLE_PREFIX=
 
 # Option B : Supabase (recommandé)
-# Utilise le même DATABASE_URL que Streamlit Cloud
 DATABASE_URL=postgresql://postgres.tnnsfheflydiuhiduntn:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
 ```
 
-### 4. Initialisation
+#### 5. Lancement
 
 ```bash
-# Lancer Streamlit
-streamlit run app.py
+# Backend : Tests et pipelines
+python test_all_apis.py
+python jobs/daily_run.py
 
-# Aller dans Admin > Initialiser le schéma DB
-# Puis : Générer données MOCK (pour test)
-# Puis : Exécuter le pipeline complet
+# Frontend : Next.js
+cd next-app
+npm run dev
 ```
+
+Accès : `http://localhost:3000`
 
 ---
 
 ## 📊 Utilisation
 
-### Interface Streamlit (Mobile-first)
-
-```bash
-streamlit run app.py
-```
-
-Accès : `http://localhost:8501`
+### Interface Next.js (Mobile-first)
 
 **Pages disponibles :**
-1. **Dashboard** : KPIs + Brief CIO + Top opportunités
-2. **Sales** : Transactions récentes avec filtres
-3. **Zones** : Analyse par localisation + régimes
-4. **Radar** : Opportunités scorées par stratégie
-5. **Yield** : Rendements locatifs
-6. **Alerts** : Notifications actives
-7. **Admin** : Gestion des données + pipeline
-8. **Insights** : Intelligence marché macro
+1. **/** : Page d'accueil avec LED status API
+2. **/dashboard** : KPIs + Brief CIO + Opportunités
+3. **/sales** : Transactions récentes avec filtres
+4. **/zones** : Analyse par localisation + régimes
+5. **/radar** : Opportunités scorées par stratégie
+6. **/yield** : Rendements locatifs
+7. **/floorplans** : Visualisation 3D plans d'étage (nouveau)
+8. **/alerts** : Notifications actives
+9. **/insights** : Intelligence marché macro
+10. **/admin** : Gestion des données + pipeline
+
 
 ### Pipeline quotidien automatique
 
