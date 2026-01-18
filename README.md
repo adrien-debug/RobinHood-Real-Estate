@@ -37,6 +37,10 @@ dubai-real-estate-intelligence/
 │   ├── dld_transactions.py         # DLD Transactions
 │   ├── dld_mortgages.py            # DLD Hypothèques
 │   ├── dld_rental_index.py         # DLD Index locatif
+│   ├── bayut_api.py                # Bayut RapidAPI (15 endpoints)
+│   ├── propertyfinder_api.py       # PropertyFinder API
+│   ├── zylalabs_api.py             # Zyla Labs API
+│   ├── emaar_helper.py             # Helper Emaar (projets, listings, transactions)
 │   ├── developers_pipeline.py      # Pipeline développeurs
 │   └── listings_placeholder.py     # Annonces (API autorisée)
 │
@@ -218,11 +222,13 @@ python realtime/poller.py
 
 **Hiérarchie des sources (par priorité)** :
 
-1. **DLD Transactions** (Dubai Pulse) ✅ **Connecté** - La vérité terrain (closing data)
-2. **DLD Rental Index API** 🔄 **À activer** - Rendement & pression locative
-3. **Bayut API** 🆕 **Nouveau** - Offre live (lead indicators)
-4. **Makani + GeoHub** 🆕 **Nouveau** - Matching + scoring localisation
-5. **DDA Zoning/Planning** 🆕 **Nouveau** - Signaux en avance
+1. **DLD Transactions** (via Bayut RapidAPI) ✅ **Connecté** - La vérité terrain (closing data)
+2. **Bayut API** ✅ **Connecté** - 15 endpoints (annonces, transactions, projets, agents, agences, promoteurs)
+3. **PropertyFinder API** ✅ **Connecté** - 500K+ listings UAE
+4. **Zyla Labs API** ✅ **Connecté** - Market stats, recherche, propriétés récentes
+5. **Emaar Helper** ✅ **Nouveau** - Accès direct aux données Emaar (projets, listings, transactions)
+6. **DLD Rental Index API** 🔄 **À activer** - Rendement & pression locative
+7. **Makani + GeoHub** 🆕 **Nouveau** - Matching + scoring localisation
 
 **Mini check-list "anti faux signaux"** :
 - ✅ Transactions ≠ Listings : les "bons coups" se confirment sur DLD closings, pas sur annonces
@@ -427,13 +433,46 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.2.4  
+**Version** : 1.3.1  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (DB locale directe)
+**Status** : ✅ Opérationnel (3 APIs + 25+ endpoints + Helper Emaar)
 
 ---
 
 ## 🔧 Changelog récent
+
+### v1.3.1 (2026-01-18) - Emaar Helper
+- **Nouveau** : `connectors/emaar_helper.py` - Helper centralisé pour données Emaar
+- **Nouveau** : `EmaarDataHelper` - Classe pour récupérer projets, listings, transactions Emaar
+- **Nouveau** : `get_emaar_data()` - Fonction helper rapide
+- **Nouveau** : Liste de 40+ projets Emaar connus (Dubai Marina, Downtown, Creek Harbour, etc.)
+- **Nouveau** : Statistiques agrégées Emaar (volume, prix, projets)
+- **Doc** : Liste complète des plateformes connectées à Emaar
+
+### v1.3.0 (2026-01-18) - Multi-API Integration
+- **Nouveau** : PropertyFinder API (500K+ listings UAE)
+- **Nouveau** : Zyla Labs API (Market Stats, Search, Recent properties)
+- **Nouveau** : IDs promoteurs (Emaar, DAMAC, Nakheel, Meraas, Sobha, Azizi, etc.)
+- **Nouveau** : Helpers `get_emaar_projects()`, `get_damac_projects()`, etc.
+- **Nouveau** : `connectors/propertyfinder_api.py`
+- **Nouveau** : `connectors/zylalabs_api.py`
+- **Config** : Ajout `PROPERTYFINDER_API_KEY`, `ZYLALABS_API_KEY`
+
+### v1.2.6 (2026-01-18) - Bayut API Complet
+- **Nouveau** : 15 endpoints Bayut RapidAPI intégrés
+- **Nouveau** : `/property/{id}` - Détails propriété complets
+- **Nouveau** : `/new_projects_search` - Projets off-plan
+- **Nouveau** : `/agencies_by_locations`, `/agencies_by_name`, `/agency/{id}` - Agences
+- **Nouveau** : `/developers_search` - Promoteurs immobiliers
+- **Nouveau** : `/agents_by_name`, `/agents_by_filters`, `/agents_in_agency/{id}`, `/agent/{id}` - Agents
+- **Nouveau** : `/amenities_search` - Équipements
+- **Nouveau** : `/floorplans` - Plans d'étage 2D/3D
+
+### v1.2.5 (2026-01-18) - DLD via Bayut RapidAPI
+- **Nouveau** : Transactions DLD via Bayut RapidAPI (pas besoin de Dubai Pulse)
+- **Nouveau** : Double source DLD : Bayut (prioritaire) + Dubai Pulse (fallback)
+- **Nouveau** : Parser transactions Bayut vers modèle `Transaction`
+- **Doc** : Mise à jour `README.md` avec statut APIs
 
 ### v1.2.4 (2026-01-18) - DB locale directe
 - **Fix** : Search path forcé sur `public` en local
