@@ -487,9 +487,56 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 1.4.0  
+**Version** : 2.0.0  
 **Date** : 2026-01-18  
-**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + 8 KPIs avancés)
+**Status** : ✅ Opérationnel (4 APIs + 30+ endpoints + 8 KPIs avancés + Next.js Frontend)
+
+---
+
+## 🚀 Next.js Frontend (Nouveau)
+
+Une nouvelle interface Next.js 14 moderne est disponible dans le dossier `next-app/`.
+
+### Installation Next.js
+
+```bash
+cd next-app
+npm install
+npm run dev
+```
+
+Accès : `http://localhost:3000`
+
+### Stack Frontend
+
+- **Framework** : Next.js 14 (App Router)
+- **UI** : Tailwind CSS (thème sombre)
+- **Charts** : Recharts
+- **Icons** : Lucide React
+- **Database** : Supabase JS Client
+
+### Pages disponibles
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/dashboard` | KPIs, charts, opportunités, régimes |
+| Sales | `/sales` | Transactions, analytics, tendances |
+| Zones | `/zones` | Analyse par zone, heatmap, signaux |
+| Radar | `/radar` | Opportunités scorées, signaux trading |
+| Yield | `/yield` | Rendements locatifs par zone |
+| Alerts | `/alerts` | Notifications marché |
+| Insights | `/insights` | Intelligence marché, RSI, prédictions |
+| Admin | `/admin` | Configuration, pipeline, status |
+
+### Configuration
+
+1. Copier `.env.example` vers `.env.local`
+2. Configurer les variables Supabase :
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
+3. Lancer avec `npm run dev`
 
 ---
 
