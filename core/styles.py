@@ -353,16 +353,10 @@ PLECTO_CSS = """
         color: var(--text-primary) !important;
     }
     
-    /* === SIDEBAR ICON-ONLY === */
+    /* === SIDEBAR === */
     [data-testid="stSidebar"] {
         background: var(--bg-secondary) !important;
         border-right: 1px solid var(--border-subtle) !important;
-        width: 70px !important;
-        min-width: 70px !important;
-    }
-    
-    [data-testid="stSidebar"] > div:first-child {
-        width: 70px !important;
     }
     
     [data-testid="stSidebarNav"] {
@@ -375,42 +369,25 @@ PLECTO_CSS = """
     
     [data-testid="stSidebarNav"] a {
         color: var(--text-secondary) !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         transition: all 0.2s ease !important;
-        padding: 0.8rem !important;
-        margin: 0.3rem !important;
+        padding: 0.6rem 1rem !important;
+        margin: 0.2rem 0.5rem !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: center !important;
-        width: 50px !important;
-        height: 50px !important;
-        font-size: 0 !important;
-    }
-    
-    [data-testid="stSidebarNav"] a::before {
-        font-size: 1.3rem !important;
-        display: block !important;
-    }
-    
-    /* Hide text, show only first letter as icon */
-    [data-testid="stSidebarNav"] a span {
-        display: none !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
     }
     
     [data-testid="stSidebarNav"] a:hover {
         color: var(--accent-green) !important;
-        background: rgba(0, 217, 163, 0.2) !important;
-        transform: scale(1.05) !important;
+        background: rgba(0, 217, 163, 0.15) !important;
     }
     
     [data-testid="stSidebarNav"] a[aria-current="page"] {
         background: var(--accent-green) !important;
         color: #000 !important;
-    }
-    
-    /* Sidebar toggle button */
-    [data-testid="stSidebar"] button[kind="header"] {
-        display: none !important;
+        font-weight: 600 !important;
     }
     
     /* === SLIDER === */
