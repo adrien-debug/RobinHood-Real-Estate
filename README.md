@@ -530,6 +530,7 @@ Accès : `http://localhost:3000`
 
 | Page | Route | Description |
 |------|-------|-------------|
+| Overview | `/overview` | **Page unique : toutes les données disponibles par section** |
 | Dashboard | `/dashboard` | Live monitoring (refresh 5s), KPIs, charts, opportunités, régimes |
 | Architecture | `/architecture` | Diagramme HTML, endpoints, provenance data |
 | Sales | `/sales` | Transactions, analytics, tendances |
