@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { RefreshCw, Database, CheckCircle2, XCircle, TrendingUp, Building2, MapPin } from 'lucide-react'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 export default function DataLoaderPage() {
+  const AUTO_REFRESH_MS = 5000
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState<any>(null)
   const [loadResult, setLoadResult] = useState<any>(null)
@@ -46,6 +48,12 @@ export default function DataLoaderPage() {
       setLoading(false)
     }
   }
+
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchStats,
+    enabled: !loading
+  })
 
   return (
     <div className="space-y-6">

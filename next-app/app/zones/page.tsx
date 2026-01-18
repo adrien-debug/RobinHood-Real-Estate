@@ -9,6 +9,7 @@ import { LoadingPage } from '@/components/ui/Loading'
 import { Badge, RegimeBadge } from '@/components/ui/Badge'
 import { AreaChart, BarChart, LineChart } from '@/components/charts'
 import { formatPercent, formatDateAPI, getRegimeColor } from '@/lib/utils'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface ZoneData {
   community: string
@@ -39,6 +40,7 @@ interface ZoneDetailData {
 }
 
 export default function ZonesPage() {
+  const AUTO_REFRESH_MS = 5000
   const [zones, setZones] = useState<ZoneData[]>([])
   const [communities, setCommunities] = useState<string[]>([])
   const [zoneDetail, setZoneDetail] = useState<ZoneDetailData | null>(null)
@@ -84,7 +86,16 @@ export default function ZonesPage() {
     }
   }
 
-  if (loading) return <LoadingPage />
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: () => {
+      fetchZones()
+      if (selectedZone) fetchZoneDetail(selectedZone)
+    },
+    deps: [selectedDate, selectedZone]
+  })
+
+  if (loading && zones.length === 0) return <LoadingPage />
 
   const topPriceZone = zones[0]
   const topVolumeZone = [...zones].sort((a, b) => b.transaction_count - a.transaction_count)[0]

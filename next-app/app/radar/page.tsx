@@ -11,6 +11,7 @@ import { PieChart, ScatterChart, BarChart } from '@/components/charts'
 import { formatPercent, formatDateAPI, getStrategyColor } from '@/lib/utils'
 import { Target, TrendingUp, AlertTriangle, Zap } from 'lucide-react'
 import type { Opportunity } from '@/lib/types/database'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface OpportunitiesData {
   opportunities: Opportunity[]
@@ -23,6 +24,7 @@ interface OpportunitiesData {
 }
 
 export default function RadarPage() {
+  const AUTO_REFRESH_MS = 5000
   const [data, setData] = useState<OpportunitiesData | null>(null)
   const [loading, setLoading] = useState(true)
   
@@ -54,6 +56,12 @@ export default function RadarPage() {
       setLoading(false)
     }
   }
+
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchOpportunities,
+    deps: [selectedDate, strategy, minScore, regime]
+  })
 
   if (loading && !data) return <LoadingPage />
   if (!data) return null

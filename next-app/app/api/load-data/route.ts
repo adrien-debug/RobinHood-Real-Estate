@@ -32,47 +32,58 @@ export async function POST(request: Request) {
 
       console.log(`Loaded ${records.length} records from CSV`)
 
-      // Insérer par batch de 50
-      const batchSize = 50
+      // Générer des IDs uniques pour chaque ligne (le CSV a des doublons de transaction_id)
+      const recordsWithUniqueIds = records.map((record: any, index: number) => ({
+        transaction_id: `${record.transaction_id}-${index}`, // ID unique par ligne
+        transaction_date: record.transaction_date,
+        transaction_type: record.transaction_type,
+        community: record.community,
+        project: record.project || null,
+        building: record.building || null,
+        property_type: record.property_type,
+        rooms_bucket: record.rooms_bucket || null,
+        area_sqft: record.area_sqft ? parseFloat(record.area_sqft) : null,
+        price_aed: parseFloat(record.price_aed),
+        price_per_sqft: record.price_per_sqft ? parseFloat(record.price_per_sqft) : null,
+        is_offplan: record.is_offplan === 'True' || record.is_offplan === 'true'
+      }))
+
+      // D'abord, supprimer les anciennes données CSV (celles avec -index dans l'ID)
+      console.log('Deleting old CSV data...')
+      await supabase
+        .from('dld_transactions')
+        .delete()
+        .like('transaction_id', 'BAY-%')
+
+      // Insérer par batch de 100 (insert simple, pas upsert)
+      const batchSize = 100
       let totalInserted = 0
       let totalErrors = 0
 
-      for (let i = 0; i < records.length; i += batchSize) {
-        const batch = records.slice(i, i + batchSize)
+      for (let i = 0; i < recordsWithUniqueIds.length; i += batchSize) {
+        const batch = recordsWithUniqueIds.slice(i, i + batchSize)
 
         try {
           const { data, error } = await supabase
             .from('dld_transactions')
-            .upsert(
-              batch.map((record: any) => ({
-                transaction_id: record.transaction_id,
-                transaction_date: record.transaction_date,
-                transaction_type: record.transaction_type,
-                community: record.community,
-                project: record.project || null,
-                building: record.building || null,
-                property_type: record.property_type,
-                rooms_bucket: record.rooms_bucket || null,
-                area_sqft: record.area_sqft ? parseFloat(record.area_sqft) : null,
-                price_aed: parseFloat(record.price_aed),
-                price_per_sqft: record.price_per_sqft ? parseFloat(record.price_per_sqft) : null,
-                is_offplan: record.is_offplan === 'True' || record.is_offplan === 'true'
-              })),
-              { onConflict: 'transaction_id' }
-            )
+            .insert(batch)
 
           if (error) {
-            console.error(`Batch ${i / batchSize + 1} error:`, error)
+            console.error(`Batch ${Math.floor(i / batchSize) + 1} error:`, error.message)
             totalErrors += batch.length
           } else {
             totalInserted += batch.length
-            console.log(`Batch ${i / batchSize + 1}: ${batch.length} records`)
+            if ((i / batchSize + 1) % 5 === 0) {
+              console.log(`Progress: ${totalInserted}/${recordsWithUniqueIds.length} records`)
+            }
           }
-        } catch (err) {
-          console.error(`Batch ${i / batchSize + 1} exception:`, err)
+        } catch (err: any) {
+          console.error(`Batch ${Math.floor(i / batchSize) + 1} exception:`, err.message)
           totalErrors += batch.length
         }
       }
+
+      console.log(`Finished: ${totalInserted} inserted, ${totalErrors} errors`)
 
       return NextResponse.json({
         success: true,

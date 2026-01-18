@@ -486,9 +486,21 @@ Propriétaire - Usage interne uniquement
 
 ---
 
-**Version** : 2.4.0  
+**Version** : 2.4.3  
 **Date** : 2026-01-18  
 **Status** : ✅ 100% Next.js - Migration Complète (9 APIs + 45+ endpoints + 20 KPIs + 10 pages Next.js + Visualisation 3D)
+
+### API Routes Next.js (Connectées Supabase)
+
+| Route | Status | Description |
+|-------|--------|-------------|
+| `/api/dashboard` | ✅ Live | KPIs, opportunités, neighborhoods, régimes |
+| `/api/transactions` | ✅ Live | 30 transactions, historique, communities |
+| `/api/zones` | ✅ Live | Analyse zones, baselines, régimes |
+| `/api/opportunities` | ✅ Live | 5 opportunités scorées |
+| `/api/alerts` | ✅ Live | 5 alertes actives |
+| `/api/sync` | ✅ Live | Synchronisation données |
+| `/api/load-data` | ✅ Live | Chargement données |
 
 ---
 
@@ -518,7 +530,7 @@ Accès : `http://localhost:3000`
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Dashboard | `/dashboard` | KPIs, charts, opportunités, régimes |
+| Dashboard | `/dashboard` | Live monitoring (refresh 5s), KPIs, charts, opportunités, régimes |
 | Sales | `/sales` | Transactions, analytics, tendances |
 | Zones | `/zones` | Analyse par zone, heatmap, signaux |
 | Radar | `/radar` | Opportunités scorées, signaux trading |

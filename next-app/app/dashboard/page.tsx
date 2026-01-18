@@ -6,6 +6,7 @@ import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { Badge, RegimeBadge, StrategyBadge } from '@/components/ui/Badge'
 import { Loading, LoadingPage } from '@/components/ui/Loading'
 import { DatePicker } from '@/components/ui/DatePicker'
+import { Select } from '@/components/ui/Select'
 import { BarChart, PieChart, AreaChart, ScatterChart, GaugeChart } from '@/components/charts'
 import { formatCompact, formatPercent, formatCurrency, formatDateAPI } from '@/lib/utils'
 import { 
@@ -14,7 +15,9 @@ import {
   Building2, 
   Target,
   AlertTriangle,
-  Zap
+  Zap,
+  RefreshCw,
+  Clock
 } from 'lucide-react'
 
 interface DashboardData {
@@ -60,6 +63,7 @@ interface DashboardData {
     main_risk: string
     strategic_recommendation: string
   } | null
+  target_date?: string
 }
 
 export default function DashboardPage() {
@@ -67,30 +71,65 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState(formatDateAPI(new Date()))
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [refreshInterval, setRefreshInterval] = useState('5')
+
+  const refreshOptions = [
+    { value: '5', label: '5s' },
+    { value: '30', label: '30s' },
+    { value: '60', label: '60s' },
+    { value: '120', label: '2 min' },
+    { value: '300', label: '5 min' }
+  ]
 
   useEffect(() => {
-    fetchDashboard()
+    fetchDashboard({ silent: false })
   }, [selectedDate])
 
-  const fetchDashboard = async () => {
+  useEffect(() => {
+    if (!autoRefresh) return
+    const intervalMs = Number(refreshInterval) * 1000
+    if (!Number.isFinite(intervalMs) || intervalMs <= 0) return
+    const id = setInterval(() => {
+      fetchDashboard({ silent: true })
+    }, intervalMs)
+    return () => clearInterval(id)
+  }, [autoRefresh, refreshInterval, selectedDate])
+
+  const fetchDashboard = async ({ silent }: { silent: boolean }) => {
     try {
-      setLoading(true)
+      setError(null)
+      if (silent) {
+        setIsRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       const res = await fetch(`/api/dashboard?date=${selectedDate}`)
       if (!res.ok) throw new Error('Failed to fetch dashboard')
       const json = await res.json()
       setData(json)
+      setLastUpdated(new Date().toISOString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
-      setLoading(false)
+      if (silent) {
+        setIsRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }
 
-  if (loading) return <LoadingPage />
-  if (error) return <div className="text-danger p-4">{error}</div>
-  if (!data) return null
+  if (loading && !data) return <LoadingPage />
+  if (!data) return <div className="text-danger p-4">No dashboard data available</div>
 
   const { kpis, top_opportunities, top_neighborhoods, property_types, regimes, brief } = data
+  const latestDateLabel = data.latest_date || data.target_date || 'N/A'
+  const lastUpdatedLabel = lastUpdated
+    ? new Date(lastUpdated).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : '—'
 
   // Prepare chart data
   const neighborhoodsChartData = top_neighborhoods.slice(0, 10).map(n => ({
@@ -127,15 +166,82 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Real Estate Intelligence</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-text-primary">Live Monitoring</h1>
+            <Badge variant={autoRefresh ? 'success' : 'default'}>
+              {autoRefresh ? 'Live' : 'Paused'}
+            </Badge>
+          </div>
           <p className="text-text-muted text-sm mt-1">Dubai Market Overview</p>
         </div>
-        <DatePicker 
-          value={selectedDate}
-          onChange={setSelectedDate}
-          max={formatDateAPI(new Date())}
-          className="w-40"
-        />
+        <div className="flex items-center gap-3">
+          <DatePicker 
+            value={selectedDate}
+            onChange={setSelectedDate}
+            max={formatDateAPI(new Date())}
+            className="w-40"
+          />
+          <Select
+            value={refreshInterval}
+            onChange={setRefreshInterval}
+            options={refreshOptions}
+            className="w-24"
+          />
+          <button
+            onClick={() => fetchDashboard({ silent: true })}
+            className="btn-secondary"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing' : 'Refresh'}
+          </button>
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className="btn-secondary"
+          >
+            {autoRefresh ? 'Pause' : 'Go Live'}
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-lg px-4 py-2">
+          {error}
+        </div>
+      )}
+
+      {/* Live Status */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-text-muted">Mode</p>
+            <p className="text-sm text-text-primary">Auto-refresh</p>
+          </div>
+          <Badge variant={autoRefresh ? 'success' : 'default'}>
+            {autoRefresh ? 'On' : 'Off'}
+          </Badge>
+        </Card>
+        <Card className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-text-muted">Refresh</p>
+            <p className="text-sm text-text-primary">Every {refreshInterval}s</p>
+          </div>
+          <Clock className="w-4 h-4 text-text-muted" />
+        </Card>
+        <Card className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-text-muted">Last Update</p>
+            <p className="text-sm text-text-primary">{lastUpdatedLabel}</p>
+          </div>
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : 'text-text-muted'}`} />
+        </Card>
+        <Card className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-text-muted">Data Date</p>
+            <p className="text-sm text-text-primary">{latestDateLabel}</p>
+          </div>
+          <Badge variant="info">Supabase</Badge>
+        </Card>
       </div>
 
       {/* KPIs Row */}

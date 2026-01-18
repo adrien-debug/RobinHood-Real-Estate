@@ -7,8 +7,10 @@ import { LoadingPage } from '@/components/ui/Loading'
 import { AreaChart, BarChart, LineChart } from '@/components/charts'
 import { formatCompact, formatPercent } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Activity, BarChart3 } from 'lucide-react'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 export default function InsightsPage() {
+  const AUTO_REFRESH_MS = 5000
   const [loading, setLoading] = useState(true)
   const [marketData, setMarketData] = useState<{
     historical: Array<{ week: string; avg_price: number; volume: number }>
@@ -47,7 +49,12 @@ export default function InsightsPage() {
     }
   }
 
-  if (loading) return <LoadingPage />
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchMarketData
+  })
+
+  if (loading && !marketData) return <LoadingPage />
   if (!marketData) return <div className="text-text-muted p-4">No data available</div>
 
   const { historical, zones } = marketData

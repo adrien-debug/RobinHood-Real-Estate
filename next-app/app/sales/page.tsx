@@ -9,6 +9,7 @@ import { LoadingPage } from '@/components/ui/Loading'
 import { BarChart, AreaChart, ScatterChart, LineChart } from '@/components/charts'
 import { formatCurrency, formatCompact, formatPercent, formatDateAPI } from '@/lib/utils'
 import type { Transaction } from '@/lib/types/database'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface TransactionsData {
   transactions: Transaction[]
@@ -28,6 +29,7 @@ interface HistoricalData {
 }
 
 export default function SalesPage() {
+  const AUTO_REFRESH_MS = 5000
   const [data, setData] = useState<TransactionsData | null>(null)
   const [historical, setHistorical] = useState<HistoricalData[]>([])
   const [communities, setCommunities] = useState<string[]>([])
@@ -95,6 +97,15 @@ export default function SalesPage() {
       setLoading(false)
     }
   }
+
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: () => {
+      fetchTransactions()
+      fetchHistorical()
+    },
+    deps: [selectedDate, selectedCommunity, selectedRooms, minPrice]
+  })
 
   if (loading && !data) return <LoadingPage />
   if (error) return <div className="text-danger p-4">{error}</div>
@@ -289,7 +300,7 @@ export default function SalesPage() {
                     </td>
                     <td>{tx.rooms_bucket || 'N/A'}</td>
                     <td>{tx.area_sqft ? `${Math.round(tx.area_sqft)} sqft` : 'N/A'}</td>
-                    <td>{formatCurrency(tx.price_aed)}</td>
+                    <td>{formatCurrency(tx.price_aed || 0)}</td>
                     <td>{tx.price_per_sqft ? Math.round(tx.price_per_sqft).toLocaleString() : 'N/A'}</td>
                     <td className={discount > 0 ? 'text-success' : discount < 0 ? 'text-danger' : ''}>
                       {discount !== 0 ? `${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(1)}%` : 'At market'}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Building, Bed, Bath, Maximize2, Eye } from 'lucide-react'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface Floorplan {
   id: number
@@ -20,16 +21,19 @@ interface FloorplanViewerProps {
 }
 
 export default function FloorplanViewer({ locationId, projectId }: FloorplanViewerProps) {
+  const AUTO_REFRESH_MS = 5000
   const [floorplans, setFloorplans] = useState<Floorplan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedFloorplan, setSelectedFloorplan] = useState<Floorplan | null>(null)
+  const canFetch = Boolean(locationId || projectId)
 
   useEffect(() => {
     fetchFloorplans()
   }, [locationId, projectId])
 
   const fetchFloorplans = async () => {
+    if (!canFetch) return
     try {
       setLoading(true)
       setError(null)
@@ -38,15 +42,8 @@ export default function FloorplanViewer({ locationId, projectId }: FloorplanView
       if (locationId) params.append('location', locationId.toString())
       if (projectId) params.append('externalID', projectId.toString())
 
-      const response = await fetch(
-        `https://uae-real-estate2.p.rapidapi.com/floorplans?${params}`,
-        {
-          headers: {
-            'X-RapidAPI-Key': process.env.NEXT_PUBLIC_BAYUT_API_KEY || '',
-            'X-RapidAPI-Host': 'uae-real-estate2.p.rapidapi.com'
-          }
-        }
-      )
+      // Call local API route (handles RapidAPI server-side)
+      const response = await fetch(`/api/floorplans?${params}`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -62,7 +59,14 @@ export default function FloorplanViewer({ locationId, projectId }: FloorplanView
     }
   }
 
-  if (loading) {
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchFloorplans,
+    enabled: canFetch,
+    deps: [locationId, projectId]
+  })
+
+  if (loading && floorplans.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>

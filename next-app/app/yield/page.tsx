@@ -7,6 +7,7 @@ import { LoadingPage } from '@/components/ui/Loading'
 import { BarChart, AreaChart } from '@/components/charts'
 import { formatPercent, formatCurrency } from '@/lib/utils'
 import { Percent, TrendingUp, Building2 } from 'lucide-react'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface YieldData {
   zones: Array<{
@@ -24,6 +25,7 @@ interface YieldData {
 }
 
 export default function YieldPage() {
+  const AUTO_REFRESH_MS = 5000
   const [data, setData] = useState<YieldData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -67,7 +69,12 @@ export default function YieldPage() {
     }
   }
 
-  if (loading) return <LoadingPage />
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchYieldData
+  })
+
+  if (loading && !data) return <LoadingPage />
   if (!data) return <div className="text-text-muted p-4">No data available</div>
 
   const { zones, summary } = data

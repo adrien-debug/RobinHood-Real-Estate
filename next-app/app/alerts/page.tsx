@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingPage } from '@/components/ui/Loading'
 import { Bell, Check, X, AlertTriangle, Info, AlertCircle } from 'lucide-react'
 import type { Alert } from '@/lib/types/database'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface AlertsData {
   alerts: Alert[]
@@ -17,6 +18,7 @@ interface AlertsData {
 }
 
 export default function AlertsPage() {
+  const AUTO_REFRESH_MS = 5000
   const [data, setData] = useState<AlertsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
@@ -64,7 +66,12 @@ export default function AlertsPage() {
     }
   }
 
-  if (loading) return <LoadingPage />
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: fetchAlerts
+  })
+
+  if (loading && !data) return <LoadingPage />
   if (!data) return <div className="text-text-muted p-4">No data available</div>
 
   const { alerts, stats } = data

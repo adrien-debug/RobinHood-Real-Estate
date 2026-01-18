@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { 
@@ -13,6 +13,7 @@ import {
   XCircle,
   AlertTriangle
 } from 'lucide-react'
+import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface PipelineStep {
   name: string
@@ -21,6 +22,7 @@ interface PipelineStep {
 }
 
 export default function AdminPage() {
+  const AUTO_REFRESH_MS = 5000
   const [isRunning, setIsRunning] = useState(false)
   const [pipelineSteps, setPipelineSteps] = useState<PipelineStep[]>([
     { name: 'Ingest Transactions', status: 'idle' },
@@ -129,6 +131,15 @@ export default function AdminPage() {
       default: return <div className="w-4 h-4 rounded-full border-2 border-text-muted" />
     }
   }
+
+  useEffect(() => {
+    checkConnections()
+  }, [])
+
+  useAutoRefresh({
+    intervalMs: AUTO_REFRESH_MS,
+    onTick: checkConnections
+  })
 
   return (
     <div className="space-y-6">
@@ -253,7 +264,7 @@ export default function AdminPage() {
             </div>
             <div className="p-4 bg-background-secondary rounded-lg">
               <p className="text-xs text-text-muted uppercase mb-1">Refresh Interval</p>
-              <p className="text-text-primary font-medium">15 minutes</p>
+              <p className="text-text-primary font-medium">5 seconds</p>
             </div>
             <div className="p-4 bg-background-secondary rounded-lg">
               <p className="text-xs text-text-muted uppercase mb-1">Cache TTL</p>
