@@ -37,14 +37,14 @@ class SimpleLogger:
 logger = SimpleLogger()
 
 
-def test_dld_transactions():
+def test_transactions():
     """Test DLD Transactions API"""
     logger.info("=" * 60)
     logger.info("TEST 1/5 : DLD Transactions (Dubai Pulse)")
     logger.info("=" * 60)
     
     try:
-        from connectors.dld_transactions import DLDTransactionsConnector
+        from connectors.transactions import DLDTransactionsConnector
         
         connector = DLDTransactionsConnector()
         
@@ -244,7 +244,7 @@ def main():
     results = []
     
     # Test 1 : DLD Transactions
-    results.append(("DLD Transactions", test_dld_transactions()))
+    results.append(("DLD Transactions", test_transactions()))
     
     # Test 2 : DLD Rental Index
     results.append(("DLD Rental Index", test_dld_rental_index()))

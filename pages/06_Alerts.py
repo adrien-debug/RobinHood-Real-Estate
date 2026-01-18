@@ -145,7 +145,7 @@ st.markdown("---")
 
 # Query
 query = """
-SELECT * FROM active_alerts
+SELECT * FROM alerts
 WHERE %s = %s
 ORDER BY created_at DESC
 LIMIT 50

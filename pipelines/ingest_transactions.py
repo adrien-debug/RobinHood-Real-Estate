@@ -6,7 +6,7 @@ from typing import Optional
 from loguru import logger
 from core.db import db
 from core.models import Transaction
-from connectors.dld_transactions import DLDTransactionsConnector
+from connectors.transactions import DLDTransactionsConnector
 
 
 def ingest_transactions(start_date: Optional[date] = None, end_date: Optional[date] = None) -> int:

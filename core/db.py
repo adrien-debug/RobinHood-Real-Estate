@@ -79,11 +79,23 @@ class Database:
                 
                 self._validate_connection_string()
                 self._connection = psycopg.connect(self.connection_string)
-                # Set search_path for Supabase (robin schema first, then public)
-                if 'supabase' in self.connection_string:
+                # Try to set search_path to robin schema (Supabase), fallback to public only
+                try:
                     with self._connection.cursor() as cur:
-                        cur.execute("SET search_path TO robin, public")
+                        # Check if robin schema exists
+                        cur.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'robin'")
+                        if cur.fetchone():
+                            cur.execute("SET search_path TO robin, public")
+                            logger.info("Search path défini sur robin, public")
+                        else:
+                            logger.info("Schéma robin non trouvé, utilisation de public")
                     self._connection.commit()
+                except Exception as e:
+                    logger.warning(f"Vérification schéma: {e}")
+                    try:
+                        self._connection.rollback()
+                    except:
+                        pass
                 logger.info("Connexion PostgreSQL établie")
             except psycopg.OperationalError as e:
                 error_msg = (

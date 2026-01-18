@@ -3,7 +3,7 @@ Script de test pour vérifier la connexion aux APIs DLD (Dubai Pulse)
 """
 from datetime import date, timedelta
 from loguru import logger
-from connectors.dld_transactions import DLDTransactionsConnector
+from connectors.transactions import DLDTransactionsConnector
 from connectors.dld_buildings import DLDBuildingsConnector
 from connectors.dubai_pulse_auth import get_dubai_pulse_auth
 

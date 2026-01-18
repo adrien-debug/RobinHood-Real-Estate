@@ -266,8 +266,8 @@ with col_right:
     if st.button("Refresh Transactions", use_container_width=True):
         with st.spinner("Syncing..."):
             try:
-                from pipelines.ingest_transactions import ingest_dld_transactions
-                result = ingest_dld_transactions()
+                from pipelines.ingest_transactions import ingest_transactions
+                result = ingest_transactions()
                 st.success(f"Done: {result}")
             except Exception as e:
                 st.error(str(e))
