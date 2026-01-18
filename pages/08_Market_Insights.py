@@ -79,7 +79,7 @@ def analyze_market_cycles():
         'confidence': confidence,
         'price_momentum': price_momentum * 100,
         'volume_trend': volume_trend,
-        'cycle_position': len([p for p in prices[-12:] if p > prices[-13] if len(prices) > 13 else 0]) / 12 * 100
+        'cycle_position': (len([p for p in prices[-12:] if p > prices[-13]]) / 12 * 100) if len(prices) > 13 else 0
     }
 
 def generate_economic_projections():
