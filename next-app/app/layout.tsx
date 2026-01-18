@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Robin - Dubai Real Estate Intelligence',
   description: 'Institutional-grade real estate intelligence for Dubai market',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
   },
 }
 
