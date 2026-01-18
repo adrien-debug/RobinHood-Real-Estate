@@ -216,7 +216,7 @@ with col1:
 with col2:
     communities = db.execute_query("""
         SELECT DISTINCT community, COUNT(*) as tx_count
-        FROM transactions
+        FROM dld_transactions
         WHERE transaction_date >= %s - INTERVAL '30 days'
         GROUP BY community
         ORDER BY tx_count DESC
@@ -237,7 +237,7 @@ zone_comparison_data = db.execute_query("""
         COUNT(*) as transaction_count,
         STDDEV(price_per_sqft) / AVG(price_per_sqft) as volatility,
         (COUNT(*) * AVG(price_per_sqft) / 1000) as momentum_score
-    FROM transactions
+    FROM dld_transactions
     WHERE transaction_date >= %s - INTERVAL '90 days'
     AND community IS NOT NULL
     GROUP BY community
@@ -315,13 +315,13 @@ st.markdown("---")
 if selected_community:
     # Get data
     baselines = db.execute_query("""
-        SELECT * FROM market_baselines
+        SELECT * FROM dld_market_baselines
         WHERE calculation_date = %s AND community = %s AND window_days = 30
         ORDER BY transaction_count DESC
     """, (target_date, selected_community))
     
     regime = db.execute_query("""
-        SELECT * FROM market_regimes
+        SELECT * FROM dld_market_regimes
         WHERE regime_date = %s AND community = %s LIMIT 1
     """, (target_date, selected_community))
     
@@ -386,7 +386,7 @@ if selected_community:
     # Get extended price history for predictions
     extended_history = db.execute_query("""
         SELECT transaction_date, AVG(price_per_sqft) as avg_price, COUNT(*) as count
-        FROM transactions
+        FROM dld_transactions
         WHERE community = %s
             AND transaction_date >= %s - INTERVAL '60 days'
             AND transaction_date <= %s
@@ -492,7 +492,7 @@ if selected_community:
     
     price_history = db.execute_query("""
         SELECT transaction_date, AVG(price_per_sqft) as avg_price, COUNT(*) as count
-        FROM transactions
+        FROM dld_transactions
         WHERE community = %s
             AND transaction_date >= %s - INTERVAL '30 days'
             AND transaction_date <= %s
@@ -594,7 +594,7 @@ if selected_community:
                 AVG(price_per_sqft) as avg_price,
                 COUNT(*) as volume,
                 STDDEV(price_per_sqft) as volatility
-            FROM transactions
+            FROM dld_transactions
             WHERE transaction_date >= %s - INTERVAL '30 days'
             AND community != %s
             AND ABS(AVG(price_per_sqft) - %s) / %s < 0.3  -- Within 30% price range

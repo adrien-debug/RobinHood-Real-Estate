@@ -24,7 +24,7 @@ def calculate_system_health_metrics():
     # Data freshness
     try:
         latest_transaction = db.execute_query("""
-            SELECT MAX(transaction_date) as latest_date FROM transactions
+            SELECT MAX(transaction_date) as latest_date FROM dld_transactions
         """)
         days_since_update = (get_dubai_today() - latest_transaction[0]['latest_date']).days if latest_transaction else 999
         metrics['data_freshness'] = days_since_update
@@ -63,7 +63,7 @@ def generate_performance_forecasts():
             SELECT
                 DATE_TRUNC('week', transaction_date) as week,
                 COUNT(*) as volume
-            FROM transactions
+            FROM dld_transactions
             WHERE transaction_date >= CURRENT_DATE - INTERVAL '8 weeks'
             GROUP BY DATE_TRUNC('week', transaction_date)
             ORDER BY week DESC
@@ -86,7 +86,7 @@ def generate_performance_forecasts():
             SELECT
                 DATE_TRUNC('month', transaction_date) as month,
                 AVG(price_per_sqft) as avg_price
-            FROM transactions
+            FROM dld_transactions
             WHERE transaction_date >= CURRENT_DATE - INTERVAL '6 months'
             GROUP BY DATE_TRUNC('month', transaction_date)
             ORDER BY month DESC
@@ -237,7 +237,7 @@ with col_left:
     
     recent_tx = db.execute_query("""
         SELECT transaction_date, community, rooms_bucket, price_aed
-        FROM transactions
+        FROM dld_transactions
         ORDER BY transaction_date DESC, created_at DESC
         LIMIT 10
     """)

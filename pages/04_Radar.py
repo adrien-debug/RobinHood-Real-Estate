@@ -278,7 +278,7 @@ if opportunities:
             DATE_TRUNC('week', transaction_date) as week,
             AVG(price_per_sqft) as avg_price,
             COUNT(*) as volume
-        FROM transactions
+        FROM dld_transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '60 days'
         GROUP BY DATE_TRUNC('week', transaction_date)
         ORDER BY week

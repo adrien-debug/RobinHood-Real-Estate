@@ -266,7 +266,7 @@ try:
             DATE_TRUNC('month', transaction_date) as month,
             AVG(price_per_sqft) as avg_price,
             COUNT(*) as volume
-        FROM transactions
+        FROM dld_transactions
         WHERE transaction_date >= CURRENT_DATE - INTERVAL '12 months'
         GROUP BY DATE_TRUNC('month', transaction_date)
         ORDER BY month
@@ -442,7 +442,7 @@ try:
                 CASE WHEN discount_pct > 0 THEN 80 + (discount_pct * 0.5)
                      ELSE 60 - (ABS(discount_pct) * 0.3) END
             ) as opportunity_score
-        FROM transactions t
+        FROM dld_transactions t
         LEFT JOIN dld_opportunities o ON t.community = o.community
         WHERE t.transaction_date >= CURRENT_DATE - INTERVAL '90 days'
         AND community IS NOT NULL
