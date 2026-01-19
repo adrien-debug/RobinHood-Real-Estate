@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
+import { AlertsBanner } from '@/components/ui/AlertsBanner'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { LoadingPage } from '@/components/ui/Loading'
 import { Select } from '@/components/ui/Select'
-import { AreaChart, BarChart, LineChart } from '@/components/charts'
+import { AreaChart, BarChart } from '@/components/charts'
 import { formatCompact, formatPercent } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Activity, BarChart3 } from 'lucide-react'
 import { useAutoRefresh } from '@/lib/useAutoRefresh'
@@ -16,8 +17,10 @@ export default function InsightsPage() {
   const [periodDays, setPeriodDays] = useState('30')
   const [marketData, setMarketData] = useState<{
     historical: Array<{ week: string; avg_price: number; volume: number }>
-    zones: Array<{ community: string; avg_price_sqft: number; transaction_count: number }>
+    zones: Array<{ community: string; avg_price_sqft: number; transaction_count: number; volatility?: number }>
   } | null>(null)
+  const [question, setQuestion] = useState('')
+  const [aiMessages, setAiMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([])
 
   useEffect(() => {
     fetchMarketData()
@@ -107,12 +110,6 @@ export default function InsightsPage() {
     volume: h.volume
   }))
 
-  const zoneChartData = zones.slice(0, 10).map(z => ({
-    name: z.community.slice(0, 12),
-    price: z.avg_price_sqft,
-    volume: z.transaction_count
-  }))
-
   // Market regime based on RSI
   const getMarketRegime = (rsiValue: number) => {
     if (rsiValue >= 70) return { label: 'Overbought', color: '#EF4444' }
@@ -122,6 +119,38 @@ export default function InsightsPage() {
   }
 
   const regime = getMarketRegime(rsi)
+
+  const zoneSignals = zones.map(zone => {
+    const volatility = typeof zone.volatility === 'number' ? zone.volatility : 0
+    const isBuy = volatility <= 0.15 && zone.transaction_count >= 8
+    const isAvoid = volatility >= 0.25
+    return {
+      ...zone,
+      signal: isBuy ? 'BUY' : isAvoid ? 'AVOID' : 'WATCH',
+      volatility
+    }
+  })
+
+  const buyZones = zoneSignals.filter(z => z.signal === 'BUY').slice(0, 3)
+  const watchZones = zoneSignals.filter(z => z.signal === 'WATCH').slice(0, 3)
+  const avoidZones = zoneSignals.filter(z => z.signal === 'AVOID').slice(0, 3)
+
+  const forecastText = priceTrend > 5
+    ? 'Momentum positif. Prioriser les zones stables avec volume élevé.'
+    : priceTrend < -3
+      ? 'Correction en cours. Se concentrer sur la qualité et le long terme.'
+      : 'Marché neutre. Favoriser des stratégies rendement.'
+
+  const handleAsk = () => {
+    const trimmed = question.trim()
+    if (!trimmed) return
+    setAiMessages(prev => ([
+      ...prev,
+      { role: 'user', text: trimmed },
+      { role: 'assistant', text: 'Assistant IA non configuré. Connectez un endpoint pour activer les réponses.' }
+    ]))
+    setQuestion('')
+  }
 
   return (
     <div className="space-y-6">
@@ -179,101 +208,110 @@ export default function InsightsPage() {
         />
       </KpiGrid>
 
-      {/* Price Evolution */}
-      <Card>
-        <CardTitle>Price Evolution</CardTitle>
-        <CardSubtitle>Average price per sqft over time ({periodLabel})</CardSubtitle>
-        <AreaChart
-          data={priceChartData}
-          dataKey="price"
-          xAxisKey="name"
-          height={300}
-          color="#00D9A3"
-        />
-      </Card>
+      <AlertsBanner />
 
-      {/* Volume Trend */}
-      <Card>
-        <CardTitle>Transaction Volume</CardTitle>
-        <CardSubtitle>Weekly transaction count ({periodLabel})</CardSubtitle>
-        <BarChart
-          data={volumeChartData}
-          dataKey="volume"
-          xAxisKey="name"
-          height={250}
-          color="#3B82F6"
-        />
-      </Card>
-
-      {/* AI Insights */}
-      <div className="section-title">AI Market Insights</div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card accent accentColor={priceTrend > 0 ? '#10B981' : '#EF4444'}>
-          <div className="flex items-center gap-2 mb-2">
-            {priceTrend > 0 ? <TrendingUp className="w-5 h-5 text-success" /> : <TrendingDown className="w-5 h-5 text-danger" />}
-            <span className="font-semibold text-text-primary">
-              {priceTrend > 5 ? 'Strong Market' : priceTrend > 0 ? 'Steady Growth' : 'Market Correction'}
-            </span>
-          </div>
-          <p className="text-sm text-text-secondary">
-            {priceTrend > 0 
-              ? `Prices up ${formatPercent(priceTrend)} over 6 months. Consider accumulating in undervalued zones.`
-              : `Market showing correction of ${formatPercent(Math.abs(priceTrend))}. Look for value opportunities.`
-            }
-          </p>
+      {/* Market Trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardTitle>Évolution des prix</CardTitle>
+          <CardSubtitle>Prix moyen par semaine ({periodLabel})</CardSubtitle>
+          <AreaChart
+            data={priceChartData}
+            dataKey="price"
+            xAxisKey="name"
+            height={260}
+            color="#10B981"
+          />
         </Card>
 
-        <Card accent accentColor={rsi > 50 ? '#3B82F6' : '#F59E0B'}>
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-5 h-5" style={{ color: regime.color }} />
-            <span className="font-semibold text-text-primary">Momentum: {regime.label}</span>
-          </div>
-          <p className="text-sm text-text-secondary">
-            RSI at {Math.round(rsi)} indicates {rsi > 70 ? 'overbought conditions - exercise caution' : rsi < 30 ? 'oversold conditions - potential buying opportunity' : 'neutral momentum - stable market'}.
-          </p>
-        </Card>
-
-        <Card accent accentColor="#8B5CF6">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-5 h-5 text-purple" />
-            <span className="font-semibold text-text-primary">Volume Analysis</span>
-          </div>
-          <p className="text-sm text-text-secondary">
-            {totalVolume > 1000 
-              ? 'High liquidity market with strong transaction volume. Good for FLIP strategies.'
-              : 'Moderate transaction volume. Focus on quality over quantity.'}
-          </p>
-        </Card>
-
-        <Card accent accentColor="#00D9A3">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-accent" />
-            <span className="font-semibold text-text-primary">Strategy Recommendation</span>
-          </div>
-          <p className="text-sm text-text-secondary">
-            {priceTrend > 5 && rsi < 70 
-              ? 'FLIP strategy recommended - strong momentum with room to grow.'
-              : priceTrend < 0 
-              ? 'LONG_TERM strategy - accumulate during correction for future gains.'
-              : 'RENT strategy - stable market suits income-focused approach.'}
-          </p>
+        <Card>
+          <CardTitle>Volume de transactions</CardTitle>
+          <CardSubtitle>Nombre de transactions ({periodLabel})</CardSubtitle>
+          <BarChart
+            data={volumeChartData}
+            dataKey="volume"
+            xAxisKey="name"
+            height={260}
+            color="#3B82F6"
+          />
         </Card>
       </div>
 
-      {/* Zone Comparison */}
+      {/* Recap */}
+      <div className="section-title">Recap IA (actionnable)</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card accent accentColor="#10B981">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-5 h-5 text-success" />
+            <span className="font-semibold text-text-primary">À acheter</span>
+          </div>
+          <div className="text-sm text-text-secondary space-y-1">
+            {buyZones.length ? buyZones.map(zone => (
+              <div key={zone.community}>{zone.community}</div>
+            )) : <div>Aucun signal fort</div>}
+          </div>
+        </Card>
+
+        <Card accent accentColor="#F59E0B">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-5 h-5 text-warning" />
+            <span className="font-semibold text-text-primary">À surveiller</span>
+          </div>
+          <div className="text-sm text-text-secondary space-y-1">
+            {watchZones.length ? watchZones.map(zone => (
+              <div key={zone.community}>{zone.community}</div>
+            )) : <div>Pas de zone stable</div>}
+          </div>
+        </Card>
+
+        <Card accent accentColor="#EF4444">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingDown className="w-5 h-5 text-danger" />
+            <span className="font-semibold text-text-primary">À éviter</span>
+          </div>
+          <div className="text-sm text-text-secondary space-y-1">
+            {avoidZones.length ? avoidZones.map(zone => (
+              <div key={zone.community}>{zone.community}</div>
+            )) : <div>Aucun signal rouge</div>}
+          </div>
+        </Card>
+      </div>
+
       <Card>
-        <CardTitle>Zone Performance Comparison</CardTitle>
-        <CardSubtitle>Top 10 zones by average price</CardSubtitle>
-        <LineChart
-          data={zoneChartData}
-          lines={[
-            { dataKey: 'price', color: '#10B981', name: 'Avg Price' },
-            { dataKey: 'volume', color: '#3B82F6', name: 'Volume', strokeDasharray: '5 5' }
-          ]}
-          xAxisKey="name"
-          height={300}
-          showLegend
-        />
+        <CardTitle>Prévision synthétique</CardTitle>
+        <CardSubtitle>Lecture rapide du momentum</CardSubtitle>
+        <div className="mt-3 text-sm text-text-secondary">
+          {forecastText}
+        </div>
+      </Card>
+
+      {/* AI Q&A */}
+      <Card>
+        <CardTitle>Question IA</CardTitle>
+        <CardSubtitle>Posez vos questions sur le marché</CardSubtitle>
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ex: Où investir ce mois-ci ?"
+              className="input flex-1"
+            />
+            <button onClick={handleAsk} className="btn-secondary">Envoyer</button>
+          </div>
+          {aiMessages.length > 0 && (
+            <div className="space-y-2">
+              {aiMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg text-sm ${msg.role === 'user' ? 'bg-background-secondary text-text-primary' : 'bg-accent/10 text-text-secondary'}`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   )

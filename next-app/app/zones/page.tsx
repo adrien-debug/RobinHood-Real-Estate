@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
+import { AlertsBanner } from '@/components/ui/AlertsBanner'
+import { DubaiMap } from '@/components/ui/DubaiMap'
 import { Select } from '@/components/ui/Select'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { LoadingPage } from '@/components/ui/Loading'
 import { Badge, RegimeBadge } from '@/components/ui/Badge'
-import { AreaChart, BarChart, LineChart } from '@/components/charts'
+import { AreaChart } from '@/components/charts'
 import { formatPercent, formatDateAPI, getRegimeColor } from '@/lib/utils'
 import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
@@ -101,11 +103,11 @@ export default function ZonesPage() {
   const topVolumeZone = [...zones].sort((a, b) => b.transaction_count - a.transaction_count)[0]
   const lowestVolatilityZone = [...zones].filter(z => z.volatility != null).sort((a, b) => (a.volatility || 0) - (b.volatility || 0))[0]
 
-  // Heatmap data
-  const heatmapData = zones.slice(0, 15).map(z => ({
-    name: z.community.slice(0, 12),
-    price: z.avg_price_sqft,
-    volume: z.transaction_count
+  const mapPoints = zones.slice(0, 20).map(zone => ({
+    name: zone.community,
+    price: zone.avg_price_sqft,
+    volume: zone.transaction_count,
+    volatility: zone.volatility
   }))
 
   // Price history chart data
@@ -140,19 +142,11 @@ export default function ZonesPage() {
         </div>
       </div>
 
-      {/* Zone Performance Heatmap */}
-      <Card>
-        <CardTitle>Zone Performance Heatmap</CardTitle>
-        <CardSubtitle>Top 15 zones by average price</CardSubtitle>
-        <BarChart
-          data={heatmapData}
-          dataKey="price"
-          xAxisKey="name"
-          color="#10B981"
-          height={200}
-          showLabels
-        />
-      </Card>
+      <DubaiMap 
+        points={mapPoints} 
+        height={380}
+        onPointClick={(name) => setSelectedZone(name)}
+      />
 
       {/* Top Zone Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -178,6 +172,9 @@ export default function ZonesPage() {
           showLive
         />
       </div>
+
+      {/* Alerts Banner */}
+      <AlertsBanner />
 
       {/* Selected Zone Detail */}
       {zoneDetail && (
@@ -225,13 +222,12 @@ export default function ZonesPage() {
           <Card>
             <CardTitle>Price Evolution</CardTitle>
             <CardSubtitle>Last 30 days</CardSubtitle>
-            <LineChart
+            <AreaChart
               data={priceHistoryData}
-              lines={[
-                { dataKey: 'price', color: '#10B981', name: 'Avg Price' }
-              ]}
               xAxisKey="name"
-              height={350}
+              dataKey="price"
+              height={320}
+              color="#10B981"
             />
           </Card>
 

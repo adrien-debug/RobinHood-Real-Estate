@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       const topZones = zoneStats
         .filter(z => z.transaction_count >= 5)
         .sort((a, b) => b.avg_price_sqft - a.avg_price_sqft)
-        .slice(0, 15)
+        .slice(0, 16)
       
       // Get communities list
       const communities = zoneStats

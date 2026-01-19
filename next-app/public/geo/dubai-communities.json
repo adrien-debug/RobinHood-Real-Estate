@@ -1,0 +1,105 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Palm Jumeirah", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.1384, 25.1124] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dubai Marina", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.1425, 25.0805] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Downtown Dubai", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.2744, 25.1972] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Business Bay", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.2614, 25.1850] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "JBR", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.1330, 25.0780] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "DIFC", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.2805, 25.2100] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "JVC", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2100, 25.0650] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "JLT", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.1480, 25.0750] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sports City", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2200, 25.0350] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dubai Hills", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.2450, 25.1050] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Arabian Ranches", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2650, 25.0450] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dubai Silicon Oasis", "area": "affordable" },
+      "geometry": { "type": "Point", "coordinates": [55.3780, 25.1180] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "International City", "area": "affordable" },
+      "geometry": { "type": "Point", "coordinates": [55.4100, 25.1650] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dubai South", "area": "affordable" },
+      "geometry": { "type": "Point", "coordinates": [55.1650, 24.9350] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Damac Hills", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2350, 25.0150] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "MBR City", "area": "premium" },
+      "geometry": { "type": "Point", "coordinates": [55.3150, 25.1650] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Al Barsha", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2050, 25.1150] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mirdif", "area": "affordable" },
+      "geometry": { "type": "Point", "coordinates": [55.4250, 25.2250] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Discovery Gardens", "area": "affordable" },
+      "geometry": { "type": "Point", "coordinates": [55.1350, 25.0450] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Motor City", "area": "midmarket" },
+      "geometry": { "type": "Point", "coordinates": [55.2350, 25.0450] }
+    }
+  ]
+}

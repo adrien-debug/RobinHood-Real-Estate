@@ -4,37 +4,33 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
-  TrendingUp,
   MapPin,
   Target,
-  Percent,
   Bell,
   Settings,
   BarChart3,
   ChevronLeft,
-  ChevronRight,
-  Building2,
-  Database
+  ChevronRight
 } from 'lucide-react'
-import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Sales', href: '/sales', icon: TrendingUp },
   { name: 'Zones', href: '/zones', icon: MapPin },
   { name: 'Radar', href: '/radar', icon: Target },
-  { name: 'Yield', href: '/yield', icon: Percent },
-  { name: 'Floorplans', href: '/floorplans', icon: Building2 },
-  { name: 'Data Loader', href: '/data-loader', icon: Database },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Insights', href: '/insights', icon: BarChart3 },
   { name: 'Admin', href: '/admin', icon: Settings },
 ]
 
-export function Sidebar() {
+export function Sidebar({
+  collapsed,
+  onToggle
+}: {
+  collapsed: boolean
+  onToggle: () => void
+}) {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <aside 
@@ -89,7 +85,7 @@ export function Sidebar() {
       {/* Collapse button */}
       <div className="p-4 border-t border-border">
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={onToggle}
           className="w-full flex items-center justify-center gap-2 py-2 text-text-muted hover:text-text-primary transition-colors"
         >
           {collapsed ? (

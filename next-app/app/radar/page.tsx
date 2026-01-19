@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
+import { AlertsBanner } from '@/components/ui/AlertsBanner'
 import { Select } from '@/components/ui/Select'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { LoadingPage } from '@/components/ui/Loading'
@@ -92,9 +93,9 @@ export default function RadarPage() {
   const topOpps = opportunities.slice(0, 5)
 
   const getSignalType = (score: number, discount: number) => {
-    if (score >= 85 || discount >= 20) return { type: 'BUY', color: '#10B981' }
-    if (score >= 70 || discount >= 10) return { type: 'HOLD', color: '#F59E0B' }
-    return { type: 'WAIT', color: '#6B7280' }
+    if (score >= 85 || discount >= 20) return { type: 'BUY', color: '#34D399' } // emerald-400
+    if (score >= 70 || discount >= 10) return { type: 'HOLD', color: '#60A5FA' } // blue-400
+    return { type: 'WAIT', color: '#9CA3AF' } // gray-400
   }
 
   return (
@@ -189,6 +190,8 @@ export default function RadarPage() {
         />
       </KpiGrid>
 
+      <AlertsBanner />
+
       {/* Trading Signals */}
       <div className="section-title">Trading Signals</div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -229,7 +232,7 @@ export default function RadarPage() {
             data={strategyChartData}
             height={300}
             centerLabel={stats.total}
-            colors={['#10B981', '#3B82F6', '#F59E0B', '#6B7280']}
+            colors={['#34D399', '#60A5FA', '#FBBF24', '#9CA3AF']}
           />
         </Card>
 
@@ -256,7 +259,7 @@ export default function RadarPage() {
           dataKey="value"
           xAxisKey="name"
           height={200}
-          colors={['#F59E0B', '#F59E0B', '#3B82F6', '#10B981', '#10B981']}
+          color="#60A5FA"
         />
       </Card>
 

@@ -3,21 +3,21 @@
 import { useEffect, useState } from 'react'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
+import { AlertsBanner } from '@/components/ui/AlertsBanner'
 import { Badge, RegimeBadge, StrategyBadge } from '@/components/ui/Badge'
-import { Loading, LoadingPage } from '@/components/ui/Loading'
+import { LoadingPage } from '@/components/ui/Loading'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { Select } from '@/components/ui/Select'
-import { BarChart, PieChart, AreaChart, ScatterChart, GaugeChart } from '@/components/charts'
+import { AreaChart, BarChart, PieChart } from '@/components/charts'
 import { formatCompact, formatPercent, formatCurrency, formatDateAPI } from '@/lib/utils'
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Building2, 
-  Target,
+import {
+  TrendingUp,
+  DollarSign,
+  Building2,
   AlertTriangle,
-  Zap,
   RefreshCw,
-  Clock
+  Clock,
+  Percent
 } from 'lucide-react'
 
 interface DashboardData {
@@ -33,27 +33,14 @@ interface DashboardData {
   }
   latest_date?: string
   top_opportunities: Array<{
-    id: number
+    id: string
     community: string
-    building: string
+    building: string | null
     rooms_bucket: string
     global_score: number
     discount_pct: number
     recommended_strategy: string
-    area_sqft: number
   }>
-  top_neighborhoods: Array<{
-    community: string
-    transaction_count: number
-    avg_price_sqft: number
-  }>
-  property_types: {
-    by_rooms: Array<{
-      rooms_bucket: string
-      count: number
-      avg_price_sqft: number
-    }>
-  }
   regimes: Array<{
     community: string
     regime: string
@@ -66,15 +53,53 @@ interface DashboardData {
   target_date?: string
 }
 
+interface ZoneData {
+  community: string
+  avg_price_sqft: number
+  transaction_count: number
+}
+
+interface YieldSummary {
+  summary: {
+    avg_yield: number
+    max_yield: number
+    min_yield: number
+    zones_with_real_data: number
+    zones_with_estimated_data: number
+    total_zones: number
+  }
+}
+
+interface TransactionItem {
+  community: string
+  building: string | null
+  rooms_bucket: string | null
+  area_sqft: number | null
+  price_aed: number | null
+  price_per_sqft: number | null
+}
+
+interface HistoricalPoint {
+  week: string
+  avg_price: number
+  volume: number
+}
+
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null)
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
+  const [zones, setZones] = useState<ZoneData[]>([])
+  const [yieldData, setYieldData] = useState<YieldSummary | null>(null)
+  const [transactions, setTransactions] = useState<TransactionItem[]>([])
+  const [snapshotHistory, setSnapshotHistory] = useState<HistoricalPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState(formatDateAPI(new Date()))
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [refreshInterval, setRefreshInterval] = useState('5')
+  const [refreshInterval, setRefreshInterval] = useState('30')
+  const [snapshotDays, setSnapshotDays] = useState('30')
+  const [txDays, setTxDays] = useState('7')
 
   const refreshOptions = [
     { value: '5', label: '5s' },
@@ -84,9 +109,20 @@ export default function DashboardPage() {
     { value: '300', label: '5 min' }
   ]
 
+  const snapshotOptions = [
+    { value: '7', label: '7 jours' },
+    { value: '30', label: '30 jours' },
+    { value: '90', label: '90 jours' }
+  ]
+
+  const txOptions = [
+    { value: '7', label: '7 jours' },
+    { value: '30', label: '30 jours' }
+  ]
+
   useEffect(() => {
     fetchDashboard({ silent: false })
-  }, [selectedDate])
+  }, [selectedDate, snapshotDays, txDays])
 
   useEffect(() => {
     if (!autoRefresh) return
@@ -96,7 +132,7 @@ export default function DashboardPage() {
       fetchDashboard({ silent: true })
     }, intervalMs)
     return () => clearInterval(id)
-  }, [autoRefresh, refreshInterval, selectedDate])
+  }, [autoRefresh, refreshInterval, selectedDate, snapshotDays, txDays])
 
   const fetchDashboard = async ({ silent }: { silent: boolean }) => {
     try {
@@ -106,10 +142,46 @@ export default function DashboardPage() {
       } else {
         setLoading(true)
       }
-      const res = await fetch(`/api/dashboard?date=${selectedDate}`)
-      if (!res.ok) throw new Error('Failed to fetch dashboard')
-      const json = await res.json()
-      setData(json)
+
+      const [
+        dashboardRes,
+        zonesRes,
+        yieldRes,
+        txRes,
+        snapshotRes
+      ] = await Promise.all([
+        fetch(`/api/dashboard?date=${selectedDate}`),
+        fetch(`/api/zones?date=${selectedDate}`),
+        fetch('/api/yield'),
+        fetch(`/api/transactions?date=${selectedDate}&days=${txDays}&limit=20`),
+        fetch('/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_historical', days: parseInt(snapshotDays, 10) || 30 })
+        })
+      ])
+
+      if (!dashboardRes.ok) throw new Error('Failed to fetch dashboard')
+
+      const [
+        dashboardJson,
+        zonesJson,
+        yieldJson,
+        txJson,
+        snapshotJson
+      ] = await Promise.all([
+        dashboardRes.json(),
+        zonesRes.json(),
+        yieldRes.json(),
+        txRes.json(),
+        snapshotRes.json()
+      ])
+
+      setDashboard(dashboardJson)
+      setZones(zonesJson.zones || [])
+      setYieldData(yieldJson)
+      setTransactions(txJson.transactions || [])
+      setSnapshotHistory(snapshotJson.historical || [])
       setLastUpdated(new Date().toISOString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -122,60 +194,42 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading && !data) return <LoadingPage />
-  if (!data) return <div className="text-danger p-4">No dashboard data available</div>
+  if (loading && !dashboard) return <LoadingPage />
+  if (!dashboard) return <div className="text-danger p-4">No dashboard data available</div>
 
-  const { kpis, top_opportunities, top_neighborhoods, property_types, regimes, brief } = data
-  const latestDateLabel = data.latest_date || data.target_date || 'N/A'
+  const { kpis, top_opportunities, regimes, brief } = dashboard
+  const latestDateLabel = dashboard.latest_date || dashboard.target_date || 'N/A'
   const lastUpdatedLabel = lastUpdated
-    ? new Date(lastUpdated).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    ? new Date(lastUpdated).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     : '—'
 
-  // Prepare chart data
-  const neighborhoodsChartData = top_neighborhoods.slice(0, 10).map(n => ({
-    name: n.community?.slice(0, 15) || 'N/A',
-    value: n.transaction_count,
-    price: n.avg_price_sqft
+  const snapshotChartData = snapshotHistory.map(h => ({
+    name: h.week.slice(5),
+    price: h.avg_price,
+    volume: h.volume
   }))
 
-  const propertyTypesChartData = property_types.by_rooms.map(p => ({
-    name: p.rooms_bucket,
-    value: p.count
-  }))
+  const snapshotVolume = snapshotHistory.reduce((sum, h) => sum + h.volume, 0)
+  const snapshotAvgPrice = snapshotHistory.length
+    ? snapshotHistory.reduce((sum, h) => sum + h.avg_price, 0) / snapshotHistory.length
+    : 0
+  const snapshotTrend = snapshotHistory.length >= 6
+    ? ((snapshotHistory[snapshotHistory.length - 1].avg_price - snapshotHistory[0].avg_price) / snapshotHistory[0].avg_price) * 100
+    : 0
 
-  const strategyData = top_opportunities.reduce((acc, opp) => {
-    const s = opp.recommended_strategy || 'OTHER'
-    acc[s] = (acc[s] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-
-  const strategyChartData = Object.entries(strategyData).map(([name, value]) => ({
-    name,
-    value
-  }))
-
-  const scoreDistribution = [
-    { name: '0-40', value: top_opportunities.filter(o => o.global_score < 40).length },
-    { name: '40-60', value: top_opportunities.filter(o => o.global_score >= 40 && o.global_score < 60).length },
-    { name: '60-80', value: top_opportunities.filter(o => o.global_score >= 60 && o.global_score < 80).length },
-    { name: '80+', value: top_opportunities.filter(o => o.global_score >= 80).length },
-  ]
+  const topZones = zones.slice(0, 16)
+  const yieldSummary = yieldData?.summary
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-text-primary">Live Monitoring</h1>
-            <Badge variant={autoRefresh ? 'success' : 'default'}>
-              {autoRefresh ? 'Live' : 'Paused'}
-            </Badge>
-          </div>
-          <p className="text-text-muted text-sm mt-1">Dubai Market Overview</p>
+          <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
+          <p className="text-text-muted text-sm mt-1">Synthèse KPI, zones, alertes et rendement</p>
         </div>
-        <div className="flex items-center gap-3">
-          <DatePicker 
+        <div className="flex items-center gap-3 flex-wrap">
+          <DatePicker
             value={selectedDate}
             onChange={setSelectedDate}
             max={formatDateAPI(new Date())}
@@ -210,23 +264,14 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Live Status */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Status */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-text-muted">Mode</p>
-            <p className="text-sm text-text-primary">Auto-refresh</p>
+            <p className="text-xs text-text-muted">Data Date</p>
+            <p className="text-sm text-text-primary">{latestDateLabel}</p>
           </div>
-          <Badge variant={autoRefresh ? 'success' : 'default'}>
-            {autoRefresh ? 'On' : 'Off'}
-          </Badge>
-        </Card>
-        <Card className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-text-muted">Refresh</p>
-            <p className="text-sm text-text-primary">Every {refreshInterval}s</p>
-          </div>
-          <Clock className="w-4 h-4 text-text-muted" />
+          <Badge variant="info">Supabase</Badge>
         </Card>
         <Card className="flex items-center justify-between">
           <div>
@@ -237,15 +282,15 @@ export default function DashboardPage() {
         </Card>
         <Card className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-text-muted">Data Date</p>
-            <p className="text-sm text-text-primary">{latestDateLabel}</p>
+            <p className="text-xs text-text-muted">Refresh</p>
+            <p className="text-sm text-text-primary">Every {refreshInterval}s</p>
           </div>
-          <Badge variant="info">Supabase</Badge>
+          <Clock className="w-4 h-4 text-text-muted" />
         </Card>
       </div>
 
-      {/* KPIs Row */}
-      <KpiGrid>
+      {/* KPI Summary */}
+      <KpiGrid className="grid-cols-2 md:grid-cols-4">
         <KpiCard
           title="Last Day"
           subtitle="Transactions"
@@ -273,132 +318,180 @@ export default function DashboardPage() {
           icon={<DollarSign className="w-5 h-5" />}
           showLive
         />
-        <KpiCard
-          title="Median Price"
-          subtitle="AED/sqft"
-          value={Math.round(kpis.median_price_sqft).toLocaleString()}
-          showLive
-        />
-        <KpiCard
-          title="Trend 7D"
-          subtitle="vs prev week"
-          value={formatPercent(kpis.variation_7d_pct, true)}
-          trend={kpis.variation_7d_pct}
-          color={kpis.variation_7d_pct > 0 ? 'success' : kpis.variation_7d_pct < 0 ? 'danger' : 'default'}
-          showLive
-        />
       </KpiGrid>
 
-      {/* Market Activity Section */}
-      <div className="section-title">Market Activity</div>
+      {/* Market Snapshot */}
+      <Card>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <CardTitle>Market Snapshot</CardTitle>
+            <CardSubtitle>Prix + volumes avec filtre unique</CardSubtitle>
+          </div>
+          <Select
+            value={snapshotDays}
+            onChange={setSnapshotDays}
+            options={snapshotOptions}
+            className="w-36"
+          />
+        </div>
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="space-y-3">
+            <div className="p-3 bg-background-secondary rounded-lg">
+              <p className="text-xs text-text-muted">Prix moyen</p>
+              <p className="text-lg font-semibold text-text-primary">
+                {Math.round(snapshotAvgPrice).toLocaleString()} AED/sqft
+              </p>
+            </div>
+            <div className="p-3 bg-background-secondary rounded-lg">
+              <p className="text-xs text-text-muted">Volume total</p>
+              <p className="text-lg font-semibold text-text-primary">
+                {formatCompact(snapshotVolume)}
+              </p>
+            </div>
+            <div className="p-3 bg-background-secondary rounded-lg">
+              <p className="text-xs text-text-muted">Tendance prix</p>
+              <p className="text-lg font-semibold text-text-primary">
+                {formatPercent(snapshotTrend, true)}
+              </p>
+            </div>
+          </div>
+          <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-background-secondary/40">
+              <CardTitle>Courbe prix</CardTitle>
+              <AreaChart
+                data={snapshotChartData}
+                dataKey="price"
+                xAxisKey="name"
+                height={200}
+                color="#10B981"
+              />
+            </Card>
+            <Card className="bg-background-secondary/40">
+              <CardTitle>Courbe volumes</CardTitle>
+              <BarChart
+                data={snapshotChartData}
+                dataKey="volume"
+                xAxisKey="name"
+                height={200}
+                color="#3B82F6"
+                showLabels
+              />
+            </Card>
+          </div>
+        </div>
+      </Card>
+
+      {/* Zones + Yield */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Neighborhoods */}
         <Card>
-          <CardTitle>Top Neighborhoods</CardTitle>
-          <CardSubtitle>30 day transaction volume</CardSubtitle>
-          <BarChart 
-            data={neighborhoodsChartData}
-            dataKey="value"
-            xAxisKey="name"
-            horizontal
-            height={350}
-            showLabels
-          />
-        </Card>
-
-        {/* Property Types */}
-        <Card>
-          <CardTitle>Property Types</CardTitle>
-          <CardSubtitle>Distribution by rooms</CardSubtitle>
-          <BarChart 
-            data={propertyTypesChartData}
-            dataKey="value"
-            xAxisKey="name"
-            height={350}
-            colors={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']}
-          />
-        </Card>
-      </div>
-
-      {/* Analytics Section */}
-      <div className="section-title">Market Analytics</div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Score Distribution */}
-        <Card>
-          <CardTitle>Score Distribution</CardTitle>
-          <BarChart 
-            data={scoreDistribution}
-            dataKey="value"
-            xAxisKey="name"
-            height={220}
-            colors={['#EF4444', '#F59E0B', '#3B82F6', '#10B981']}
-          />
-        </Card>
-
-        {/* Strategy Mix */}
-        <Card className="flex flex-col">
-          <CardTitle>Strategy Mix</CardTitle>
-          <div className="flex-1 flex items-center justify-center">
-            <PieChart 
-              data={strategyChartData}
-              height={220}
-              centerLabel={top_opportunities.length}
-              colors={['#10B981', '#3B82F6', '#F59E0B', '#6B7280']}
-            />
+          <CardTitle>Top 16 Zones</CardTitle>
+          <CardSubtitle>Prix moyen + volume (cliquez pour la carte)</CardSubtitle>
+          <div className="mt-4 space-y-3">
+            {topZones.map(zone => (
+              <div key={zone.community} className="flex items-center justify-between">
+                <div className="text-sm text-text-primary truncate max-w-[160px]">
+                  {zone.community}
+                </div>
+                <div className="text-xs text-text-muted">
+                  {Math.round(zone.avg_price_sqft).toLocaleString()} AED/sqft • {zone.transaction_count} tx
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
 
-        {/* Quality Gauge */}
-        <Card className="flex flex-col items-center justify-center">
-          <CardTitle>Quality Score</CardTitle>
-          <div className="flex-1 flex items-center justify-center">
-            <GaugeChart 
-              value={kpis.avg_opportunity_score || 75}
-              size="lg"
-              label="Avg Score"
-            />
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Yield Summary</CardTitle>
+              <CardSubtitle>Données réelles + estimées</CardSubtitle>
+            </div>
+            <Percent className="w-5 h-5 text-text-muted" />
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-background-secondary rounded-lg">
+              <p className="text-xs text-text-muted">Rendement moyen</p>
+              <p className="text-lg font-semibold text-text-primary">
+                {yieldSummary ? formatPercent(yieldSummary.avg_yield) : '—'}
+              </p>
+              <p className="text-xs text-text-muted mt-1">
+                Max {yieldSummary ? formatPercent(yieldSummary.max_yield) : '—'} • Min {yieldSummary ? formatPercent(yieldSummary.min_yield) : '—'}
+              </p>
+            </div>
+            <div className="p-3 bg-background-secondary rounded-lg">
+              <PieChart
+                data={[
+                  { name: 'Réel', value: yieldSummary?.zones_with_real_data || 0 },
+                  { name: 'Estimé', value: yieldSummary?.zones_with_estimated_data || 0 }
+                ]}
+                height={180}
+                innerRadius={50}
+                outerRadius={70}
+                showLabels={false}
+                centerLabel={yieldSummary?.total_zones || 0}
+                colors={['#10B981', '#3B82F6']}
+              />
+            </div>
           </div>
         </Card>
       </div>
 
-      {/* Opportunities & Insights */}
+      {/* Alerts + Brief */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Opportunities */}
+        <AlertsBanner />
+
+        <Card accent accentColor="#00D9A3">
+          <CardTitle>CIO Brief</CardTitle>
+          {brief ? (
+            <div className="space-y-4 mt-4">
+              <div>
+                <div className="flex items-center gap-2 text-warning mb-1">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-xs font-semibold uppercase">Risk</span>
+                </div>
+                <p className="text-sm text-text-secondary line-clamp-3">
+                  {brief.main_risk}
+                </p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 text-info mb-1">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="text-xs font-semibold uppercase">Action</span>
+                </div>
+                <p className="text-sm text-text-secondary line-clamp-3">
+                  {brief.strategic_recommendation}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-text-muted text-sm mt-4">No brief available</p>
+          )}
+        </Card>
+      </div>
+
+      {/* Opportunities + Regimes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardTitle>Top Opportunities</CardTitle>
-          <CardSubtitle>Highest scoring deals</CardSubtitle>
+          <CardSubtitle>Résumé des meilleurs deals</CardSubtitle>
           <div className="table-container mt-4">
             <table className="table">
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>Location</th>
-                  <th>Type</th>
                   <th>Score</th>
                   <th>Discount</th>
                   <th>Strategy</th>
                 </tr>
               </thead>
               <tbody>
-                {top_opportunities.slice(0, 8).map((opp, index) => (
+                {top_opportunities.slice(0, 6).map((opp) => (
                   <tr key={opp.id}>
-                    <td className="text-text-muted">{index + 1}</td>
                     <td>
                       <div className="font-medium text-text-primary">{opp.community}</div>
-                      <div className="text-xs text-text-muted">{opp.building}</div>
+                      <div className="text-xs text-text-muted">{opp.building || ''}</div>
                     </td>
-                    <td>{opp.rooms_bucket}</td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="progress w-16">
-                          <div 
-                            className="progress-bar bg-accent" 
-                            style={{ width: `${opp.global_score}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium">{Math.round(opp.global_score)}</span>
-                      </div>
-                    </td>
+                    <td>{Math.round(opp.global_score)}</td>
                     <td className="text-success">-{opp.discount_pct?.toFixed(1)}%</td>
                     <td>
                       <StrategyBadge strategy={opp.recommended_strategy} />
@@ -410,64 +503,75 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Regimes & Brief */}
-        <div className="space-y-6">
-          {/* Market Regimes */}
-          <Card>
-            <CardTitle>Market Regimes</CardTitle>
-            <div className="space-y-2 mt-4">
-              {regimes.slice(0, 4).map((r, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-background-secondary rounded-lg"
-                >
-                  <span className="text-sm text-text-primary truncate max-w-[150px]">
-                    {r.community}
+        <Card>
+          <CardTitle>Market Regimes</CardTitle>
+          <CardSubtitle>Signaux de tendance</CardSubtitle>
+          <div className="space-y-2 mt-4">
+            {regimes.slice(0, 4).map((r, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-background-secondary rounded-lg"
+              >
+                <span className="text-sm text-text-primary truncate max-w-[160px]">
+                  {r.community}
+                </span>
+                <div className="flex items-center gap-2">
+                  <RegimeBadge regime={r.regime} />
+                  <span className="text-xs text-text-muted">
+                    {Math.round((r.confidence_score || 0) * 100)}%
                   </span>
-                  <div className="flex items-center gap-2">
-                    <RegimeBadge regime={r.regime} />
-                    <span className="text-xs text-text-muted">
-                      {Math.round((r.confidence_score || 0) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-              {regimes.length === 0 && (
-                <p className="text-text-muted text-sm">No regime data available</p>
-              )}
-            </div>
-          </Card>
-
-          {/* CIO Brief */}
-          <Card accent accentColor="#00D9A3">
-            <CardTitle>CIO Brief</CardTitle>
-            {brief ? (
-              <div className="space-y-4 mt-4">
-                <div>
-                  <div className="flex items-center gap-2 text-warning mb-1">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="text-xs font-semibold uppercase">Risk</span>
-                  </div>
-                  <p className="text-sm text-text-secondary line-clamp-3">
-                    {brief.main_risk}
-                  </p>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 text-info mb-1">
-                    <Zap className="w-4 h-4" />
-                    <span className="text-xs font-semibold uppercase">Action</span>
-                  </div>
-                  <p className="text-sm text-text-secondary line-clamp-3">
-                    {brief.strategic_recommendation}
-                  </p>
                 </div>
               </div>
-            ) : (
-              <p className="text-text-muted text-sm mt-4">No brief available</p>
+            ))}
+            {regimes.length === 0 && (
+              <p className="text-text-muted text-sm">No regime data available</p>
             )}
-          </Card>
-        </div>
+          </div>
+        </Card>
       </div>
+
+      {/* Transactions Table */}
+      <Card>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <CardTitle>Transactions</CardTitle>
+            <CardSubtitle>Liste unique avec filtre période</CardSubtitle>
+          </div>
+          <Select
+            value={txDays}
+            onChange={setTxDays}
+            options={txOptions}
+            className="w-32"
+          />
+        </div>
+        <div className="table-container mt-4">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Area</th>
+                <th>Price</th>
+                <th>AED/sqft</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((tx, index) => (
+                <tr key={index}>
+                  <td>
+                    <div className="font-medium text-text-primary">{tx.community || 'N/A'}</div>
+                    <div className="text-xs text-text-muted">{tx.building || ''}</div>
+                  </td>
+                  <td>{tx.rooms_bucket || 'N/A'}</td>
+                  <td>{tx.area_sqft ? `${Math.round(tx.area_sqft)} sqft` : 'N/A'}</td>
+                  <td>{formatCurrency(tx.price_aed || 0)}</td>
+                  <td>{tx.price_per_sqft ? Math.round(tx.price_per_sqft).toLocaleString() : 'N/A'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   )
 }

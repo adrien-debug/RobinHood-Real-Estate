@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
+import { AlertsBanner } from '@/components/ui/AlertsBanner'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingPage } from '@/components/ui/Loading'
 import { Bell, Check, X, AlertTriangle, Info, AlertCircle } from 'lucide-react'
@@ -98,6 +99,19 @@ export default function AlertsPage() {
     }
   }
 
+  const getSeverityGradient = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'from-red-500/20 via-red-500/10 to-transparent'
+      case 'high':
+        return 'from-amber-500/20 via-amber-500/10 to-transparent'
+      case 'medium':
+        return 'from-blue-500/20 via-blue-500/10 to-transparent'
+      default:
+        return 'from-slate-500/20 via-slate-500/10 to-transparent'
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -128,6 +142,8 @@ export default function AlertsPage() {
         </div>
       </div>
 
+      <AlertsBanner />
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="text-center">
@@ -157,11 +173,11 @@ export default function AlertsPage() {
           </Card>
         ) : (
           filteredAlerts.map((alert) => (
-            <Card 
+            <Card
               key={alert.id}
-              accent
-              accentColor={getSeverityColor(alert.severity)}
-              className={`${!alert.is_read ? 'bg-background-hover' : ''}`}
+              className={`border border-border/70 bg-gradient-to-br ${getSeverityGradient(alert.severity)} ${
+                !alert.is_read ? 'bg-background-hover' : ''
+              }`}
             >
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">

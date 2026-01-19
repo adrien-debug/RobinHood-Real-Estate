@@ -36,9 +36,9 @@ dubai-real-estate-intelligence/
 │   │   └── api/                    # API Routes
 │   ├── components/                 # Composants React
 │   │   ├── charts/                 # Graphiques Recharts
-│   │   ├── layout/                 # Header, Sidebar
-│   │   ├── ui/                     # UI Components
-│   │   └── FloorplanViewer.tsx    # Viewer 3D (nouveau)
+│   │   ├── layout/                 # TopNav, AppShell (navigation horizontale)
+│   │   ├── ui/                     # UI Components (DubaiMap, AlertsBanner...)
+│   │   └── FloorplanViewer.tsx    # Viewer 3D
 │   ├── lib/                        # Utilitaires
 │   │   ├── supabase.ts             # Client Supabase
 │   │   └── utils.ts                # Helpers
@@ -193,15 +193,13 @@ Accès : `http://localhost:3000`
 
 **Pages disponibles :**
 1. **/** : Page d'accueil avec LED status API
-2. **/dashboard** : KPIs + Brief CIO + Opportunités
-3. **/sales** : Transactions récentes avec filtres
-4. **/zones** : Analyse par localisation + régimes
-5. **/radar** : Opportunités scorées par stratégie
-6. **/yield** : Rendements locatifs
-7. **/floorplans** : Visualisation 3D plans d'étage (nouveau)
-8. **/alerts** : Notifications actives
-9. **/insights** : Intelligence marché macro
-10. **/admin** : Gestion des données + pipeline
+2. **/dashboard** : Vue unifiée (KPI, snapshot prix/volume, yield, alertes)
+3. **/zones** : Analyse zones + carte interactive Leaflet (Dubai réel)
+4. **/radar** : Opportunités scorées par stratégie
+5. **/alerts** : Notifications actives
+6. **/insights** : Intelligence marché + recap IA + Q&A
+7. **/admin** : Gestion des données + pipeline
+8. **/overview** : Redirige vers `/dashboard` (page fusionnée)
 
 
 ### Pipeline quotidien automatique
@@ -496,7 +494,7 @@ Propriétaire - Usage interne uniquement
 | Route | Status | Description |
 |-------|--------|-------------|
 | `/api/dashboard` | ✅ Live | KPIs, opportunités, neighborhoods, régimes |
-| `/api/transactions` | ✅ Live | 30 transactions, historique, communities |
+| `/api/transactions` | ✅ Live | Transactions, historique, communities (param `days`) |
 | `/api/zones` | ✅ Live | Analyse zones, baselines, régimes |
 | `/api/opportunities` | ✅ Live | 5 opportunités scorées |
 | `/api/alerts` | ✅ Live | 5 alertes actives |
@@ -531,13 +529,13 @@ Accès : `http://localhost:3000`
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Overview | `/overview` | **Page unique : toutes les données disponibles par section** |
-| Dashboard | `/dashboard` | Live monitoring (refresh 5s), KPIs, charts, opportunités, régimes |
+| Dashboard | `/dashboard` | Vue unifiée (KPI, snapshot prix/volume, yield, alertes) |
+| Overview | `/overview` | Redirection vers `/dashboard` (page fusionnée) |
 | Architecture | `/architecture` | Diagramme HTML, endpoints, provenance data |
 | Sales | `/sales` | Transactions, analytics, tendances |
-| Zones | `/zones` | Analyse par zone, heatmap, signaux |
+| Zones | `/zones` | Analyse par zone, carte interactive Leaflet |
 | Radar | `/radar` | Opportunités scorées, signaux trading |
-| Yield | `/yield` | Rendements locatifs par zone (données réelles + estimées) |
+| Yield | `/yield` | Rendements locatifs par zone (aussi résumé sur Dashboard) |
 | Alerts | `/alerts` | Notifications marché |
 | Insights | `/insights` | Intelligence marché, RSI, prédictions |
 | Admin | `/admin` | Configuration, pipeline, status |
