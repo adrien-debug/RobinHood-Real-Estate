@@ -21,6 +21,7 @@
 | **Sync** | POST | `/api/sync` | Déclencher synchronisation | `source` | Pipeline |
 | **Load Data** | GET | `/api/load-data` | Statut du chargement | - | Metadata |
 | **Load Data** | POST | `/api/load-data` | Charger données (CSV, rental) | `action`, `data` | CSV, JSON |
+| **Chat** | POST | `/api/chat` | Q&A IA sur les données marché | `question` | `dld_transactions`, `dld_opportunities`, `dld_rental_index` |
 
 ---
 

@@ -38,7 +38,6 @@ const DUBAI_COMMUNITIES: Record<string, [number, number]> = {
   'Sobha Hartland': [25.1750, 55.3050],
 }
 
-// Centre de Dubai
 const DUBAI_CENTER: [number, number] = [25.1, 55.2]
 const DEFAULT_ZOOM = 11
 
@@ -55,7 +54,6 @@ interface DubaiMapProps {
   onPointClick?: (name: string) => void
 }
 
-// Composant Map chargé dynamiquement (SSR disabled)
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false }
@@ -80,14 +78,14 @@ function MapContent({ points, onPointClick }: { points: MapPoint[]; onPointClick
 
   const getColor = (price: number) => {
     const ratio = (price - minPrice) / (maxPrice - minPrice || 1)
-    if (ratio > 0.7) return '#10B981' // Premium (vert)
-    if (ratio > 0.4) return '#3B82F6' // Mid (bleu)
-    return '#F59E0B' // Affordable (ambre)
+    if (ratio > 0.7) return '#22C55E' // Vert vif
+    if (ratio > 0.4) return '#3B82F6' // Bleu vif
+    return '#F59E0B' // Ambre vif
   }
 
   const getRadius = (volume: number) => {
-    const base = 6
-    const scale = (volume / maxVolume) * 14
+    const base = 8
+    const scale = (volume / maxVolume) * 12
     return base + scale
   }
 
@@ -95,7 +93,7 @@ function MapContent({ points, onPointClick }: { points: MapPoint[]; onPointClick
     <>
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
       {points.map((point) => {
         const coords = DUBAI_COMMUNITIES[point.name]
@@ -109,21 +107,18 @@ function MapContent({ points, onPointClick }: { points: MapPoint[]; onPointClick
             pathOptions={{
               color: getColor(point.price),
               fillColor: getColor(point.price),
-              fillOpacity: 0.7,
+              fillOpacity: 0.8,
               weight: 2
             }}
             eventHandlers={{
               click: () => onPointClick?.(point.name)
             }}
           >
-            <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
-              <div className="text-xs">
-                <div className="font-semibold">{point.name}</div>
-                <div>{Math.round(point.price).toLocaleString()} AED/sqft</div>
-                <div>{point.volume} transactions</div>
-                {point.volatility !== undefined && (
-                  <div>Volatilité: {(point.volatility * 100).toFixed(1)}%</div>
-                )}
+            <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+              <div className="text-xs font-medium">
+                <div className="font-bold text-gray-900">{point.name}</div>
+                <div className="text-gray-700">{Math.round(point.price).toLocaleString()} AED/sqft</div>
+                <div className="text-gray-600">{point.volume} transactions</div>
               </div>
             </Tooltip>
           </CircleMarker>
@@ -140,9 +135,8 @@ export function DubaiMap({ points, height = 400, onPointClick }: DubaiMapProps) 
     setMounted(true)
   }, [])
 
-  // Légende
   const legend = [
-    { label: 'Premium', color: '#10B981' },
+    { label: 'Premium', color: '#22C55E' },
     { label: 'Mid-market', color: '#3B82F6' },
     { label: 'Affordable', color: '#F59E0B' }
   ]
@@ -151,7 +145,7 @@ export function DubaiMap({ points, height = 400, onPointClick }: DubaiMapProps) 
     return (
       <Card>
         <CardTitle>Dubai Market Map</CardTitle>
-        <CardSubtitle>Chargement de la carte...</CardSubtitle>
+        <CardSubtitle>Chargement...</CardSubtitle>
         <div style={{ height }} className="bg-background-secondary rounded-lg animate-pulse" />
       </Card>
     )
@@ -162,9 +156,9 @@ export function DubaiMap({ points, height = 400, onPointClick }: DubaiMapProps) 
       <div className="flex items-center justify-between mb-4">
         <div>
           <CardTitle>Dubai Market Map</CardTitle>
-          <CardSubtitle>Cliquez sur une zone pour détails</CardSubtitle>
+          <CardSubtitle>Cliquez sur une zone</CardSubtitle>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {legend.map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <div
@@ -176,7 +170,7 @@ export function DubaiMap({ points, height = 400, onPointClick }: DubaiMapProps) 
           ))}
         </div>
       </div>
-      <div style={{ height }} className="rounded-lg overflow-hidden">
+      <div style={{ height }} className="rounded-lg overflow-hidden border border-border">
         <MapContainer
           center={DUBAI_CENTER}
           zoom={DEFAULT_ZOOM}

@@ -36,7 +36,7 @@ dubai-real-estate-intelligence/
 │   │   └── api/                    # API Routes
 │   ├── components/                 # Composants React
 │   │   ├── charts/                 # Graphiques Recharts
-│   │   ├── layout/                 # TopNav, AppShell (navigation horizontale)
+│   │   ├── layout/                 # Sidebar, Header
 │   │   ├── ui/                     # UI Components (DubaiMap, AlertsBanner...)
 │   │   └── FloorplanViewer.tsx    # Viewer 3D
 │   ├── lib/                        # Utilitaires
@@ -193,13 +193,18 @@ Accès : `http://localhost:3000`
 
 **Pages disponibles :**
 1. **/** : Page d'accueil avec LED status API
-2. **/dashboard** : Vue unifiée (KPI, snapshot prix/volume, yield, alertes)
-3. **/zones** : Analyse zones + carte interactive Leaflet (Dubai réel)
+2. **/dashboard** : Vue unifiée (KPI, snapshot prix/volume, yield, alertes) + Export PDF
+3. **/zones** : Analyse zones + carte interactive Leaflet + Export PDF
 4. **/radar** : Opportunités scorées par stratégie
-5. **/alerts** : Notifications actives
+5. **/alerts** : Notifications actives + Historique timeline
 6. **/insights** : Intelligence marché + recap IA + Q&A
 7. **/admin** : Gestion des données + pipeline
 8. **/overview** : Redirige vers `/dashboard` (page fusionnée)
+
+**Fonctionnalités globales :**
+- **Chat IA** : Bouton flottant (coin bas-droit) pour Q&A sur les données marché
+- **Export PDF** : Bouton sur Dashboard et Zones pour générer un rapport
+- **Historique alertes** : Timeline avec filtre date sur la page Alerts
 
 
 ### Pipeline quotidien automatique

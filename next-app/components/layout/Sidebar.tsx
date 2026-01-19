@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const navigation = [
@@ -23,14 +24,9 @@ const navigation = [
   { name: 'Admin', href: '/admin', icon: Settings },
 ]
 
-export function Sidebar({
-  collapsed,
-  onToggle
-}: {
-  collapsed: boolean
-  onToggle: () => void
-}) {
+export function Sidebar() {
   const pathname = usePathname()
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <aside 
@@ -85,7 +81,7 @@ export function Sidebar({
       {/* Collapse button */}
       <div className="p-4 border-t border-border">
         <button
-          onClick={onToggle}
+          onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center gap-2 py-2 text-text-muted hover:text-text-primary transition-colors"
         >
           {collapsed ? (

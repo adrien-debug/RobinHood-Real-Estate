@@ -4,19 +4,18 @@ import { useEffect, useState } from 'react'
 import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { AlertsBanner } from '@/components/ui/AlertsBanner'
+import { ExportPdf } from '@/components/ui/ExportPdf'
 import { Badge, RegimeBadge, StrategyBadge } from '@/components/ui/Badge'
 import { LoadingPage } from '@/components/ui/Loading'
-import { DatePicker } from '@/components/ui/DatePicker'
 import { Select } from '@/components/ui/Select'
 import { AreaChart, BarChart, PieChart } from '@/components/charts'
-import { formatCompact, formatPercent, formatCurrency, formatDateAPI } from '@/lib/utils'
+import { formatCompact, formatPercent, formatCurrency } from '@/lib/utils'
 import {
   TrendingUp,
   DollarSign,
   Building2,
   AlertTriangle,
   RefreshCw,
-  Clock,
   Percent
 } from 'lucide-react'
 
@@ -93,7 +92,6 @@ export default function DashboardPage() {
   const [snapshotHistory, setSnapshotHistory] = useState<HistoricalPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState(formatDateAPI(new Date()))
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -122,7 +120,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboard({ silent: false })
-  }, [selectedDate, snapshotDays, txDays])
+  }, [snapshotDays, txDays])
 
   useEffect(() => {
     if (!autoRefresh) return
@@ -132,7 +130,7 @@ export default function DashboardPage() {
       fetchDashboard({ silent: true })
     }, intervalMs)
     return () => clearInterval(id)
-  }, [autoRefresh, refreshInterval, selectedDate, snapshotDays, txDays])
+  }, [autoRefresh, refreshInterval, snapshotDays, txDays])
 
   const fetchDashboard = async ({ silent }: { silent: boolean }) => {
     try {
@@ -150,10 +148,10 @@ export default function DashboardPage() {
         txRes,
         snapshotRes
       ] = await Promise.all([
-        fetch(`/api/dashboard?date=${selectedDate}`),
-        fetch(`/api/zones?date=${selectedDate}`),
+        fetch('/api/dashboard'),
+        fetch('/api/zones'),
         fetch('/api/yield'),
-        fetch(`/api/transactions?date=${selectedDate}&days=${txDays}&limit=20`),
+        fetch(`/api/transactions?days=${txDays}&limit=20`),
         fetch('/api/transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -226,20 +224,16 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-          <p className="text-text-muted text-sm mt-1">Synthèse KPI, zones, alertes et rendement</p>
+          <p className="text-text-muted text-sm mt-1">
+            Data: {latestDateLabel} • Refresh: {refreshInterval}s
+          </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <DatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-            max={formatDateAPI(new Date())}
-            className="w-40"
-          />
+        <div className="flex items-center gap-2">
           <Select
             value={refreshInterval}
             onChange={setRefreshInterval}
             options={refreshOptions}
-            className="w-24"
+            className="w-20"
           />
           <button
             onClick={() => fetchDashboard({ silent: true })}
@@ -247,14 +241,14 @@ export default function DashboardPage() {
             disabled={isRefreshing}
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing' : 'Refresh'}
           </button>
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className="btn-secondary"
+            className={`btn-secondary ${autoRefresh ? 'bg-success/20 text-success' : ''}`}
           >
-            {autoRefresh ? 'Pause' : 'Go Live'}
+            {autoRefresh ? 'Live' : 'Paused'}
           </button>
+          <ExportPdf targetId="dashboard-content" filename="dashboard-report" />
         </div>
       </div>
 
@@ -264,31 +258,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Status */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-text-muted">Data Date</p>
-            <p className="text-sm text-text-primary">{latestDateLabel}</p>
-          </div>
-          <Badge variant="info">Supabase</Badge>
-        </Card>
-        <Card className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-text-muted">Last Update</p>
-            <p className="text-sm text-text-primary">{lastUpdatedLabel}</p>
-          </div>
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : 'text-text-muted'}`} />
-        </Card>
-        <Card className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-text-muted">Refresh</p>
-            <p className="text-sm text-text-primary">Every {refreshInterval}s</p>
-          </div>
-          <Clock className="w-4 h-4 text-text-muted" />
-        </Card>
-      </div>
-
+      <div id="dashboard-content">
       {/* KPI Summary */}
       <KpiGrid className="grid-cols-2 md:grid-cols-4">
         <KpiCard
@@ -572,6 +542,7 @@ export default function DashboardPage() {
           </table>
         </div>
       </Card>
+      </div>
     </div>
   )
 }

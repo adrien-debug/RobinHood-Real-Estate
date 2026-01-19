@@ -238,42 +238,54 @@ export default function InsightsPage() {
       </div>
 
       {/* Recap */}
-      <div className="section-title">Recap IA (actionnable)</div>
+      <div className="section-title">Recommandations</div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card accent accentColor="#10B981">
-          <div className="flex items-center gap-2 mb-2">
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-5 h-5 text-success" />
             <span className="font-semibold text-text-primary">À acheter</span>
           </div>
-          <div className="text-sm text-text-secondary space-y-1">
+          <ul className="text-sm text-text-secondary space-y-2">
             {buyZones.length ? buyZones.map(zone => (
-              <div key={zone.community}>{zone.community}</div>
-            )) : <div>Aucun signal fort</div>}
-          </div>
+              <li key={zone.community} className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0" />
+                <span>{zone.community}</span>
+                <span className="text-xs text-text-muted ml-auto">{zone.transaction_count} tx</span>
+              </li>
+            )) : <li className="text-text-muted">Aucun signal fort</li>}
+          </ul>
         </Card>
 
-        <Card accent accentColor="#F59E0B">
-          <div className="flex items-center gap-2 mb-2">
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
             <Activity className="w-5 h-5 text-warning" />
             <span className="font-semibold text-text-primary">À surveiller</span>
           </div>
-          <div className="text-sm text-text-secondary space-y-1">
+          <ul className="text-sm text-text-secondary space-y-2">
             {watchZones.length ? watchZones.map(zone => (
-              <div key={zone.community}>{zone.community}</div>
-            )) : <div>Pas de zone stable</div>}
-          </div>
+              <li key={zone.community} className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-warning flex-shrink-0" />
+                <span>{zone.community}</span>
+                <span className="text-xs text-text-muted ml-auto">{zone.transaction_count} tx</span>
+              </li>
+            )) : <li className="text-text-muted">Aucune zone</li>}
+          </ul>
         </Card>
 
-        <Card accent accentColor="#EF4444">
-          <div className="flex items-center gap-2 mb-2">
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
             <TrendingDown className="w-5 h-5 text-danger" />
             <span className="font-semibold text-text-primary">À éviter</span>
           </div>
-          <div className="text-sm text-text-secondary space-y-1">
+          <ul className="text-sm text-text-secondary space-y-2">
             {avoidZones.length ? avoidZones.map(zone => (
-              <div key={zone.community}>{zone.community}</div>
-            )) : <div>Aucun signal rouge</div>}
-          </div>
+              <li key={zone.community} className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-danger flex-shrink-0" />
+                <span>{zone.community}</span>
+                <span className="text-xs text-text-muted ml-auto">{formatPercent(zone.volatility * 100)} vol</span>
+              </li>
+            )) : <li className="text-text-muted">Aucun signal rouge</li>}
+          </ul>
         </Card>
       </div>
 

@@ -5,6 +5,7 @@ import { KpiCard, KpiGrid } from '@/components/ui/KpiCard'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { AlertsBanner } from '@/components/ui/AlertsBanner'
 import { DubaiMap } from '@/components/ui/DubaiMap'
+import { ExportPdf } from '@/components/ui/ExportPdf'
 import { Select } from '@/components/ui/Select'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { LoadingPage } from '@/components/ui/Loading'
@@ -139,8 +140,11 @@ export default function ZonesPage() {
             placeholder="Select Zone"
             className="w-56"
           />
+          <ExportPdf targetId="zones-content" filename="zones-report" />
         </div>
       </div>
+
+      <div id="zones-content">
 
       <DubaiMap 
         points={mapPoints} 
@@ -298,6 +302,7 @@ export default function ZonesPage() {
           </table>
         </div>
       </Card>
+      </div>
     </div>
   )
 }

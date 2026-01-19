@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardTitle, CardSubtitle } from '@/components/ui/Card'
 import { AlertsBanner } from '@/components/ui/AlertsBanner'
+import { AlertsHistory } from '@/components/ui/AlertsHistory'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingPage } from '@/components/ui/Loading'
 import { Bell, Check, X, AlertTriangle, Info, AlertCircle } from 'lucide-react'
@@ -143,6 +144,9 @@ export default function AlertsPage() {
       </div>
 
       <AlertsBanner />
+
+      {/* Historique */}
+      <AlertsHistory />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
