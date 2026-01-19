@@ -292,7 +292,7 @@ export default function DashboardPage() {
 
       {/* Market Snapshot */}
       <Card>
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
           <div>
             <CardTitle>Market Snapshot</CardTitle>
             <CardSubtitle>Prix + volumes avec filtre unique</CardSubtitle>
@@ -304,7 +304,7 @@ export default function DashboardPage() {
             className="w-36"
           />
         </div>
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <div className="p-3 bg-background-secondary rounded-lg">
               <p className="text-xs text-text-muted">Prix moyen</p>
@@ -325,28 +325,23 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="bg-background-secondary/40">
-              <CardTitle>Courbe prix</CardTitle>
+          <div className="lg:col-span-3 relative">
+            {snapshotHistory.length > 1 ? (
               <AreaChart
                 data={snapshotChartData}
                 dataKey="price"
                 xAxisKey="name"
-                height={200}
+                height={280}
                 color="#10B981"
               />
-            </Card>
-            <Card className="bg-background-secondary/40">
-              <CardTitle>Courbe volumes</CardTitle>
-              <BarChart
-                data={snapshotChartData}
-                dataKey="volume"
-                xAxisKey="name"
-                height={200}
-                color="#3B82F6"
-                showLabels
-              />
-            </Card>
+            ) : (
+              <div className="h-[280px] flex items-center justify-center bg-background-secondary/40 rounded-lg border border-border">
+                <div className="text-center">
+                  <p className="text-text-muted text-sm">Données insuffisantes pour afficher le graphique</p>
+                  <p className="text-text-muted text-xs mt-1">{snapshotHistory.length} point(s) de données disponible(s)</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Card>
@@ -406,38 +401,8 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Alerts + Brief */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AlertsBanner />
-
-        <Card accent accentColor="#00D9A3">
-          <CardTitle>CIO Brief</CardTitle>
-          {brief ? (
-            <div className="space-y-4 mt-4">
-              <div>
-                <div className="flex items-center gap-2 text-warning mb-1">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Risk</span>
-                </div>
-                <p className="text-sm text-text-secondary line-clamp-3">
-                  {brief.main_risk}
-                </p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 text-info mb-1">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Action</span>
-                </div>
-                <p className="text-sm text-text-secondary line-clamp-3">
-                  {brief.strategic_recommendation}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-text-muted text-sm mt-4">No brief available</p>
-          )}
-        </Card>
-      </div>
+      {/* Alerts Banner */}
+      <AlertsBanner />
 
       {/* Opportunities + Regimes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -477,7 +442,7 @@ export default function DashboardPage() {
           <CardTitle>Market Regimes</CardTitle>
           <CardSubtitle>Signaux de tendance</CardSubtitle>
           <div className="space-y-2 mt-4">
-            {regimes.slice(0, 4).map((r, index) => (
+            {regimes.slice(0, 6).map((r, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-3 bg-background-secondary rounded-lg"

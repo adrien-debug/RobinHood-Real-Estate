@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Building, Bed, Bath, Maximize2, Eye } from 'lucide-react'
+import { Building, Bed, Bath, Maximize2 } from 'lucide-react'
 import { useAutoRefresh } from '@/lib/useAutoRefresh'
 
 interface Floorplan {
@@ -93,178 +93,121 @@ export default function FloorplanViewer({ locationId, projectId }: FloorplanView
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-text-primary">
-          Plans d'Étage
-        </h3>
-        <span className="text-sm text-text-muted">
-          {floorplans.length} plan{floorplans.length > 1 ? 's' : ''} disponible{floorplans.length > 1 ? 's' : ''}
-        </span>
-      </div>
-
-      {/* Floorplans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="h-full flex flex-col">
+      {/* Grille de plans - Utilise tout l'espace */}
+      <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-3 overflow-auto">
         {floorplans.map((floorplan) => (
           <div
             key={floorplan.id}
-            className="bg-background-secondary border border-border rounded-lg overflow-hidden hover:border-accent transition-colors cursor-pointer"
+            className="bg-background-secondary border border-border rounded-lg overflow-hidden hover:border-accent transition-colors cursor-pointer flex flex-col"
             onClick={() => setSelectedFloorplan(floorplan)}
           >
-            {/* Image Preview */}
-            <div className="relative aspect-video bg-background-primary">
+            {/* Image - Grande */}
+            <div className="relative flex-1 min-h-[200px] bg-background-primary">
               {floorplan['2d_imgs'] && floorplan['2d_imgs'][0] ? (
                 <img
                   src={floorplan['2d_imgs'][0]}
                   alt={`Plan ${floorplan.beds} chambres`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <Building className="w-12 h-12 text-text-muted" />
+                  <Building className="w-10 h-10 text-text-muted" />
                 </div>
               )}
               
               {/* Badges */}
-              <div className="absolute top-2 right-2 flex gap-2">
+              <div className="absolute top-2 right-2 flex gap-1">
                 {floorplan.models && floorplan.models.length > 0 && (
-                  <span className="bg-accent text-background-primary text-xs px-2 py-1 rounded-full">
-                    3D
-                  </span>
-                )}
-                {floorplan.state === 'active' && (
-                  <span className="bg-success text-background-primary text-xs px-2 py-1 rounded-full">
-                    Actif
-                  </span>
+                  <span className="bg-accent text-background-primary text-[10px] px-1.5 py-0.5 rounded">3D</span>
                 )}
               </div>
             </div>
 
-            {/* Info */}
-            <div className="p-4 space-y-3">
-              {/* Category */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-text-muted">
-                  {floorplan.category.join(' • ')}
-                </span>
-              </div>
-
-              {/* Specs */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <Bed className="w-4 h-4 text-accent" />
-                  <span className="text-sm text-text-primary font-medium">
-                    {floorplan.beds === 0 ? 'Studio' : `${floorplan.beds} ch`}
-                  </span>
+            {/* Info compacte */}
+            <div className="p-2 border-t border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs">
+                  <Bed className="w-3 h-3 text-accent" />
+                  <span className="text-text-primary">{floorplan.beds === 0 ? 'Studio' : `${floorplan.beds}ch`}</span>
+                  <Bath className="w-3 h-3 text-accent ml-1" />
+                  <span className="text-text-primary">{floorplan.baths}sdb</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Bath className="w-4 h-4 text-accent" />
-                  <span className="text-sm text-text-primary font-medium">
-                    {floorplan.baths} sdb
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                {floorplan['2d_imgs'] && floorplan['2d_imgs'].length > 0 && (
-                  <button className="flex-1 flex items-center justify-center gap-1.5 bg-background-primary border border-border rounded px-3 py-1.5 text-xs text-text-secondary hover:border-accent transition-colors">
-                    <Maximize2 className="w-3 h-3" />
-                    2D
-                  </button>
-                )}
-                {floorplan['3d_imgs'] && floorplan['3d_imgs'].length > 0 && (
-                  <button className="flex-1 flex items-center justify-center gap-1.5 bg-background-primary border border-border rounded px-3 py-1.5 text-xs text-text-secondary hover:border-accent transition-colors">
-                    <Eye className="w-3 h-3" />
-                    3D
-                  </button>
-                )}
+                <Maximize2 className="w-3 h-3 text-text-muted" />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal for selected floorplan */}
+      {/* Modal plein écran pour le plan sélectionné */}
       {selectedFloorplan && (
         <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-background-primary z-50 flex flex-col"
           onClick={() => setSelectedFloorplan(null)}
         >
-          <div
-            className="bg-background-secondary rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-background-secondary border-b border-border p-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Plan {selectedFloorplan.beds === 0 ? 'Studio' : `${selectedFloorplan.beds} Chambres`}
-                </h3>
-                <p className="text-sm text-text-muted">
-                  {selectedFloorplan.category.join(' • ')}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedFloorplan(null)}
-                className="text-text-muted hover:text-text-primary"
-              >
-                ✕
-              </button>
+          {/* Header minimal */}
+          <div className="flex items-center justify-between p-3 border-b border-border bg-background-secondary">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-text-primary">
+                {selectedFloorplan.beds === 0 ? 'Studio' : `${selectedFloorplan.beds} Chambres`} • {selectedFloorplan.baths} SDB
+              </span>
+              <span className="text-xs text-text-muted">{selectedFloorplan.category.join(' • ')}</span>
             </div>
-
-            {/* Modal Content */}
-            <div className="p-6 space-y-6">
-              {/* 3D Model */}
-              {selectedFloorplan.models && selectedFloorplan.models[0] && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-text-primary">Modèle 3D Interactif</h4>
-                  <div className="aspect-video rounded-lg overflow-hidden bg-background-primary">
-                    <iframe
-                      src={selectedFloorplan.models[0]}
-                      className="w-full h-full"
-                      allowFullScreen
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* 2D Images */}
-              {selectedFloorplan['2d_imgs'] && selectedFloorplan['2d_imgs'].length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-text-primary">Plans 2D</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedFloorplan['2d_imgs'].map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img}
-                        alt={`Plan 2D ${idx + 1}`}
-                        className="w-full rounded-lg border border-border"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3D Images */}
-              {selectedFloorplan['3d_imgs'] && selectedFloorplan['3d_imgs'].length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-text-primary">Rendus 3D</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedFloorplan['3d_imgs'].map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img}
-                        alt={`Rendu 3D ${idx + 1}`}
-                        className="w-full rounded-lg border border-border"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setSelectedFloorplan(null)}
+              className="p-2 text-text-muted hover:text-text-primary rounded-lg hover:bg-background-hover"
+            >
+              ✕
+            </button>
           </div>
+
+          {/* Contenu - Modèle 3D plein écran */}
+          <div className="flex-1 p-4" onClick={(e) => e.stopPropagation()}>
+            {selectedFloorplan.models && selectedFloorplan.models[0] ? (
+              <iframe
+                src={selectedFloorplan.models[0]}
+                className="w-full h-full rounded-lg border border-border"
+                allowFullScreen
+              />
+            ) : selectedFloorplan['2d_imgs'] && selectedFloorplan['2d_imgs'][0] ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <img
+                  src={selectedFloorplan['2d_imgs'][0]}
+                  alt="Plan 2D"
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Building className="w-16 h-16 text-text-muted" />
+              </div>
+            )}
+          </div>
+
+          {/* Thumbnails en bas */}
+          {(selectedFloorplan['2d_imgs']?.length > 1 || selectedFloorplan['3d_imgs']?.length > 0) && (
+            <div className="p-3 border-t border-border bg-background-secondary">
+              <div className="flex gap-2 overflow-x-auto">
+                {selectedFloorplan['2d_imgs']?.map((img, idx) => (
+                  <img
+                    key={`2d-${idx}`}
+                    src={img}
+                    alt={`Plan ${idx + 1}`}
+                    className="h-16 w-auto rounded border border-border hover:border-accent cursor-pointer"
+                  />
+                ))}
+                {selectedFloorplan['3d_imgs']?.map((img, idx) => (
+                  <img
+                    key={`3d-${idx}`}
+                    src={img}
+                    alt={`Rendu ${idx + 1}`}
+                    className="h-16 w-auto rounded border border-border hover:border-accent cursor-pointer"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
